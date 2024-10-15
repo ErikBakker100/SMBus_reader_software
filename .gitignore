@@ -1,0 +1,16 @@
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+.pio
+.vscode
+hooks/
+info/
+objects/
+refs/
+.travis.yml
+config
+description
+lib/readme.txt
+HEAD
+examples
