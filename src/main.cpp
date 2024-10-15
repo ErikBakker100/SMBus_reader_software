@@ -11,11 +11,13 @@
 
 #include <Arduino.h>
 #include "../lib/SBS/ArduinoSMBus.h"
+#include "../lib/i2cscanner/i2cscanner.h"
 
 ArduinoSMBus battery(0x0B); // Replace with your battery's address
 
 void setup() {
   Serial.begin(115200);
+  i2cscan();
 }
 
 void loop() {

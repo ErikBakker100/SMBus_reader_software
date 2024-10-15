@@ -27,8 +27,8 @@
 // Devices with higher bit address might not be seen properly.
 //
 
-#include <Wire.h>
-#include <Arduino.h>
+#include "i2cscanner.h"
+
 /*
 * Nodemcu board : pin number is equal to GPIO
 * pin 1 = GPIO1 = TX
@@ -43,8 +43,7 @@
 * pin 16 = GPIO16 = D0
 */
 
-void i2cscan()
-{
+void i2cscan() {
   Wire.begin();
   byte error{0}, address{0}, prev{0};
   int nDevices{0};
