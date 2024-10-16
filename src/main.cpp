@@ -13,32 +13,32 @@
 #include "../lib/SBS/ArduinoSMBus.h"
 #include "../lib/i2cscanner/i2cscanner.h"
 
-ArduinoSMBus battery(0x0B); // Replace with your battery's address
+ArduinoSMBus battery;
 
 void setup() {
   Serial.begin(115200);
-  i2cscan();
 }
 
 void loop() {
   delay(1000*5);
+  battery.setBatteryAddress(i2cscan());
   Serial.print("Manufacturer Access (0x00): 0x");
   Serial.print(battery.manufacturerAccess(), HEX);
-  Serial.println("\t" + *battery.ErrorCode());
+  Serial.println("\t\t\t" + *battery.ErrorCode());
 
   BatteryMode mode = battery.batteryMode(); // We need to read this first to determine output ranges further on
 
   Serial.print("Remaining Capacity Alarm (0x01): ");
   Serial.print(battery.remainingCapacityAlarm());
-  Serial.println(mode.capacity_mode ? " 10mWh" : " mAh");
+  Serial.print(mode.capacity_mode ? " 10mWh" : " mAh");
   Serial.println("\t" + *battery.ErrorCode());
 
   Serial.print("Remaining Time Alarm (0x02): ");
-  Serial.println(battery.remainingTimeAlarm());
-  Serial.println(" minutes\t" + *battery.ErrorCode());
+  Serial.print(battery.remainingTimeAlarm());
+  Serial.println(" minutes\t\t" + *battery.ErrorCode());
 
-  Serial.println("Battery Modes (0x03):"); 
-  Serial.println("\t" + *battery.ErrorCode());
+  Serial.print("Battery Modes (0x03):"); 
+  Serial.println("\t\t\t\t" + *battery.ErrorCode());
   Serial.print("\tInternal Charge Controller: ");
   Serial.println(mode.internal_charge_controller ? "Enabled" : "Disabled");
   Serial.print("\tPrimary Battery Support: ");
@@ -55,20 +55,29 @@ void loop() {
   Serial.println(mode.charger_mode ? "Set" : "Not Set");
   Serial.print("\tCapacity Mode: ");
   Serial.println(mode.capacity_mode ? "Set" : "Not Set");
+
   Serial.print("At Rate (0x04): ");
-  Serial.println(battery.atRate());
+  Serial.print(battery.atRate());
+  Serial.println("\t\t\t\t" + *battery.ErrorCode());
+
   Serial.print("At Rate Time To Full (0x05): ");
-  Serial.println(battery.atRateTimeToFull());
+  Serial.print(battery.atRateTimeToFull());
+  Serial.println("\t\t" + *battery.ErrorCode());
+
   Serial.print("At Rate Time To Empty (0x06): ");
-  Serial.println(battery.atRateTimeToEmpty());
+  Serial.print(battery.atRateTimeToEmpty());
+  Serial.println("\t\t" + *battery.ErrorCode());
+
   Serial.print("At Rate OK (0x07): ");
-  Serial.println(battery.atRateOK());
+  Serial.print(battery.atRateOK());
+  Serial.println("\t\t" + *battery.ErrorCode());
+
   Serial.print("Temperature in Kelvin (0x08): ");
   Serial.println(battery.temperature());
   Serial.print("\tTemperature in Celsius: ");
   Serial.println(battery.temperatureC());
   Serial.print("\tTemperature in Fahrenheit: ");
-  Serial.println(battery.temperatureF());
+  Serial.println(battery.temperatureF()); 
   Serial.print("Voltage in mV (0x09): ");
   Serial.println(battery.voltage());
   Serial.print("Current in mA (0x0a): ");

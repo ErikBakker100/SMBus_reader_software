@@ -16,9 +16,9 @@
  * 
  * @param batteryAddress 
  */
-ArduinoSMBus::ArduinoSMBus(uint8_t batteryAddress) {
-  _batteryAddress = batteryAddress;
+ArduinoSMBus::ArduinoSMBus() {
   Wire.begin();
+  Wire.setClock(130000);                  /**< Roughly 100kHz */
   ErrorCodes[0] = {"OK"};                 /**< The Smart Battery processed the function code without detecting any errors. */
   ErrorCodes[1] = {"Busy"};               /**< The Smart Battery is unable to process the function code at this time. */
   ErrorCodes[2] = {"Usupported Command"}; /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
@@ -35,6 +35,8 @@ ArduinoSMBus::ArduinoSMBus(uint8_t batteryAddress) {
  */
 void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
   _batteryAddress = batteryAddress;
+  Serial.print("Battery address set to: 0x");
+  Serial.println(_batteryAddress, HEX);
 }
 
 /**

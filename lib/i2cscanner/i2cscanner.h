@@ -3,4 +3,4 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-void i2cscan();
+uint8_t i2cscan();

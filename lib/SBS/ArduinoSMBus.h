@@ -8,9 +8,7 @@
  * @copyright Copyright (c) 2024
  *
  */
-
-#ifndef ArduinoSMBus_h
-#define ArduinoSMBus_h
+#pragma once
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -105,7 +103,7 @@ struct Errorcode {
 
 class ArduinoSMBus {
 public:
-  ArduinoSMBus(uint8_t batteryAddress);
+  ArduinoSMBus();
   void setBatteryAddress(uint8_t batteryAddress);
   uint16_t manufacturerAccess(); // command 0x00
   uint16_t remainingCapacityAlarm(); // command 0x01
@@ -159,5 +157,3 @@ private:
   uint16_t readRegister(uint8_t reg);
   void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
 };
-
-#endif

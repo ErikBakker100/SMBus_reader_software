@@ -43,8 +43,9 @@
 * pin 16 = GPIO16 = D0
 */
 
-void i2cscan() {
-  Wire.begin();
+uint8_t i2cscan() {
+//  Wire.begin();
+//  Wire.setClock(130000);                  /**< Roughly 100kHz */
   byte error{0}, address{0}, prev{0};
   int nDevices{0};
   Serial.println("Scanning...");
@@ -84,8 +85,8 @@ void i2cscan() {
         Serial.print("0");
       Serial.print(address,HEX);
       Serial.println("  !");
-
       nDevices++;
+      break;
     }
     else if (error==4)
     {
@@ -99,4 +100,5 @@ void i2cscan() {
     Serial.println("No I2C devices found\n");
   else
     Serial.println("done\n");
+  return address;
 }
