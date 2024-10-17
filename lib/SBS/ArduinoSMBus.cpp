@@ -19,13 +19,13 @@
 ArduinoSMBus::ArduinoSMBus() {
   Wire.begin();
   Wire.setClock(130000);                  /**< Roughly 100kHz */
-  ErrorCodes[0] = {"OK"};                 /**< The Smart Battery processed the function code without detecting any errors. */
-  ErrorCodes[1] = {"Busy"};               /**< The Smart Battery is unable to process the function code at this time. */
-  ErrorCodes[2] = {"Usupported Command"}; /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
-  ErrorCodes[3] = {"AccessDenied"};       /**< The Smart Battery detected an attempt to write to a read only function code. */
-  ErrorCodes[4] = {"Overflow_Underflow"}; /**< The Smart Battery detected a data overflow or under flow. */
-  ErrorCodes[5] = {"BadSize"};            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
-  ErrorCodes[6] = {"UnknownError"};       /**< The Smart Battery detected an unidentifiable error. */
+  BatteryCodes[0] = {"OK"};                 /**< The Smart Battery processed the function code without detecting any errors. */
+  BatteryCodes[1] = {"Busy"};               /**< The Smart Battery is unable to process the function code at this time. */
+  BatteryCodes[2] = {"Usupported Command"}; /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
+  BatteryCodes[3] = {"AccessDenied"};       /**< The Smart Battery detected an attempt to write to a read only function code. */
+  BatteryCodes[4] = {"Overflow_Underflow"}; /**< The Smart Battery detected a data overflow or under flow. */
+  BatteryCodes[5] = {"BadSize"};            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
+  BatteryCodes[6] = {"UnknownError"};       /**< The Smart Battery detected an unidentifiable error. */
 }
        
 /**
@@ -41,7 +41,7 @@ void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
 
 /**
  * @brief implementation specific. It may be used by a manufacturer to return specific version information, internal calibration information, or some other manufacturer specific function.
- * Content determined by the Smart Battery's manufacturer.
+ * Content determined by the Smart Battery's manufacturer. When writing to this register TI default unseal codes are 0414 3672 and the default full access codes are ffff ffff
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::manufacturerAccess() {
@@ -138,32 +138,36 @@ bool ArduinoSMBus::atRateOK() {
 /**
  * @brief Get the battery's temperature.
  * Returns the battery temperature in Kelvin.
- * @return uint16_t 
+ * @return float 
  */
-uint16_t ArduinoSMBus::temperature() {
-  return readRegister(TEMPERATURE);
+float ArduinoSMBus::temperature() {
+  return readRegister(TEMPERATURE)/10;
 }
 
 /**
  * @brief Get the battery's temperature in Celsius.
  * Returns the battery temperature in 0.1 degrees Celsius.
- * @return uint16_t 
+ * @return float 
  */
-uint16_t ArduinoSMBus::temperatureC() {
-  uint16_t temperatureKelvin = readRegister(TEMPERATURE);
-  uint16_t temperatureCelsius = temperatureKelvin - 2731; // Convert from Kelvin to Celsius
-  return temperatureCelsius;
+float ArduinoSMBus::temperatureC() {
+  float temperatureKelvin = readRegister(TEMPERATURE)/10;
+  return temperatureKelvin - 273.15;
+  
+//  uint16_t temperatureCelsius = temperatureKelvin - 2731; // Convert from Kelvin to Celsius
+//  return temperatureCelsius;
 }
 
 /**
  * @brief Get the battery's temperature in Fahrenheit.
  * Returns the battery temperature in 0.1 degrees Fahrenheit.
- * @return uint16_t 
+ * @return float 
  */
-uint16_t ArduinoSMBus::temperatureF() {
-  uint16_t temperatureKelvin = readRegister(TEMPERATURE);
-  uint16_t temperatureFahrenheit = (temperatureKelvin * 18 - 45967) / 10; // Convert from Kelvin to Fahrenheit
-  return temperatureFahrenheit;
+float ArduinoSMBus::temperatureF() {
+  float temperatureKelvin = readRegister(TEMPERATURE)/10;
+  return temperatureKelvin - 459,67;
+
+//  uint16_t temperatureFahrenheit = (temperatureKelvin * 18 - 45967) / 10; // Convert from Kelvin to Fahrenheit
+//  return temperatureFahrenheit;
 }
 
 /**
@@ -515,6 +519,34 @@ uint16_t ArduinoSMBus::stateOfHealth() {
 }
 
 /**
+ * @brief Get the current Operation Status from the battery.
+ * Returns the current operation status struct 
+ * This command is not supported by all batteries.
+ * @return uint16_t 
+ */
+OperationStatus ArduinoSMBus::Operationstatus() {
+  OperationStatus operationstatus{0};
+  uint16_t status = readRegister(OPERATIONSTATUS);
+  operationstatus.qen = status & (1); 
+  operationstatus.vok = status & (1 << 1);
+  operationstatus.r_dis = status & (1 << 2);
+  operationstatus.rsvd = status & (1 << 3);
+  operationstatus.xdsgi = status & (1 << 4);
+/*  operationstatus = status & (1 << 5);
+  operationstatus = status & (1 << 6);
+  operationstatus = status & (1 << 7);
+  operationstatus = status & (1 << 8);
+  operationstatus = status & (1 << 9);
+  operationstatus = status & (1 << 10);
+  operationstatus = status & (1 << 11);
+  operationstatus = status & (1 << 12);
+  operationstatus = status & (1 << 13);
+  operationstatus = status & (1 << 14);
+*/   
+  return operationstatus;
+}
+
+/**
  * @brief Read a register from the battery.
  * Reads a standard 16-bit register from the battery.
  * @param reg 
@@ -553,7 +585,7 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
   uint8_t count = Wire.requestFrom(_batteryAddress, length + 1); // Request one extra byte for the length
 
   if (Wire.available()) {
-    count = Wire.read(); // The first byte is the length of the block
+    count = Wire.read(); // The first byte is the length of the block, it returns the numberr of bytes received.
   }
 
   for (uint8_t i = 0; i < count && i < length; i++) {
@@ -566,11 +598,11 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
 String* ArduinoSMBus::ErrorCode(void) {
   uint16_t status = readRegister(BATTERY_STATUS);
   status = status & 0x000f;
-  if (status & 0x0001) return &ErrorCodes[0].Error;      // OK
-  else if (status & 0x0002) return &ErrorCodes[1].Error; // Busy
-  else if (status & 0x0003) return &ErrorCodes[2].Error; // Unsupported Command
-  else if (status & 0x0004) return &ErrorCodes[3].Error; // Access Denied
-  else if (status & 0x0005) return &ErrorCodes[4].Error; // Overflow/Underflow 
-  else if (status & 0x0006) return &ErrorCodes[5].Error; // BadSize
-  else return &ErrorCodes[6].Error;                      // Unknown Error
+  if (status & 0x0001) return &BatteryCodes[0].Error;      // OK
+  else if (status & 0x0002) return &BatteryCodes[1].Error; // Busy
+  else if (status & 0x0003) return &BatteryCodes[2].Error; // Unsupported Command
+  else if (status & 0x0004) return &BatteryCodes[3].Error; // Access Denied
+  else if (status & 0x0005) return &BatteryCodes[4].Error; // Overflow/Underflow 
+  else if (status & 0x0006) return &BatteryCodes[5].Error; // BadSize
+  else return &BatteryCodes[6].Error;                      // Unknown Error
 }

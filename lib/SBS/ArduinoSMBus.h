@@ -42,20 +42,21 @@
 #define CYCLE_COUNT 0x17
 #define DESIGN_CAPACITY 0x18
 #define DESIGN_VOLTAGE 0x19
-#define SPECIFICATIONINFO 0x1a // Nog implementeren
+#define SPECIFICATIONINFO 0x1a
 #define MANUFACTURE_DATE 0x1b
 #define SERIAL_NUMBER 0x1c
 //reserved 0x1d - 0x1f
 #define MANUFACTURER_NAME 0x20
 #define DEVICE_NAME 0x21
 #define DEVICE_CHEMISTRY 0x22
-#define MANUFACTURERDATA 0x23 // Nog implementeren
-#define OPTIONALMFGFUNCTIONS 0x2f // Nog implementeren
-#define VOLTAGECELLFOUR 0x3c // Nog implementeren
-#define VOLTAGECELLTHREE 0x3d // Nog implementeren
-#define VOLTAGECELLTWO 0x3e // Nog implementeren
-#define VOLTAGECELLONE 0x3f // Nog implementeren
+#define MANUFACTURERDATA 0x23
+#define OPTIONALMFGFUNCTIONS 0x2f
+#define VOLTAGECELLFOUR 0x3c
+#define VOLTAGECELLTHREE 0x3d
+#define VOLTAGECELLTWO 0x3e
+#define VOLTAGECELLONE 0x3f
 #define STATE_OF_HEALTH 0x4f
+#define OPERATIONSTATUS 0x54
 
  /**
  * @struct BatteryMode
@@ -92,12 +93,34 @@ struct BatteryStatus {
 };
 
 /**
- * @struct Errorcode
- * @brief A struct to hold various return error codes.
+ * @struct OperationStatus
+ * @brief A struct to hold the operation status flags.
+ *
+ * This struct holds various flags that represent the operation status.
+ */
+struct OperationStatus {
+  bool pres;                    /**< Low indicating that the system is present (battery inserted). */
+  bool fas;                     /**< Low means full access security mode. */
+  bool ss;         
+  bool csv;    
+  bool ldmd;      
+  bool wake;          
+  bool dsg;  
+  bool xdsg;
+  bool xdsgi; 
+  bool r_dis;
+  bool vok;
+  bool qen;
+  bool rsvd;
+};
+
+/**
+ * @struct Batterycode
+ * @brief A struct to hold various return error codes coming from the battery.
  *
  * After sending a command, a status is requested. The Error (or not) is being placed here.
  */
-struct Errorcode {
+struct Batterycode {
   String Error;
 };
 
@@ -113,9 +136,9 @@ public:
   uint16_t atRateTimeToFull(); // command 0x05
   uint16_t atRateTimeToEmpty(); // command 0x06
   bool atRateOK(); // command 0x07 
-  uint16_t temperature(); // command 0x08, in Kelvin
-  uint16_t temperatureC();
-  uint16_t temperatureF();
+  float temperature(); // command 0x08, in Kelvin
+  float temperatureC();
+  float temperatureF();
   uint16_t voltage(); // command 0x09
   uint16_t current(); // command 0x0a
   uint16_t averageCurrent(); // command 0x0b
@@ -150,9 +173,12 @@ public:
   uint16_t voltageCellTwo(); // command 0x3e
   uint16_t voltageCellOne(); // command 0x3f
   uint16_t stateOfHealth(); // command 0x4f
+  OperationStatus Operationstatus(); // command 0x54
+
   String* ErrorCode(void);
+
 private:
-  Errorcode ErrorCodes[6];
+  Batterycode BatteryCodes[6];
   uint8_t _batteryAddress;
   uint16_t readRegister(uint8_t reg);
   void readBlock(uint8_t reg, uint8_t* data, uint8_t len);

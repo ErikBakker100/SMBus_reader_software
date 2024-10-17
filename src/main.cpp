@@ -40,21 +40,21 @@ void loop() {
   Serial.print("Battery Modes (0x03):"); 
   Serial.println("\t\t\t\t" + *battery.ErrorCode());
   Serial.print("\tInternal Charge Controller: ");
-  Serial.println(mode.internal_charge_controller ? "Enabled" : "Disabled");
+  Serial.println(mode.internal_charge_controller ? "Internal Charge Controller Supported" : "Function Not Supported");
   Serial.print("\tPrimary Battery Support: ");
-  Serial.println(mode.primary_battery_support ? "Enabled" : "Disabled");
+  Serial.println(mode.primary_battery_support ? "Primary or Secondary Battery Support" : "Function Not Supported");
   Serial.print("\tCondition Flag: ");
-  Serial.println(mode.condition_flag ? "Set" : "Not Set");
+  Serial.println(mode.condition_flag ? "Conditioning Cycle Requested" : "Battery OK");
   Serial.print("\tCharge Controller: ");
-  Serial.println(mode.charge_controller_enabled ? "Enabled" : "Disabled");
+  Serial.println(mode.charge_controller_enabled ? "Internal Charge Control Enabled" : "Internal Charge Control Disabled");
   Serial.print("\tPrimary Battery: ");
-  Serial.println(mode.primary_battery ? "Enabled" : "Disabled");
+  Serial.println(mode.primary_battery ? "Battery operating in its primary role" : "Battery operating in its secondary role");
   Serial.print("\tAlarm Mode: ");
-  Serial.println(mode.alarm_mode ? "Set" : "Not Set");
+  Serial.println(mode.alarm_mode ? "Disable AlarmWarning broadcast to Host and Smart Battery Charger" : "Enable AlarmWarning broadcasts to Host and Smart Battery Charger");
   Serial.print("\tCharger Mode: ");
-  Serial.println(mode.charger_mode ? "Set" : "Not Set");
+  Serial.println(mode.charger_mode ? "Disable broadcasts of ChargingVoltage and ChargingCurrent" : "Enable ChargingVoltage and ChargingCurrent broadcasts");
   Serial.print("\tCapacity Mode: ");
-  Serial.println(mode.capacity_mode ? "Set" : "Not Set");
+  Serial.println(mode.capacity_mode ? "Report in 10mW or 10mWh" : "Report in mA or mAh");
 
   Serial.print("At Rate (0x04): ");
   Serial.print(battery.atRate());
@@ -69,15 +69,21 @@ void loop() {
   Serial.println("\t\t" + *battery.ErrorCode());
 
   Serial.print("At Rate OK (0x07): ");
-  Serial.print(battery.atRateOK());
+  Serial.print(battery.atRateOK() ? "true" : "false");
   Serial.println("\t\t" + *battery.ErrorCode());
 
-  Serial.print("Temperature in Kelvin (0x08): ");
-  Serial.println(battery.temperature());
+  Serial.print("Temperature (0x08): ");
+  Serial.print(battery.temperature(), 1);
+  Serial.println(" °K\t\t" + *battery.ErrorCode());
+
   Serial.print("\tTemperature in Celsius: ");
-  Serial.println(battery.temperatureC());
+  Serial.print(battery.temperatureC(), 1);
+  Serial.println(" °C\t\t" + *battery.ErrorCode());
+
   Serial.print("\tTemperature in Fahrenheit: ");
-  Serial.println(battery.temperatureF()); 
+  Serial.print(battery.temperatureF()); 
+  Serial.println(" °F\t\t" + *battery.ErrorCode());
+  
   Serial.print("Voltage in mV (0x09): ");
   Serial.println(battery.voltage());
   Serial.print("Current in mA (0x0a): ");
@@ -164,6 +170,7 @@ void loop() {
   Serial.println(battery.voltageCellOne());
   Serial.print("State Of Health (0x4f): ");
   Serial.println(battery.stateOfHealth());
+  
   char tekst[] = "\033[H"; // Ansi terminal code for home position
   Serial.write(tekst, 5); // goto home position
 }

@@ -50,7 +50,7 @@ uint8_t i2cscan() {
   int nDevices{0};
   Serial.println("Scanning...");
 
-  for(address = 1; address < 255; address++ )
+  for(address = 0; address < 128; address++ )
   {
     // The i2c_scanner uses the return value of
     // the Write.endTransmisstion to see if
