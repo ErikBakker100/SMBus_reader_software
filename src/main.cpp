@@ -22,155 +22,240 @@ void setup() {
 void loop() {
   delay(1000*5);
   battery.setBatteryAddress(i2cscan());
-  Serial.print("Manufacturer Access (0x00): 0x");
+  Serial.print("Manufacturer Access (0x00):\t\t0x");
   Serial.print(battery.manufacturerAccess(), HEX);
-  Serial.println("\t\t\t" + *battery.ErrorCode());
+  Serial.println("\t\t\t" + battery.ErrorCode());
 
   BatteryMode mode = battery.batteryMode(); // We need to read this first to determine output ranges further on
 
-  Serial.print("Remaining Capacity Alarm (0x01): ");
+  Serial.print("Remaining Capacity Alarm (0x01):\t");
   Serial.print(battery.remainingCapacityAlarm());
   Serial.print(mode.capacity_mode ? " 10mWh" : " mAh");
-  Serial.println("\t" + *battery.ErrorCode());
+  Serial.println("\t\t\t" + battery.ErrorCode());
 
-  Serial.print("Remaining Time Alarm (0x02): ");
+  Serial.print("Remaining Time Alarm (0x02):\t\t");
   Serial.print(battery.remainingTimeAlarm());
-  Serial.println(" minutes\t\t" + *battery.ErrorCode());
+  Serial.println(" minutes\t\t" + battery.ErrorCode());
 
   Serial.print("Battery Modes (0x03):"); 
-  Serial.println("\t\t\t\t" + *battery.ErrorCode());
-  Serial.print("\tInternal Charge Controller: ");
-  Serial.println(mode.internal_charge_controller ? "Internal Charge Controller Supported" : "Function Not Supported");
-  Serial.print("\tPrimary Battery Support: ");
-  Serial.println(mode.primary_battery_support ? "Primary or Secondary Battery Support" : "Function Not Supported");
-  Serial.print("\tCondition Flag: ");
-  Serial.println(mode.condition_flag ? "Conditioning Cycle Requested" : "Battery OK");
-  Serial.print("\tCharge Controller: ");
-  Serial.println(mode.charge_controller_enabled ? "Internal Charge Control Enabled" : "Internal Charge Control Disabled");
-  Serial.print("\tPrimary Battery: ");
-  Serial.println(mode.primary_battery ? "Battery operating in its primary role" : "Battery operating in its secondary role");
-  Serial.print("\tAlarm Mode: ");
-  Serial.println(mode.alarm_mode ? "Disable AlarmWarning broadcast to Host and Smart Battery Charger" : "Enable AlarmWarning broadcasts to Host and Smart Battery Charger");
-  Serial.print("\tCharger Mode: ");
-  Serial.println(mode.charger_mode ? "Disable broadcasts of ChargingVoltage and ChargingCurrent" : "Enable ChargingVoltage and ChargingCurrent broadcasts");
-  Serial.print("\tCapacity Mode: ");
-  Serial.println(mode.capacity_mode ? "Report in 10mW or 10mWh" : "Report in mA or mAh");
+  Serial.println("\t\t\t\t\t\t" + battery.ErrorCode());
+  Serial.print("  Internal Charge Controller:\t\t");
+  Serial.println(mode.internal_charge_controller ? "Supported" : "Not Supported");
+  Serial.print("  Primary Battery Support:\t\t");
+  Serial.println(mode.primary_battery_support ? "Supported" : "Not Supported");
+  Serial.print("  Condition Flag:\t\t\t");
+  Serial.println(mode.condition_flag ? "Cycle Requested" : "Battery OK");
+  Serial.print("  Internal Charge Controller:\t\t");
+  Serial.println(mode.charge_controller_enabled ? "Enabled" : "Disabled");
+  Serial.print("  Primary Battery:\t\t\t");
+  Serial.println(mode.primary_battery ? "Operating in primary role" : "Operating in secondary role");
+  Serial.print("  Alarm Mode:\t\t\t\t");
+  Serial.println(mode.alarm_mode ? "Disabled AlarmWarning broadcast" : "Enabled AlarmWarning broadcasts");
+  Serial.print("  Charger Mode:\t\t\t\t");
+  Serial.println(mode.charger_mode ? "Disabled broadcasts of ChargingVoltage and Current" : "Enabled broadcasts of ChargingVoltage and Current");
+  Serial.print("  Capacity Mode:\t\t\t");
+  Serial.println(mode.capacity_mode ? "In 10mW or 10mWh" : "In mA or mAh");
 
-  Serial.print("At Rate (0x04): ");
+  Serial.print("At Rate (0x04):\t\t\t\t");
   Serial.print(battery.atRate());
-  Serial.println("\t\t\t\t" + *battery.ErrorCode());
+  Serial.println("\t\t\t" + battery.ErrorCode());
 
-  Serial.print("At Rate Time To Full (0x05): ");
+  Serial.print("At Rate Time To Full (0x05):\t\t");
   Serial.print(battery.atRateTimeToFull());
-  Serial.println("\t\t" + *battery.ErrorCode());
+  Serial.println("\t\t\t" + battery.ErrorCode());
 
-  Serial.print("At Rate Time To Empty (0x06): ");
+  Serial.print("At Rate Time To Empty (0x06):\t\t");
   Serial.print(battery.atRateTimeToEmpty());
-  Serial.println("\t\t" + *battery.ErrorCode());
+  Serial.println("\t\t\t" + battery.ErrorCode());
 
-  Serial.print("At Rate OK (0x07): ");
+  Serial.print("At Rate OK (0x07):\t\t\t");
   Serial.print(battery.atRateOK() ? "true" : "false");
-  Serial.println("\t\t" + *battery.ErrorCode());
+  Serial.println("\t\t\t" + battery.ErrorCode());
 
-  Serial.print("Temperature (0x08): ");
+  Serial.print("Temperature (0x08):\t\t");
   Serial.print(battery.temperature(), 1);
-  Serial.println(" °K\t\t" + *battery.ErrorCode());
+  Serial.println(" Kelvin\t\t" + battery.ErrorCode());
 
-  Serial.print("\tTemperature in Celsius: ");
+  Serial.print("\tTemperature:\t\t");
   Serial.print(battery.temperatureC(), 1);
-  Serial.println(" °C\t\t" + *battery.ErrorCode());
+  Serial.println(" Celsius\t\t" + battery.ErrorCode());
 
-  Serial.print("\tTemperature in Fahrenheit: ");
+  Serial.print("\tTemperature:\t\t");
   Serial.print(battery.temperatureF()); 
-  Serial.println(" °F\t\t" + *battery.ErrorCode());
+  Serial.println(" Fahrenheit\t\t" + battery.ErrorCode());
   
-  Serial.print("Voltage in mV (0x09): ");
-  Serial.println(battery.voltage());
-  Serial.print("Current in mA (0x0a): ");
-  Serial.println(battery.current());
-  Serial.print("Average Current in mA (0x0b): ");
-  Serial.println(battery.averageCurrent());
-  Serial.print("Max Error in % (0x0c): ");
-  Serial.println(battery.maxError());
-  Serial.print("Relative State Of Charge in % of max (0x0d): ");
-  Serial.println(battery.relativeStateOfCharge());
-  Serial.print("Absolute State Of Charge in % of max (0x0e): ");
-  Serial.println(battery.absoluteStateOfCharge());
-  Serial.print("Remaining Capacity in mAh(0x0f): ");
-  Serial.println(battery.remainingCapacity());
-  Serial.print("Full Capacity in mAh (0x10): ");
-  Serial.println(battery.fullCapacity());
-  Serial.print("Run Time To Empty in minutes (0x11): ");
-  Serial.println(battery.runTimeToEmpty());
-  Serial.print("Average Time To Empty in minutes (0x12): ");
-  Serial.println(battery.avgTimeToEmpty());
-  Serial.print("Average Time To Full in minutes (0x13): ");
-  Serial.println(battery.avgTimeToFull());
-  Serial.print("Charging Current in mA (0x14):");
-  Serial.println(battery.chargingCurrent());
-  Serial.print("Charging Voltage in mV (0x15):");
-  Serial.println(battery.chargingVoltage());
-  Serial.println("Battery Status (0x16):");
+  Serial.print("Voltage (0x09):\t\t\t");
+  Serial.print(battery.voltage());
+  Serial.println(" mV\t\t" + battery.ErrorCode());
+
+  Serial.print("Current (0x0a):\t\t");
+  Serial.print(battery.current());
+  Serial.println("\t\t" + battery.ErrorCode());
+  Serial.println("\t\t\tmA - for discharge, + for charge\t\t" + battery.ErrorCode());
+
+  Serial.print("Average Current (0x0b):\t");
+  Serial.print(battery.averageCurrent());
+  Serial.println("\t\t" + battery.ErrorCode());
+  Serial.println("\t\tmA - for discharge, + for charge\t" + battery.ErrorCode());
+
+  Serial.print("Max Error (0x0c):\t\t\t");
+  Serial.print(battery.maxError());
+  Serial.println("%\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Relative State Of Charge (0x0d): ");
+  Serial.print(battery.relativeStateOfCharge());
+  Serial.println("% of Full Charge Capacity\t" + battery.ErrorCode());
+ 
+  Serial.print("Absolute State Of Charge (0x0e): ");
+  Serial.print(battery.absoluteStateOfCharge());
+  Serial.println("% of Full Charge Capacity\t" + battery.ErrorCode());
+
+  Serial.print("Remaining Capacity (0x0f):\t");
+  Serial.print(battery.remainingCapacity());
+  Serial.print(mode.capacity_mode ? " 10mW" : " mA");
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Full Capacity (0x10):\t");
+  Serial.print(battery.fullCapacity());
+  Serial.print(mode.capacity_mode ? " 10mWh" : " mAh");
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Run Time To Empty (0x11):\t");
+  Serial.print(battery.runTimeToEmpty());
+  Serial.println(" minutes\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Average Time To Empty (0x12):\t");
+  Serial.print(battery.avgTimeToEmpty());
+  Serial.println(" minutes\t\t" + battery.ErrorCode());
+
+  Serial.print("Average Time To Full (0x13):\t");
+  Serial.print(battery.avgTimeToFull());
+  Serial.println(" minutes\t\t" + battery.ErrorCode());
+
+  Serial.print("Desired Charging Current (0x14):");
+  Serial.print(battery.chargingCurrent());
+  Serial.println(" mA\t\t\t\t" + battery.ErrorCode());
+  Serial.print("Desired Charging Voltage (0x15):");
+  Serial.print(battery.chargingVoltage());
+  Serial.println(" mV\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Battery Status (0x16):");
+  Serial.println("\t\t\t\t\t\t" + battery.ErrorCode());
   BatteryStatus status = battery.batteryStatus();
-  Serial.print("  Over Charged Alarm: ");
-  Serial.println(status.over_charged_alarm ? "True" : "False");
-  Serial.print("  Terminate Charge Alarm: ");
-  Serial.println(status.term_charge_alarm ? "True" : "False");
-  Serial.print("  Over Temperature Alarm: ");
-  Serial.println(status.over_temp_alarm ? "True" : "False");
-  Serial.print("  Terminate Discharge Alarm: ");
-  Serial.println(status.term_discharge_alarm ? "True" : "False");
-  Serial.print("  Remaining Capacity Alarm: ");
-  Serial.println(status.rem_capacity_alarm ? "True" : "False");
-  Serial.print("  Remaining Time Alarm: ");
-  Serial.println(status.rem_time_alarm ? "True" : "False");
-  Serial.print("  Initialized: ");
-  Serial.println(status.initialized ? "True" : "False");
-  Serial.print("  Discharging: ");
+  Serial.print("  Over Charged Alarm:\t\t");
+  Serial.println(status.over_charged_alarm ? "Fully charged" : "No charging, alarm cleared");
+  Serial.print("  Terminate Charge Alarm:\t");
+  Serial.println(status.term_charge_alarm ? "Suspend charging" : "No charging, alarm cleared");
+  Serial.print("  Over Temperature Alarm:\t");
+  Serial.println(status.over_temp_alarm ? "Above limit" : "Within acceptable range");
+  Serial.print("  Terminate Discharge Alarm:\t");
+  Serial.println(status.term_discharge_alarm ? "Capacity depleted" : "Discharge not detected");
+  Serial.print("  Remaining Capacity Alarm:\t");
+  Serial.println(status.rem_capacity_alarm ? "RemainingCapacity() < RemainingCapacityAlarm()" : "RemainingCapacityAlarm() < RemainingCapacity() or 0");
+  Serial.print("  Remaining Time Alarm:\t\t");
+  Serial.println(status.rem_time_alarm ? "AverageTimeToEmpty() < RemainingTimeAlarm()" : "RemainingTimeAlarm() < AverageTimeToEmpty() or 0");
+  Serial.print("  Initialized:\t\t\t");
+  Serial.println(status.initialized ? "First calibrated" : "Calibration or configuration information lost");
+  Serial.print("  Discharging:\t\t\t");
   Serial.println(status.discharging ? "True" : "False");
-  Serial.print("  Fully Charged: ");
+  Serial.print("  Fully Charged:\t\t");
   Serial.println(status.fully_charged ? "True" : "False");
-  Serial.print("  Fully Discharged: ");
-  Serial.println(status.fully_discharged ? "True" : "False");
-  Serial.print("\tStatus OK: ");
-  Serial.println(battery.statusOK());
-  Serial.print("Cycle Count (0x17): ");
-  Serial.println(battery.cycleCount());
-  Serial.print("Design Capacity in mAh (0x18): ");
-  Serial.println(battery.designCapacity());
-  Serial.print("Design Voltage in mV (0x19): ");
-  Serial.println(battery.designVoltage());
-  Serial.print("Manufacture Date (0x1b): ");
-  Serial.println(battery.manufactureDate());
-  Serial.print("\tManufacture Day: ");
-  Serial.println(battery.manufactureDay());
-  Serial.print("\tManufacture Month: ");
-  Serial.println(battery.manufactureMonth());
-  Serial.print("\tManufacture Year: ");
-  Serial.println(battery.manufactureYear());
-  Serial.print("Serial Number (0x1c): ");
-  Serial.println(battery.serialNumber());
-  Serial.print("Manufacturer Name (0x20): ");
-  Serial.println(battery.manufacturerName());
-  Serial.print("Device Name (0x21): ");
-  Serial.println(battery.deviceName());
-  Serial.print("Device Chemistry (0x22): ");
-  Serial.println(battery.deviceChemistry());
-  Serial.print("Manufacturer Data (0x23): ");
-  Serial.println(battery.manufacturerData());
-  Serial.print("Optional Mfg Function (0x2f): ");
-  Serial.println(battery.optionalMfgFunction());
-  Serial.print("voltageCellFour (0x3c): ");
-  Serial.println(battery.voltageCellFour());
-  Serial.print("voltageCellThree (0x3d): ");
-  Serial.println(battery.voltageCellThree());
-  Serial.print("voltageCellTwo (0x3e): ");
-  Serial.println(battery.voltageCellTwo());
-  Serial.print("voltageCellOne (0x3f): ");
-  Serial.println(battery.voltageCellOne());
-  Serial.print("State Of Health (0x4f): ");
-  Serial.println(battery.stateOfHealth());
+  Serial.print("  Fully Discharged:\t\t");
+  Serial.println(status.fully_discharged ? "True" : "RelativeStateOfCharge() > 20%");
+
+  Serial.print("Cycle Count (0x17):\t");
+  Serial.print(battery.cycleCount());
+  Serial.println(" times\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Design Capacity (0x18):\t");
+  Serial.print(battery.designCapacity());
+  Serial.print(mode.capacity_mode ? " 10mWh" : " mAh");
+  Serial.println("\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Design Voltage (0x19):\t");
+  Serial.print(battery.designVoltage());
+  Serial.println(" mV\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Protocol (0x1a):\t");
+  Serial.print(battery.specificationInfo());
+  Serial.println("\t\t\t\t\t" + battery.ErrorCode());
   
+  Serial.print("Manufacture Date (0x1b): ");
+  Serial.print(battery.manufactureDate());
+  Serial.print("\tDay: ");
+  Serial.print(battery.manufactureDay());
+  Serial.print(" Month: ");
+  Serial.print(battery.manufactureMonth());
+  Serial.print(" Year: ");
+  Serial.print(battery.manufactureYear());
+  Serial.println("\t" + battery.ErrorCode());
+  
+  Serial.print("Serial Number (0x1c):\t");
+  Serial.print(battery.serialNumber());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+  Serial.print("Manufacturer Name (0x20):\t");
+  Serial.print(battery.manufacturerName());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+  Serial.print("Device Name (0x21):\t");
+  Serial.print(battery.deviceName());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+  Serial.print("Device Chemistry (0x22):\t");
+  Serial.print(battery.deviceChemistry());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+  Serial.print("Manufacturer Data (0x23):\t");
+  Serial.print(battery.manufacturerData());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+// Following functions are not part of the smart battery specification version 1.1
+  Serial.print("voltageCellFour (0x3c):\t");
+  Serial.print(battery.voltageCellFour());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+  Serial.print("voltageCellThree (0x3d):\t");
+  Serial.print(battery.voltageCellThree());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+  Serial.print("voltageCellTwo (0x3e):\t");
+  Serial.print(battery.voltageCellTwo());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+  
+  Serial.print("voltageCellOne (0x3f):\t");
+  Serial.print(battery.voltageCellOne());
+  Serial.println("\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("FET's status (0x46):\t");
+  FETcontrol fets = battery.FETControl();
+  Serial.print(fets.raw, HEX);
+  Serial.println("\t\t\t\t\t" + battery.ErrorCode());  
+  Serial.print("  Charge FET:\t\t");
+  Serial.println(fets.chg?"ON":"OFF");
+  Serial.print("  DisCharge FET:\t\t");
+  Serial.println(fets.dsg?"ON":"OFF");
+
+  Serial.print("State Of Health (0x4f):\t");
+  Serial.print(battery.stateOfHealth());
+  Serial.println("%\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Safety Alert (0x50):\t");
+  Serial.print(battery.Safetyalert().raw);
+  Serial.println("%\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("Safety Status (0x51):\t");
+  Serial.print(battery.Safetystatus().raw);
+  Serial.println("%\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("PF Alert (0x52):\t");
+  Serial.print(battery.PFalert().raw);
+  Serial.println("%\t\t\t\t\t" + battery.ErrorCode());
+
+  Serial.print("PF Status (0x53):\t");
+  Serial.print(battery.PFstatus().raw);
+  Serial.println("%\t\t\t\t" + battery.ErrorCode());
+
   char tekst[] = "\033[H"; // Ansi terminal code for home position
   Serial.write(tekst, 5); // goto home position
 }

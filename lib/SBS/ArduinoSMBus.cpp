@@ -19,15 +19,8 @@
 ArduinoSMBus::ArduinoSMBus() {
   Wire.begin();
   Wire.setClock(130000);                  /**< Roughly 100kHz */
-  BatteryCodes[0] = {"OK"};                 /**< The Smart Battery processed the function code without detecting any errors. */
-  BatteryCodes[1] = {"Busy"};               /**< The Smart Battery is unable to process the function code at this time. */
-  BatteryCodes[2] = {"Usupported Command"}; /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
-  BatteryCodes[3] = {"AccessDenied"};       /**< The Smart Battery detected an attempt to write to a read only function code. */
-  BatteryCodes[4] = {"Overflow_Underflow"}; /**< The Smart Battery detected a data overflow or under flow. */
-  BatteryCodes[5] = {"BadSize"};            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
-  BatteryCodes[6] = {"UnknownError"};       /**< The Smart Battery detected an unidentifiable error. */
 }
-       
+
 /**
  * @brief Set the battery's I2C address.
  * Can be used to change the address after the object is created
@@ -35,7 +28,7 @@ ArduinoSMBus::ArduinoSMBus() {
  */
 void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
   _batteryAddress = batteryAddress;
-  Serial.print("Battery address set to: 0x");
+  Serial.print("Battery address set to:\t\t0x");
   Serial.println(_batteryAddress, HEX);
 }
 
@@ -184,7 +177,7 @@ uint16_t ArduinoSMBus::voltage() {
  * Returns the battery measured current (from the coulomb counter) in mA.
  * @return uint16_t 
  */
-uint16_t ArduinoSMBus::current() {
+int16_t ArduinoSMBus::current() {
   return readRegister(CURRENT);
 }
 
@@ -193,7 +186,7 @@ uint16_t ArduinoSMBus::current() {
  * Returns the average current in a 1-minute rolling average, in mA.
  * @return uint16_t 
  */
-uint16_t ArduinoSMBus::averageCurrent() {
+int16_t ArduinoSMBus::averageCurrent() {
   return readRegister(AVERAGE_CURRENT);
 }
 
@@ -302,33 +295,20 @@ uint16_t ArduinoSMBus::chargingVoltage() {
  * @return BatteryStatus A struct containing the status of each bit in the BatteryStatus register.
  */
 BatteryStatus ArduinoSMBus::batteryStatus() {
-  uint16_t status = readRegister(BATTERY_STATUS);
-  BatteryStatus batteryStatus;
+  uint16_t data = readRegister(BATTERY_STATUS);
+  BatteryStatus status;
 
-  batteryStatus.over_charged_alarm = status & (1 << 15);
-  batteryStatus.term_charge_alarm = status & (1 << 14);
-  batteryStatus.over_temp_alarm = status & (1 << 12);
-  batteryStatus.term_discharge_alarm = status & (1 << 11);
-  batteryStatus.rem_capacity_alarm = status & (1 << 9);
-  batteryStatus.rem_time_alarm = status & (1 << 8);
-  batteryStatus.initialized = status & (1 << 7);
-  batteryStatus.discharging = status & (1 << 6);
-  batteryStatus.fully_charged = status & (1 << 5);
-  batteryStatus.fully_discharged = status & (1 << 4);
-  return batteryStatus;
-}
-
-/**
- * @brief Check if the battery status is OK.
- * Check for any alarm conditions in the battery status. These include over charge, 
- * termination charge, over temperature, termination discharge alarms. If any of these alarms are set, the battery is not OK.
- * 
- * @return bool True if the battery status is OK, false otherwise.
- */
-bool ArduinoSMBus::statusOK() {
-  BatteryStatus status = this->batteryStatus();
-  return !(status.over_charged_alarm || status.term_charge_alarm || status.over_temp_alarm || 
-           status.term_discharge_alarm);
+  status.over_charged_alarm = data & (1 << 15);
+  status.term_charge_alarm = data & (1 << 14);
+  status.over_temp_alarm = data & (1 << 12);
+  status.term_discharge_alarm = data & (1 << 11);
+  status.rem_capacity_alarm = data & (1 << 9);
+  status.rem_time_alarm = data & (1 << 8);
+  status.initialized = data & (1 << 7);
+  status.discharging = data & (1 << 6);
+  status.fully_charged = data & (1 << 5);
+  status.fully_discharged = data & (1 << 4);
+  return status;
 }
 
 /**
@@ -359,6 +339,22 @@ uint16_t ArduinoSMBus::designCapacity() {
  */
 uint16_t ArduinoSMBus::designVoltage() {
   return readRegister(DESIGN_VOLTAGE);
+}
+
+/**
+ * @brief  Get the battery's supported smart battery specification.
+ * Returns the Version and revision : 
+ * Day + Month*32 + (Year–1980)*512
+ * @return String 
+ */
+String ArduinoSMBus::specificationInfo() {
+  uint16_t data = readRegister(SPECIFICATIONINFO);
+  String info{""};
+  if (data & 0x0100) info += "Version: 1.0.";
+  if (data & 0x0200) info += "Version: 1.1.";
+  if (data & 0x0300) info += "Version: 1.1 with optional PEC support.";
+  if (data & 0x1000) info += " Revision: Version 1.0 and 1.1.";
+  return info;
 }
 
 /**
@@ -450,21 +446,8 @@ const char* ArduinoSMBus::deviceChemistry() {
  * @return string 
  */
 const char* ArduinoSMBus::manufacturerData() {
-  static char data[BLOCKLENGTH]; // Assuming the device name is up to 20 characters long
+  static char data[15];
   readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH);
-  data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
-  return data;
-}
-
-/**
- * @brief Get optional function data.
- * Returns the string the manufacturer has programmed.
- * @return string 
- */
-const char* ArduinoSMBus::optionalMfgFunction() {
-  #define BLOCKLENGTH 255
-  static char data[BLOCKLENGTH]; // Assuming the device name is up to 20 characters long
-  readBlock(OPTIONALMFGFUNCTIONS, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
 }
@@ -506,6 +489,23 @@ uint16_t ArduinoSMBus::voltageCellOne() {
 }
 
 /**
+ * @brief Get the current FET Status from the battery.
+ * Returns the current operation status struct 
+ * This command is not supported by all batteries.
+ * @return FETcontrol 
+ */
+FETcontrol ArduinoSMBus::FETControl() {
+  FETcontrol fets;
+  uint16_t data = readRegister(FETCONTROL);
+  fets.raw = static_cast<uint8_t>(data & 0x00FF);
+  fets.od = data & (1 << 4);
+  fets.zvchg = data & (1 << 3);
+  fets.chg = data & (1 << 2);
+  fets.dsg = data & (1 << 1);
+  return fets; 
+}
+
+/**
  * @brief Get the State of Health from the battery.
  * Returns the estimated health of the battery, as a percentage of design capacity
  * This command is not supported by all batteries.
@@ -519,32 +519,159 @@ uint16_t ArduinoSMBus::stateOfHealth() {
 }
 
 /**
+ * @brief Returns indications of pending safety issues.
+ * This read-word function returns indications of pending safety issues, such as running safety timers, or fail 
+ * counters that are nonzero but have not reached the required time or value to trigger a SafetyStatus failure.
+ * This command is not supported by all batteries.
+ * @return SafetyAlert 
+ */
+SafetyAlert ArduinoSMBus::Safetyalert() {
+  SafetyAlert status{0};
+  uint16_t data = readRegister(SAFETYALERT);
+  status.raw = data;
+  status.scd = data & (1 << 0);
+  status.scc = data & (1 << 1);
+  status.aocd = data & (1 << 2);
+  status.wdf = data & (1 << 3);
+  status.hwdg = data & (1 << 4);
+  status.pf = data & (1 << 5);
+  status.cov = data & (1 << 6);
+  status.cuv = data & (1 << 7);
+  status.pov = data & (1 << 8);
+  status.puv = data & (1 << 9);
+  status.occ2 = data & (1 << 10);
+  status.ocd2 = data & (1 << 11);
+  status.occ = data & (1 << 12);
+  status.ocd = data & (1 << 13);
+  status.otc = data & (1 << 14);
+  status.otd = data & (1 << 15);
+  return status;
+}
+
+/**
+ * @brief Returns the status of the 1st level safety features.
+ * This command is not supported by all batteries.
+ * @return SafetyStatus 
+ */
+SafetyStatus ArduinoSMBus::Safetystatus() {
+  SafetyStatus status{0};
+  uint16_t data = readRegister(SAFETYSTATUS);
+  status.raw = data;
+  status.scd = data & (1 << 0);
+  status.scc = data & (1 << 1);
+  status.aocd = data & (1 << 2);
+  status.wdf = data & (1 << 3);
+  status.hwdg = data & (1 << 4);
+  status.pf = data & (1 << 5);
+  status.cov = data & (1 << 6);
+  status.cuv = data & (1 << 7);
+  status.pov = data & (1 << 8);
+  status.puv = data & (1 << 9);
+  status.occ2 = data & (1 << 10);
+  status.ocd2 = data & (1 << 11);
+  status.occ = data & (1 << 12);
+  status.ocd = data & (1 << 13);
+  status.otc = data & (1 << 14);
+  status.otd = data & (1 << 15);
+  return status;
+}
+
+/**
+ * @brief Returns indications of pending safety issues.
+ * This read-word function returns indications of pending safety issues, such as running safety timers that
+ * have not reached the required time to trigger a PFAlert failure
+ * @return PFAlert 
+ */
+PFAlert ArduinoSMBus::PFalert() {
+  PFAlert status{0};
+  uint16_t data = readRegister(PFALERT);
+  status.raw = data;
+  status.pfin = data & (1 << 0);
+  status.sov = data & (1 << 1);
+  status.sotc = data & (1 << 2);
+  status.sotd = data & (1 << 3);
+  status.cim = data & (1 << 4);
+  status.cfetf = data & (1 << 5);
+  status.dfetf = data & (1 << 6);
+  status.dff = data & (1 << 7);
+  status.ace_c = data & (1 << 8);
+  status.afe_p = data & (1 << 9);
+  status.socc = data & (1 << 10);
+  status.socd = data & (1 << 11);
+  status.sopt = data & (1 << 12);
+  status.fbf = data & (1 << 15);
+  return status;
+}
+
+/**
+ * @brief Get the data from the permanent failure status register.
+ * Returns the source of the bq20z90/bq20z95 permanent-failure condition.
+ * This command is not supported by all batteries.
+ * @return PFStatus
+ */
+PFStatus ArduinoSMBus::PFstatus() {
+  PFStatus status{0};
+  uint16_t data = readRegister(PFSTATUS);
+  status.raw = data;
+  status.pfin = data & (1 << 0);
+  status.sov = data & (1 << 1);
+  status.sotc = data & (1 << 2);
+  status.sotd = data & (1 << 3);
+  status.cim = data & (1 << 4);
+  status.cfetf = data & (1 << 5);
+  status.dfetf = data & (1 << 6);
+  status.dff = data & (1 << 7);
+  status.afe_c = data & (1 << 8);
+  status.afe_p = data & (1 << 9);
+  status.socc = data & (1 << 10);
+  status.socd = data & (1 << 11);
+  status.sopt = data & (1 << 12);
+  status.fbf = data & (1 << 15);
+  return status;
+}
+
+/**
  * @brief Get the current Operation Status from the battery.
  * Returns the current operation status struct 
  * This command is not supported by all batteries.
  * @return uint16_t 
  */
 OperationStatus ArduinoSMBus::Operationstatus() {
-  OperationStatus operationstatus{0};
-  uint16_t status = readRegister(OPERATIONSTATUS);
-  operationstatus.qen = status & (1); 
-  operationstatus.vok = status & (1 << 1);
-  operationstatus.r_dis = status & (1 << 2);
-  operationstatus.rsvd = status & (1 << 3);
-  operationstatus.xdsgi = status & (1 << 4);
-/*  operationstatus = status & (1 << 5);
-  operationstatus = status & (1 << 6);
-  operationstatus = status & (1 << 7);
-  operationstatus = status & (1 << 8);
-  operationstatus = status & (1 << 9);
-  operationstatus = status & (1 << 10);
-  operationstatus = status & (1 << 11);
-  operationstatus = status & (1 << 12);
-  operationstatus = status & (1 << 13);
-  operationstatus = status & (1 << 14);
-*/   
-  return operationstatus;
+  OperationStatus status{0};
+  uint16_t data = readRegister(OPERATIONSTATUS);
+  status.raw = data;
+  status.qen = data & (1 <<0 ); 
+  status.vok = data & (1 << 1);
+  status.r_dis = data & (1 << 2);
+  status.xdsgi = data & (1 << 4);
+  status.xdsg = data & (1 << 5);
+  status.dsg = data & (1 << 6);
+  status.wake = data & (1 << 7);
+  status.ldmd = data & (1 << 10);
+  status.csv = data & (1 << 12);
+  status.ss = data & (1 << 13);
+  status.fas = data & (1 << 14);
+  status.pres = data & (1 << 15);
+  return status;
 }
+
+/**
+ * @brief Clear bq20z90/bq20z95 permanent failure.
+ * The bq20z90/bq20z95 permanent failure can be cleared by sending 
+ * two ManufacturerAccess commands in sequence: the first word of the 
+ * PFKey followed by the second word of the PFKey. After sending 
+ * these two commands in sequence, PFStatus flags are cleared. 
+ * Refer to Permanent Fail Clear (PFKey) Manufacturer access for further details.
+ * Related Variables:
+ * • SBS:ManufacturerAccess(0x00)
+ * • SBS:PFStatus(0x53)
+ * @param void
+ * @return void 
+ */
+void ClearingPermanentFailure() {
+
+}
+
 
 /**
  * @brief Read a register from the battery.
@@ -552,7 +679,7 @@ OperationStatus ArduinoSMBus::Operationstatus() {
  * @param reg 
  * @return uint16_t 
  */
-uint16_t ArduinoSMBus::readRegister(uint8_t reg) {
+int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
   Wire.endTransmission();
@@ -593,16 +720,24 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
       data[i] = Wire.read();
     }
   }
+  data[count] = '\0'; //terminate the string
 }
 
-String* ArduinoSMBus::ErrorCode(void) {
+/**
+ * @brief Check if the battery status is OK.
+ * Check for any alarm conditions in the battery status. These include over charge, 
+ * termination charge, over temperature, termination discharge alarms. If any of these alarms are set, the battery is not OK.
+ * 
+ * @return String.
+ */
+String ArduinoSMBus::ErrorCode(void) {
   uint16_t status = readRegister(BATTERY_STATUS);
-  status = status & 0x000f;
-  if (status & 0x0001) return &BatteryCodes[0].Error;      // OK
-  else if (status & 0x0002) return &BatteryCodes[1].Error; // Busy
-  else if (status & 0x0003) return &BatteryCodes[2].Error; // Unsupported Command
-  else if (status & 0x0004) return &BatteryCodes[3].Error; // Access Denied
-  else if (status & 0x0005) return &BatteryCodes[4].Error; // Overflow/Underflow 
-  else if (status & 0x0006) return &BatteryCodes[5].Error; // BadSize
-  else return &BatteryCodes[6].Error;                      // Unknown Error
+  status &= 0x0007;
+  if (status == 0) return "OK";                 /**< The Smart Battery processed the function code without detecting any errors. */
+  if (status == 1) return "Busy";               /**< The Smart Battery is unable to process the function code at this time. */
+  if (status == 3) return "Usupported";         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
+  if (status == 4) return "AccessDenied";       /**< The Smart Battery detected an attempt to write to a read only function code. */
+  if (status == 5) return "Over-, Under-flow";  /**< The Smart Battery detected a data overflow or under flow. */
+  if (status == 6) return "BadSize";            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
+  return "UnknownError";                        /**< The Smart Battery detected an unidentifiable error. */
 }

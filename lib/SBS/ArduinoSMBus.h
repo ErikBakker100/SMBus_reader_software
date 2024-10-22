@@ -12,6 +12,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <string.h>
 
 #define BLOCKLENGTH 255 // Maximum of data stream to be read
 
@@ -55,7 +56,12 @@
 #define VOLTAGECELLTHREE 0x3d
 #define VOLTAGECELLTWO 0x3e
 #define VOLTAGECELLONE 0x3f
+#define FETCONTROL 0x46
 #define STATE_OF_HEALTH 0x4f
+#define SAFETYALERT 0x50
+#define SAFETYSTATUS 0x51
+#define PFALERT 0x52
+#define PFSTATUS 0x53
 #define OPERATIONSTATUS 0x54
 
  /**
@@ -63,6 +69,7 @@
  * @brief A struct to hold various battery mode flags.
  */
 struct BatteryMode {
+  uint16_t raw;                     /**< Data read */
   bool internal_charge_controller;  /**< True if the internal charge controller is supported, false otherwise. BIT 0 (Read only) */
   bool primary_battery_support;     /**< True if the primary battery support is supported, false otherwise. BIT 1 (Read only) */
   bool condition_flag;              /**< False if condition is ok, true if battery conditioning cycle is needed. BIT 7 (Read only) */
@@ -80,6 +87,7 @@ struct BatteryMode {
  * This struct holds various flags that represent the battery status.
  */
 struct BatteryStatus {
+  uint16_t raw;                 /**<*/
   bool over_charged_alarm;      /**< True if the battery is overcharged, false otherwise. Corresponds to bit 15 of the BatteryStatus register. */
   bool term_charge_alarm;       /**< True if the termination charge alarm is set, false otherwise. Corresponds to bit 14 of the BatteryStatus register. */
   bool over_temp_alarm;         /**< True if the battery temperature is over the limit, false otherwise. Corresponds to bit 12 of the BatteryStatus register. */
@@ -93,12 +101,107 @@ struct BatteryStatus {
 };
 
 /**
+ * @struct SafetyAlert
+ * @brief A struct to hold the flags of teh pending safety issues register.
+ */
+struct SafetyAlert {
+  uint16_t raw;                 /**< Data read */
+  bool scd;                     /**< Discharge short-circuit alert. */
+  bool scc;                     /**< Charge short-circuit alert. */
+  bool aocd;                    /**< AFE discharge overcurrent alert. */
+  bool wdf;                     /**< AFE watchdog alert. */  
+  bool hwdg;                    /**< Host watchdog alert. */
+  bool pf;                      /**< Permanent failure alert. */
+  bool cov;                     /**< Cell overvoltage alert. */
+  bool cuv;                     /**< Cell undervoltage alert. */
+  bool pov;                     /**< Pack overvoltage alert. */
+  bool puv;                     /**< Pack undervoltage alert. */
+  bool occ2;                    /**< Tier-2 charge overcurrent alert. */
+  bool ocd2;                    /**< Tier-2 discharge overcurrent alert. */
+  bool occ;                     /**< Charge overcurrent alert. */
+  bool ocd;                     /**< Discharge overcurrent alert. */
+  bool otc;                     /**< Charge overtemperature alert. */
+  bool otd;                     /**< Discharge overtemperature alert. */
+};
+
+/**
+ * @struct SafetyStatus
+ * @brief A struct to hold the flags of the 1st level safety features register.
+ */
+struct SafetyStatus {
+  uint16_t raw;                 /**< Data read */
+  bool scd;                     /**< Discharge short-circuit condition. */
+  bool scc;                     /**< Charge short-circuit condition. */
+  bool aocd;                    /**< AFE discharge overcurrent condition. */
+  bool wdf;                     /**< AFE watchdog condition. */  
+  bool hwdg;                    /**< Host watchdog condition. */
+  bool pf;                      /**< Permanent failure and SAFE pin has been driven high.. */
+  bool cov;                     /**< Cell overvoltage condition. */
+  bool cuv;                     /**< Cell undervoltage condition. */
+  bool pov;                     /**< Pack overvoltage condition. */
+  bool puv;                     /**< Pack undervoltage condition. */
+  bool occ2;                    /**< Tier-2 charge overcurrent condition. */
+  bool ocd2;                    /**< Tier-2 discharge overcurrent condition. */
+  bool occ;                     /**< Charge overcurrent condition. */
+  bool ocd;                     /**< Discharge overcurrent condition. */
+  bool otc;                     /**< Charge overtemperature condition. */
+  bool otd;                     /**< Discharge overtemperature condition. */
+};
+
+/**
+ * @struct PFAlert
+ * @brief A struct to hold the flags of the pending safety issues register.
+ * The permanent failure status register indicates the source of the bq20z90/bq20z95 permanent-failure condition.
+ */
+struct PFAlert {
+  uint16_t raw;                 /**< Data read */
+  bool pfin;                    /**< External Input Indication of permanent failure alert. */
+  bool sov;                     /**< Safety-Overvoltage permanent failure alert. */
+  bool sotc;                    /**< Charge Safety Overtemperature permanent failure alert. */
+  bool sotd;                    /**< Discharge Safety Overtemperature permanent failure alert. */  
+  bool cim;                     /**< Cell-Imbalance permanent failure alert. */
+  bool cfetf;                   /**< Charge-FET-Failure permanent failure alert. */
+  bool dfetf;                   /**< Discharge-FET-Failure permanent failure alert. */
+  bool dff;                     /**< Data Flash Fault permanent failure alert. */
+  bool ace_c;                   /**< Permanent AFE Communications failure alert. */
+  bool afe_p;                   /**< Periodic AFE Communications permanent failure alert. */
+  bool socc;                    /**< Charge Safety-Overcurrent permanent failure alert. */
+  bool socd;                    /**< Discharge Safety Overcurrent permanent failure alert. */
+  bool sopt;                    /**< Open Thermistor permanent failure alert. */
+  bool fbf;                     /**< Fuse Blow Failure alert. */
+};
+
+/**
+ * @struct PFStatus
+ * @brief A struct to hold the permanent failure status register flags.
+ * The permanent failure status register indicates the source of the bq20z90/bq20z95 permanent-failure condition.
+ */
+struct PFStatus {
+  uint16_t raw;                 /**< Data read */
+  bool pfin;                    /**< External Input Indication of permanent failure. */
+  bool sov;                     /**< Safety-Overvoltage permanent failure. */
+  bool sotc;                    /**< Charge Safety Overtemperature permanent failure. */
+  bool sotd;                    /**< Discharge Safety Overtemperature permanent failure. */  
+  bool cim;                     /**< Cell-Imbalance permanent failure. */
+  bool cfetf;                   /**< Charge-FET-Failure permanent failure. */
+  bool dfetf;                   /**< Discharge-FET-Failure permanent failure. */
+  bool dff;                     /**< Data Flash Fault permanent failure. */
+  bool afe_c;                   /**< Permanent AFE Communications failure. */
+  bool afe_p;                   /**< Periodic AFE Communications permanent failure. */
+  bool socc;                    /**< Charge Safety-Overcurrent permanent failure. */
+  bool socd;                    /**< Discharge Safety Overcurrent permanent failure. */
+  bool sopt;                    /**< Open Thermistor permanent failure. */
+  bool fbf;                     /**< Fuse Blow Failure. */
+};
+
+/**
  * @struct OperationStatus
  * @brief A struct to hold the operation status flags.
  *
  * This struct holds various flags that represent the operation status.
  */
 struct OperationStatus {
+  uint16_t raw;                 /**< Data read */
   bool pres;                    /**< Low indicating that the system is present (battery inserted). */
   bool fas;                     /**< Low means full access security mode. */
   bool ss;         
@@ -111,17 +214,18 @@ struct OperationStatus {
   bool r_dis;
   bool vok;
   bool qen;
-  bool rsvd;
 };
 
 /**
- * @struct Batterycode
- * @brief A struct to hold various return error codes coming from the battery.
- *
- * After sending a command, a status is requested. The Error (or not) is being placed here.
+ * @struct FETcontrol
+ * @brief This read- or write-word function allows direct control of the FETs for test purposes.
  */
-struct Batterycode {
-  String Error;
+struct FETcontrol {
+  uint8_t raw;
+  bool od;
+  bool zvchg;
+  bool chg;                     /**< Charge FET Control, 0 = turn OFF CHG FET. CHG FET doesn't turn off in discharge mode to protect the FET body diode. 1 = turn ON CHG FET */
+  bool dsg;                     /**< Discharge FET control 0 = turn OFF DSG FET. DSG FET doesn't turn of in charge mode to protect the FET body diode. 1 = turn ON DSG FET */
 };
 
 class ArduinoSMBus {
@@ -140,8 +244,8 @@ public:
   float temperatureC();
   float temperatureF();
   uint16_t voltage(); // command 0x09
-  uint16_t current(); // command 0x0a
-  uint16_t averageCurrent(); // command 0x0b
+  int16_t current(); // command 0x0a
+  int16_t averageCurrent(); // command 0x0b
   uint16_t maxError(); // command 0x0c
   uint16_t relativeStateOfCharge(); // command 0x0d
   uint16_t absoluteStateOfCharge(); // command 0x0e
@@ -153,11 +257,10 @@ public:
   uint16_t chargingCurrent(); // command 0x14
   uint16_t chargingVoltage(); // command 0x15
   BatteryStatus batteryStatus(); // command 0x16
-  bool statusOK();
   uint16_t cycleCount(); // command 0x17
   uint16_t designCapacity(); // command 0x18
   uint16_t designVoltage(); // command 0x19
-  uint16_t specificationInfo(); // command 0x1a
+  String specificationInfo(); // command 0x1a
   uint16_t manufactureDate(); // command 0x1b
   uint8_t manufactureDay();
   uint8_t manufactureMonth();
@@ -167,19 +270,23 @@ public:
   const char* deviceName(); // command 0x21
   const char* deviceChemistry(); // command 0x22
   const char* manufacturerData(); // command 0x23
-  const char* optionalMfgFunction(); // command 0x2f
   uint16_t voltageCellFour(); // command 0x3c
   uint16_t voltageCellThree(); // command 0x3d
   uint16_t voltageCellTwo(); // command 0x3e
   uint16_t voltageCellOne(); // command 0x3f
+  // following are extended SBS commands which are only available when the bq20z90/bq20z95 device is in unsealed or full access mode.
+  FETcontrol FETControl(); // command 0x46
   uint16_t stateOfHealth(); // command 0x4f
+  SafetyAlert Safetyalert(); // command 0x50
+  SafetyStatus Safetystatus(); // command 0x51
+  PFAlert PFalert(); // command 0x52
+  PFStatus PFstatus(); // command 0x53
   OperationStatus Operationstatus(); // command 0x54
-
-  String* ErrorCode(void);
+  void ClearingPermanentFailure();
+  String ErrorCode(void);
 
 private:
-  Batterycode BatteryCodes[6];
   uint8_t _batteryAddress;
-  uint16_t readRegister(uint8_t reg);
+  int16_t readRegister(uint8_t reg);
   void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
 };
