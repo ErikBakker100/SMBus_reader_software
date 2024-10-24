@@ -31,15 +31,6 @@ void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
 }
 
 /**
- * @brief implementation specific. It may be used by a manufacturer to return specific version information, internal calibration information, or some other manufacturer specific function.
- * Content determined by the Smart Battery's manufacturer.
- * @return uint16_t 
- */
-uint16_t ArduinoSMBus::manufacturerAccess() {
-  return readRegister(MANUFACTURER_ACCESS);
-}
-
-/**
  * @brief implementation specific. Used to get into Sealed mode or Full Access
  * Content determined by the Smart Battery's manufacturer. TI default unseal codes are 0414 3672 and the default full access codes are ffff ffff.
  * Unsealing is a 2 step command performed by writing the 1st word of the UnSealKey followed by the second word of the UnSealKey.
@@ -66,8 +57,9 @@ uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
  * least-significant byte (LSB) = sub-decimal integer, e.g.: 0x0120 = version 01.20.
  * @return uint16_t
  */
-uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code = 0x0002) {
-  return readRegister(MANUFACTURER_ACCESS);  
+uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code) {
+  this->writeRegister(MANUFACTURER_ACCESS, code);
+  return readRegister(MANUFACTURER_ACCESS);
 }
 
 /**
@@ -75,7 +67,8 @@ uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code = 0x0002) {
  * Content determined by the Smart Battery's manufacturer. Returns the hardware version stored in a single byte of reserved data flash.
  * @return uint16_t
  */
-uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code = 0x0003) {
+uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
+  this->writeRegister(MANUFACTURER_ACCESS, code);
   return readRegister(MANUFACTURER_ACCESS);
 }
 
@@ -84,8 +77,42 @@ uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code = 0x0003) {
  * Content determined by the Smart Battery's manufacturer. 
  * @return ManufacturerBatteryStatus
  */
-ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code = 0x0006) {
-  ManufacturerBatStatus status;
+ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
+  ManufacturerBatStatus status{0};
+  this->writeRegister(MANUFACTURER_ACCESS, code);
+  uint16_t data = readRegister(MANUFACTURER_ACCESS);
+  status.raw = data;
+  if ((data & 0x000f) == 0) status.wakeup = true;
+  else if ((data & 0x000f) == 1) status.normaldischarge = true;
+  else if ((data & 0x000f) == 3) status.precharge = true;
+  else if ((data & 0x000f) == 5) status.charge = true;
+  else if ((data & 0x000f) == 7) status.chargetermination = true;
+  else if ((data & 0x000f) == 8) status.faultchargeterminate = true;
+  else if ((data & 0x000f) == 9) status.permanentfailure = true;
+  else if ((data & 0x000f) == 10) status.overcurrent = true;
+  else if ((data & 0x000f) == 11) status.overtemperature = true;
+  else if ((data & 0x000f) == 12) status.batteryfailure = true;
+  else if ((data & 0x000f) == 13) status.normaldischarge = true;
+  else if ((data & 0x000f) == 15) status.batteryremoved = true;
+  if (data >> 14 == 0) {
+    status.chg_fet = true;
+    status.dsg_fet = true; }
+  else if (data >> 14 == 1) {
+    status.chg_fet = false;
+    status.dsg_fet = true; }
+  else if (data >> 14 == 2) {
+    status.chg_fet = false;
+    status.dsg_fet = false; }
+  else {
+    status.chg_fet = true;
+    status.dsg_fet = false; }
+  if (status.permanentfailure) {
+    status.failure = "";
+    if ((data >> 12) & 0xc == 0) status.failure = "Fuse is blown";
+    else if ((data >> 12) & 0xc == 1) status.failure = "Cell imbalance failure";
+    else if ((data >> 12) & 0xc == 2) status.failure = "Safety voltage failure";
+    else status.failure = "FET failure";
+  }
   return status;
 }
 
@@ -95,8 +122,8 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code = 
  * This command is only available when the bq20z90/bq20z95 is in Unsealed or Full Access mode.
  * @return void
  */
-void ArduinoSMBus::manufacturerAccessSealDevice(uint16_t command = 0x0020) {
-
+void ArduinoSMBus::manufacturerAccessSealDevice(uint16_t code) {
+  this->writeRegister(MANUFACTURER_ACCESS, code);
 }
 
 /**
@@ -105,7 +132,7 @@ void ArduinoSMBus::manufacturerAccessSealDevice(uint16_t command = 0x0020) {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::remainingCapacityAlarm() {
-  return readRegister(REMAINING_CAPACITY_ALARM);
+  return this->readRegister(REMAINING_CAPACITY_ALARM);
 }
 
 /**
@@ -114,7 +141,7 @@ uint16_t ArduinoSMBus::remainingCapacityAlarm() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::remainingTimeAlarm() {
-  return readRegister(REMAINING_TIME_ALARM);
+  return this->readRegister(REMAINING_TIME_ALARM);
 }
 
 /**
@@ -761,10 +788,34 @@ int16_t ArduinoSMBus::readRegister(uint8_t reg) {
  * @return void 
  */
 void ArduinoSMBus::writeRegister(uint8_t reg, uint16_t data) {
+  uint8_t error{0};
   Wire.beginTransmission(_batteryAddress);
-  Wire.write(reg);
+/*  Wire.write(reg);
+  byte = data;
+  Wire.write(byte);
+  byte = data >> 8; */
   Wire.write(data);
-  Wire.endTransmission();
+  error = Wire.endTransmission();
+  String message;
+  switch (error) {
+    case 0:
+      message = " ok ";
+      break;
+    case 1:
+      message = " data too long to fit in transmit buffer ";
+      break;
+    case 2:
+      message = " received NACK on transmit of address ";
+      break;
+    case 3:
+      message = " received NACK on transmit of data ";
+      break;
+    case 4:
+      message = " other ";
+    default:
+      message = " timeout ";
+  }
+  Serial.print(message);
 }
 
 /**
