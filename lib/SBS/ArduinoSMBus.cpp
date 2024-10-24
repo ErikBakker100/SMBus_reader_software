@@ -28,17 +28,75 @@ ArduinoSMBus::ArduinoSMBus() {
  */
 void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
   _batteryAddress = batteryAddress;
-  Serial.print("Battery address set to:\t\t0x");
-  Serial.println(_batteryAddress, HEX);
 }
 
 /**
  * @brief implementation specific. It may be used by a manufacturer to return specific version information, internal calibration information, or some other manufacturer specific function.
- * Content determined by the Smart Battery's manufacturer. When writing to this register TI default unseal codes are 0414 3672 and the default full access codes are ffff ffff
+ * Content determined by the Smart Battery's manufacturer.
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::manufacturerAccess() {
   return readRegister(MANUFACTURER_ACCESS);
+}
+
+/**
+ * @brief implementation specific. Used to get into Sealed mode or Full Access
+ * Content determined by the Smart Battery's manufacturer. TI default unseal codes are 0414 3672 and the default full access codes are ffff ffff.
+ * Unsealing is a 2 step command performed by writing the 1st word of the UnSealKey followed by the second word of the UnSealKey.
+ * Changing from Unsealed to Full Access is performed by writing the 1st word of the FullAccessKey followed by the second word of the FullAccessKey.
+ * This command is only available when the bq20z90/bq20z95 is in Sealed mode.
+ * @return void
+ */
+void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b) {
+}
+
+/**
+ * @brief implementation specific. For TI bq20z90/bq20z95 Returns the IC part number.
+ * Content determined by the Smart Battery's manufacturer.
+ * @return uint16_t
+ */
+uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
+  this->writeRegister(MANUFACTURER_ACCESS, code);
+  return readRegister(MANUFACTURER_ACCESS);
+}
+
+/**
+ * @brief implementation specific. For TI bq20z90/bq20z95 Returns the Firmware version.
+ * Content determined by the Smart Battery's manufacturer. The format is most-significant byte (MSB) = Decimal integer, and the
+ * least-significant byte (LSB) = sub-decimal integer, e.g.: 0x0120 = version 01.20.
+ * @return uint16_t
+ */
+uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code = 0x0002) {
+  return readRegister(MANUFACTURER_ACCESS);  
+}
+
+/**
+ * @brief implementation specific. For TI bq20z90/bq20z95 Returns the Hardware version.
+ * Content determined by the Smart Battery's manufacturer. Returns the hardware version stored in a single byte of reserved data flash.
+ * @return uint16_t
+ */
+uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code = 0x0003) {
+  return readRegister(MANUFACTURER_ACCESS);
+}
+
+/**
+ * @brief implementation specific. For TI bq20z90/bq20z95 Returns the Battery Status.
+ * Content determined by the Smart Battery's manufacturer. 
+ * @return ManufacturerBatteryStatus
+ */
+ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code = 0x0006) {
+  ManufacturerBatStatus status;
+  return status;
+}
+
+/**
+ * @brief implementation specific. For TI bq20z90/bq20z95 Brings the IC in a Sealed condition.
+ * Content determined by the Smart Battery's manufacturer. For the bq20z90/bq20z95 used to limit access to the extended SBS functions and data flash space, sets.
+ * This command is only available when the bq20z90/bq20z95 is in Unsealed or Full Access mode.
+ * @return void
+ */
+void ArduinoSMBus::manufacturerAccessSealDevice(uint16_t command = 0x0020) {
+
 }
 
 /**
@@ -157,7 +215,8 @@ float ArduinoSMBus::temperatureC() {
  */
 float ArduinoSMBus::temperatureF() {
   float temperatureKelvin = readRegister(TEMPERATURE)/10;
-  return temperatureKelvin - 459,67;
+  ;
+  return temperatureKelvin - 459.67;
 
 //  uint16_t temperatureFahrenheit = (temperatureKelvin * 18 - 45967) / 10; // Convert from Kelvin to Fahrenheit
 //  return temperatureFahrenheit;
@@ -446,7 +505,7 @@ const char* ArduinoSMBus::deviceChemistry() {
  * @return string 
  */
 const char* ArduinoSMBus::manufacturerData() {
-  static char data[15];
+  static char data[BLOCKLENGTH];
   readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
@@ -672,7 +731,6 @@ void ClearingPermanentFailure() {
 
 }
 
-
 /**
  * @brief Read a register from the battery.
  * Reads a standard 16-bit register from the battery.
@@ -686,13 +744,27 @@ int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   
   delay(10);
   
-  Wire.requestFrom(_batteryAddress, 2); // Read 2 bytes
+  uint8_t datalength = 2;
+  Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
   
   if(Wire.available()) {
-    return Wire.read() | Wire.read() << 8;
+    return Wire.read() | (Wire.read() << 8);
   } else {
     return 0;
   }
+}
+
+
+/**
+ * @brief Write word to a register.
+ * @param reg, data 
+ * @return void 
+ */
+void ArduinoSMBus::writeRegister(uint8_t reg, uint16_t data) {
+  Wire.beginTransmission(_batteryAddress);
+  Wire.write(reg);
+  Wire.write(data);
+  Wire.endTransmission();
 }
 
 /**
@@ -708,8 +780,8 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
   Wire.endTransmission(false);
 
   delay(10); // Add a small delay to give the device time to prepare the data
-
-  uint8_t count = Wire.requestFrom(_batteryAddress, length + 1); // Request one extra byte for the length
+  uint8_t datalength = length + 1;
+  uint8_t count = Wire.requestFrom(_batteryAddress, datalength); // Request one extra byte for the length
 
   if (Wire.available()) {
     count = Wire.read(); // The first byte is the length of the block, it returns the numberr of bytes received.

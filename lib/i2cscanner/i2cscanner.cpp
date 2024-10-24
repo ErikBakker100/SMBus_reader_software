@@ -96,9 +96,10 @@ uint8_t i2cscan() {
       Serial.println(address,HEX);
     }
   }
-  if (nDevices == 0)
+  if (nDevices == 0) {
     Serial.println("No I2C devices found\n");
-  else
+    address=0;
+  } else
     Serial.println("done\n");
   return address;
 }
