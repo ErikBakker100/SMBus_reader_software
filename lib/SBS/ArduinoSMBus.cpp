@@ -82,18 +82,20 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
   this->writeRegister(MANUFACTURER_ACCESS, code);
   uint16_t data = readRegister(MANUFACTURER_ACCESS);
   status.raw = data;
-  if ((data & 0x000f) == 0) status.wakeup = true;
-  else if ((data & 0x000f) == 1) status.normaldischarge = true;
-  else if ((data & 0x000f) == 3) status.precharge = true;
-  else if ((data & 0x000f) == 5) status.charge = true;
-  else if ((data & 0x000f) == 7) status.chargetermination = true;
-  else if ((data & 0x000f) == 8) status.faultchargeterminate = true;
-  else if ((data & 0x000f) == 9) status.permanentfailure = true;
-  else if ((data & 0x000f) == 10) status.overcurrent = true;
-  else if ((data & 0x000f) == 11) status.overtemperature = true;
-  else if ((data & 0x000f) == 12) status.batteryfailure = true;
-  else if ((data & 0x000f) == 13) status.normaldischarge = true;
-  else if ((data & 0x000f) == 15) status.batteryremoved = true;
+
+  if ((data & 0x000f) == 0) status.failure = "Wake Up.";
+  else if ((data & 0x000f) == 1) status.failure = "Normal Discharge";
+  else if ((data & 0x000f) == 3) status.failure = "Pre-Charge";
+  else if ((data & 0x000f) == 5) status.failure = "Charge";
+  else if ((data & 0x000f) == 7) status.failure = "Charge Termination";
+  else if ((data & 0x000f) == 8) status.failure = "Fault Charge Terminate";
+  else if ((data & 0x000f) == 9) status.failure = "Permanent Failure, ";
+  else if ((data & 0x000f) == 10) status.failure = "Overcurrent";
+  else if ((data & 0x000f) == 11) status.failure = "Overtemperature";
+  else if ((data & 0x000f) == 12) status.failure = "Battery Failure";
+  else if ((data & 0x000f) == 13) status.failure = "Sleep";
+  else if ((data & 0x000f) == 15) status.failure = "Battery Removed";
+  status.permfailure = "";
   if (data >> 14 == 0) {
     status.chg_fet = true;
     status.dsg_fet = true; }
@@ -106,12 +108,11 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
   else {
     status.chg_fet = true;
     status.dsg_fet = false; }
-  if (status.permanentfailure) {
-    status.failure = "";
-    if ((data >> 12) & 0xc == 0) status.failure = "Fuse is blown";
-    else if ((data >> 12) & 0xc == 1) status.failure = "Cell imbalance failure";
-    else if ((data >> 12) & 0xc == 2) status.failure = "Safety voltage failure";
-    else status.failure = "FET failure";
+  if ((data & 0x000f) == 9) { // Permanent Failure
+    if (((data >> 12) & 0xc) == 0) status.permfailure = "Fuse is blown";
+    else if (((data >> 12) & 0xc) == 1) status.permfailure = "Cell imbalance failure";
+    else if (((data >> 12) & 0xc) == 2) status.permfailure = "Safety voltage failure";
+    else status.permfailure = "FET failure";
   }
   return status;
 }
@@ -291,7 +292,9 @@ uint16_t ArduinoSMBus::maxError() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::relativeStateOfCharge() {
-  return readRegister(REL_STATE_OF_CHARGE);
+  uint16_t data = readRegister(REL_STATE_OF_CHARGE);
+  data &= 0x00ff;
+  return data;
 }
 
 /**
@@ -300,7 +303,9 @@ uint16_t ArduinoSMBus::relativeStateOfCharge() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::absoluteStateOfCharge() {
-  return readRegister(ABS_STATE_OF_CHARGE);
+  uint16_t data = readRegister(ABS_STATE_OF_CHARGE);
+  data &= 0x00ff;
+  return data;
 }
 
 /**
@@ -435,11 +440,13 @@ uint16_t ArduinoSMBus::designVoltage() {
  */
 String ArduinoSMBus::specificationInfo() {
   uint16_t data = readRegister(SPECIFICATIONINFO);
-  String info{""};
-  if (data & 0x0100) info += "Version: 1.0.";
-  if (data & 0x0200) info += "Version: 1.1.";
-  if (data & 0x0300) info += "Version: 1.1 with optional PEC support.";
-  if (data & 0x1000) info += " Revision: Version 1.0 and 1.1.";
+  data &= 0x00ff;
+  String info{"Version: "};
+  info += String(data, HEX);
+//  if (data & 0x08) info += "Version: 1.0.";
+//  if (data & 0x02) info += "Version: 1.1.";
+//  if (data & 0x03) info += "Version: 1.1 with optional PEC support.";
+//  if (data & 0x10) info += "Version: 1.0 and 1.1.";
   return info;
 }
 
@@ -598,10 +605,7 @@ FETcontrol ArduinoSMBus::FETControl() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::stateOfHealth() {
-  uint8_t data[2];
-  readBlock(STATE_OF_HEALTH, data, 2);
-  uint16_t stateOfHealth = (data[1] << 8) | data[0];
-  return stateOfHealth;
+  return readRegister(STATE_OF_HEALTH);
 }
 
 /**
@@ -767,7 +771,7 @@ void ClearingPermanentFailure() {
 int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
-  Wire.endTransmission();
+  this->I2Ccode(Wire.endTransmission());
   
   delay(10);
   
@@ -779,43 +783,31 @@ int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   } else {
     return 0;
   }
-}
+/* 
+  Wire.beginTransmission(_batteryAddress);
+  Wire.write(BATTERY_STATUS);
+  I2Ccode(Wire.endTransmission());
+  delay(10);
+  Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
 
+  if(Wire.available()) {
+    uint16_t status = Wire.read() | (Wire.read() << 8);
+    BatErrorCode(status &= 0x0007);
+  }*/
+}
 
 /**
  * @brief Write word to a register.
- * @param reg, data 
+ * @param reg
+ * @param data 
  * @return void 
  */
 void ArduinoSMBus::writeRegister(uint8_t reg, uint16_t data) {
-  uint8_t error{0};
   Wire.beginTransmission(_batteryAddress);
-/*  Wire.write(reg);
-  byte = data;
-  Wire.write(byte);
-  byte = data >> 8; */
-  Wire.write(data);
-  error = Wire.endTransmission();
-  String message;
-  switch (error) {
-    case 0:
-      message = " ok ";
-      break;
-    case 1:
-      message = " data too long to fit in transmit buffer ";
-      break;
-    case 2:
-      message = " received NACK on transmit of address ";
-      break;
-    case 3:
-      message = " received NACK on transmit of data ";
-      break;
-    case 4:
-      message = " other ";
-    default:
-      message = " timeout ";
-  }
-  Serial.print(message);
+  Wire.write(reg);
+  Wire.write(lowByte(data));
+  Wire.write(highByte(data));
+  I2Ccode(Wire.endTransmission());
 }
 
 /**
@@ -828,7 +820,8 @@ void ArduinoSMBus::writeRegister(uint8_t reg, uint16_t data) {
 void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
-  Wire.endTransmission(false);
+
+  I2Ccode(Wire.endTransmission(false));
 
   delay(10); // Add a small delay to give the device time to prepare the data
   uint8_t datalength = length + 1;
@@ -844,6 +837,9 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
     }
   }
   data[count] = '\0'; //terminate the string
+  
+  uint16_t status = readRegister(BATTERY_STATUS);
+  BatErrorCode(status &= 0x0007);
 }
 
 /**
@@ -853,14 +849,62 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
  * 
  * @return String.
  */
-String ArduinoSMBus::ErrorCode(void) {
-  uint16_t status = readRegister(BATTERY_STATUS);
-  status &= 0x0007;
-  if (status == 0) return "OK";                 /**< The Smart Battery processed the function code without detecting any errors. */
-  if (status == 1) return "Busy";               /**< The Smart Battery is unable to process the function code at this time. */
-  if (status == 3) return "Usupported";         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
-  if (status == 4) return "AccessDenied";       /**< The Smart Battery detected an attempt to write to a read only function code. */
-  if (status == 5) return "Over-, Under-flow";  /**< The Smart Battery detected a data overflow or under flow. */
-  if (status == 6) return "BadSize";            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
-  return "UnknownError";                        /**< The Smart Battery detected an unidentifiable error. */
+void ArduinoSMBus::BatErrorCode(uint8_t code) {
+  code &= 0x07;
+  if (code != BatError.nr) {
+    BatError.nr = code;
+    switch (code) {
+      case 0:
+        BatError.note = "ok";                 /**< The Smart Battery processed the function code without detecting any errors. */
+        break;
+      case 1:
+        BatError.note = "busy";               /**< The Smart Battery is unable to process the function code at this time. */
+        break;
+      case 2:
+        BatError.note = "reserved";           /**< The Smart Battery detected an attempt to read orwrite to a function code
+                                                   reserved by this version of the specification. The Smart Battery detected an
+                                                   attempt to access an unsupported optional manufacturer function code. */
+        break;
+      case 3:
+        BatError.note = "usupported";         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
+        break;
+      case 4:
+        BatError.note = "accessDenied";       /**< The Smart Battery detected an attempt to write to a read only function code. */
+        break;
+      case 5:
+        BatError.note = "over-, under-flow";  /**< The Smart Battery detected a data overflow or under flow. */
+        break;
+      case 6:
+        BatError.note = "badSize";            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
+        break;
+      case 7: 
+        BatError.note = "unknownerror";       /**< The Smart Battery detected an unidentifiable error. */
+    }
+  }
 }
+
+void ArduinoSMBus::I2Ccode(uint8_t code) {
+  code &= 0x05;
+  if (this->I2CError.nr != code) {
+    this->I2CError.nr = code;
+    switch (code) {
+      case 0:
+        this->I2CError.note = "ok";
+        break;
+      case 1:
+        this->I2CError.note = "data too long";
+        break;
+      case 2:
+        this->I2CError.note = "NACK on tx address";
+        break;
+      case 3:
+        this->I2CError.note = "NACK on tx data";
+        break;
+      case 4:
+        this->I2CError.note = "other";
+      case 5:
+        this->I2CError.note = "timeout";
+    }
+  }
+}
+
