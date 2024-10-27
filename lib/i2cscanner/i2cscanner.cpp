@@ -44,10 +44,7 @@
 */
 
 uint8_t i2cscan() {
-//  Wire.begin();
-//  Wire.setClock(130000);                  /**< Roughly 100kHz */
   byte error{0}, address{0}, prev{0};
-  int nDevices{0};
   Serial.println("Scanning...");
 
   for(address = 0; address < 128; address++ )
@@ -61,45 +58,43 @@ uint8_t i2cscan() {
       String message;
       switch (error) {
         case 0:
-          message = "success";
+          message = "device found ";
           break;
         case 1:
-          message = "data too long to fit in transmit buffer";
+          message = "data too long";
           break;
         case 2:
-          message = "received NACK on transmit of address";
+          message = "received NACK";
           break;
         case 3:
-          message = "received NACK on transmit of data";
+          message = "received NACK";
           break;
         default:
-          message = "other";
+          message = "other        ";
       }
-      Serial.println(message);
+      Serial.print(message);
       prev = error;
     }
     if (error == 0)
-    {
-      Serial.print("I2C device found at address 0x");
-      if (address<16)
-        Serial.print("0");
+    { 
+      Serial.println("");
+      Serial.print(" at address 0x");
+      if (address<0x10) Serial.print("0");
       Serial.print(address,HEX);
       Serial.println("  !");
-      nDevices++;
       break;
     }
     else if (error==4)
     {
+      Serial.println("");
       Serial.print("Unknown error at address 0x");
-      if (address<16)
-        Serial.print("0");
+      if (address<0x10) Serial.print("0");
       Serial.println(address,HEX);
     }
   }
-  if (nDevices == 0) {
+  if (address == 127) {
     Serial.println("No I2C devices found\n");
     address=0;
-  } else
-    Serial.println("done\n");
+  }
   return address;
 }

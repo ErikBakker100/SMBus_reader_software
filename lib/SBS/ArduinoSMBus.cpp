@@ -10,6 +10,11 @@
  */
 
 #include "ArduinoSMBus.h"
+#define BACKGROUND ansi.black
+#define TAB1 40
+#define TAB2 65
+
+ANSI ansi(&Serial);
 
 /**
  * @brief Construct a new ArduinoSMBus:: ArduinoSMBus object.
@@ -47,7 +52,7 @@ void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSea
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
-  this->writeRegister(MANUFACTURER_ACCESS, code);
+  writeRegister(MANUFACTURER_ACCESS, code);
   return readRegister(MANUFACTURER_ACCESS);
 }
 
@@ -58,7 +63,7 @@ uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code) {
-  this->writeRegister(MANUFACTURER_ACCESS, code);
+  writeRegister(MANUFACTURER_ACCESS, code);
   return readRegister(MANUFACTURER_ACCESS);
 }
 
@@ -68,7 +73,7 @@ uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code) {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
-  this->writeRegister(MANUFACTURER_ACCESS, code);
+  writeRegister(MANUFACTURER_ACCESS, code);
   return readRegister(MANUFACTURER_ACCESS);
 }
 
@@ -79,7 +84,7 @@ uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
  */
 ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
   ManufacturerBatStatus status{0};
-  this->writeRegister(MANUFACTURER_ACCESS, code);
+  writeRegister(MANUFACTURER_ACCESS, code);
   uint16_t data = readRegister(MANUFACTURER_ACCESS);
   status.raw = data;
 
@@ -124,7 +129,7 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
  * @return void
  */
 void ArduinoSMBus::manufacturerAccessSealDevice(uint16_t code) {
-  this->writeRegister(MANUFACTURER_ACCESS, code);
+  writeRegister(MANUFACTURER_ACCESS, code);
 }
 
 /**
@@ -133,7 +138,7 @@ void ArduinoSMBus::manufacturerAccessSealDevice(uint16_t code) {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::remainingCapacityAlarm() {
-  return this->readRegister(REMAINING_CAPACITY_ALARM);
+  return readRegister(REMAINING_CAPACITY_ALARM);
 }
 
 /**
@@ -142,7 +147,7 @@ uint16_t ArduinoSMBus::remainingCapacityAlarm() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::remainingTimeAlarm() {
-  return this->readRegister(REMAINING_TIME_ALARM);
+  return readRegister(REMAINING_TIME_ALARM);
 }
 
 /**
@@ -465,8 +470,8 @@ uint16_t ArduinoSMBus::manufactureDate() {
  * @return uint8_t
  */
 uint8_t ArduinoSMBus::manufactureDay() {
-  uint16_t manufactureDate = this->manufactureDate();
-  uint8_t day = (manufactureDate & 0xF);
+  uint16_t date = manufactureDate();
+  uint8_t day = (date & 0xF);
   return day;
 }
 /**
@@ -474,8 +479,8 @@ uint8_t ArduinoSMBus::manufactureDay() {
  * @return uint8_t
  */
 uint8_t ArduinoSMBus::manufactureMonth() {
-  uint8_t manufactureDate = this->manufactureDate();
-  uint8_t month = ((manufactureDate >> 5 ) & 0xF);
+  uint8_t date = manufactureDate();
+  uint8_t month = ((date >> 5 ) & 0xF);
   return month;
 }
 /**
@@ -483,8 +488,8 @@ uint8_t ArduinoSMBus::manufactureMonth() {
  * @return int 
  */
 int ArduinoSMBus::manufactureYear() {
-  uint16_t manufactureDate = this->manufactureDate();
-  int year = ((manufactureDate >> 9) & 0x7F) + 1980;
+  uint16_t date = manufactureDate();
+  int year = ((date >> 9) & 0x7F) + 1980;
   return year;
 }
 
@@ -503,9 +508,9 @@ uint16_t ArduinoSMBus::serialNumber() {
  * @return const char* 
  */
 const char* ArduinoSMBus::manufacturerName() {
-  static char manufacturerName[21]; // 20 characters plus null terminator
-  readBlock(MANUFACTURER_NAME, reinterpret_cast<uint8_t*>(manufacturerName), 20);
-  manufacturerName[20] = '\0'; // Null-terminate the C-string
+  static char manufacturerName[BLOCKLENGTH]; // 20 characters plus null terminator
+  readBlock(MANUFACTURER_NAME, reinterpret_cast<uint8_t*>(manufacturerName), BLOCKLENGTH-2);
+  manufacturerName[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return manufacturerName;
 }
 
@@ -515,9 +520,9 @@ const char* ArduinoSMBus::manufacturerName() {
  * @return const char* 
  */
 const char* ArduinoSMBus::deviceName() {
-  static char deviceName[21]; // Assuming the device name is up to 20 characters long
-  readBlock(DEVICE_NAME, reinterpret_cast<uint8_t*>(deviceName), 20);
-  deviceName[20] = '\0'; // Null-terminate the C-string
+  static char deviceName[BLOCKLENGTH]; // Assuming the device name is up to 20 characters long
+  readBlock(DEVICE_NAME, reinterpret_cast<uint8_t*>(deviceName), BLOCKLENGTH-2);
+  deviceName[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return deviceName;
 }
 
@@ -527,9 +532,9 @@ const char* ArduinoSMBus::deviceName() {
  * @return const char* 
  */
 const char* ArduinoSMBus::deviceChemistry() {
-  static char deviceChemistry[5];
-  readBlock(DEVICE_CHEMISTRY, reinterpret_cast<uint8_t*>(deviceChemistry), 8);
-  deviceChemistry[4] = '\0';
+  static char deviceChemistry[BLOCKLENGTH];
+  readBlock(DEVICE_CHEMISTRY, reinterpret_cast<uint8_t*>(deviceChemistry), BLOCKLENGTH-2);
+  deviceChemistry[BLOCKLENGTH-1] = '\0';
   return deviceChemistry;
 }
 
@@ -540,7 +545,7 @@ const char* ArduinoSMBus::deviceChemistry() {
  */
 const char* ArduinoSMBus::manufacturerData() {
   static char data[BLOCKLENGTH];
-  readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH);
+  readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
 }
@@ -771,7 +776,7 @@ void ClearingPermanentFailure() {
 int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
-  this->I2Ccode(Wire.endTransmission());
+  I2Ccode(Wire.endTransmission());
   
   delay(10);
   
@@ -885,26 +890,513 @@ void ArduinoSMBus::BatErrorCode(uint8_t code) {
 
 void ArduinoSMBus::I2Ccode(uint8_t code) {
   code &= 0x05;
-  if (this->I2CError.nr != code) {
-    this->I2CError.nr = code;
+  if (I2CError.nr != code) {
+    I2CError.nr = code;
     switch (code) {
       case 0:
-        this->I2CError.note = "ok";
+        I2CError.note = "ok";
         break;
       case 1:
-        this->I2CError.note = "data too long";
+        I2CError.note = "data too long";
         break;
       case 2:
-        this->I2CError.note = "NACK on tx address";
+        I2CError.note = "NACK on tx address";
         break;
       case 3:
-        this->I2CError.note = "NACK on tx data";
+        I2CError.note = "NACK on tx data";
         break;
       case 4:
-        this->I2CError.note = "other";
+        I2CError.note = "other";
       case 5:
-        this->I2CError.note = "timeout";
+        I2CError.note = "timeout";
     }
   }
 }
 
+void Display_standard(ArduinoSMBus& battery) {
+    uint16_t x, y; // x and y position
+
+    ansi.print("Device Type (0x00 -> 0x0001):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print("bq20z");
+    ansi.print(battery.manufacturerAccessType(), HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Firmware version (0x00 -> 0x0002):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    uint16_t version = battery.manufacturerAccessFirmware();
+    ansi.print((uint8_t)version >> 8 , HEX);
+    ansi.print(".");
+    ansi.print((uint8_t)version & 0x00ff);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Hardware version (0x00 -> 0x0003):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    version = battery.manufacturerAccessHardware();
+    ansi.print((uint8_t)version & 0x00ff, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Man. Battery Status (0x00 -> 0x0006):");
+    ansi.readCursorPosition(x, y);
+    ManufacturerBatStatus status = battery.manufacturerAccessBatStatus();
+    ansi.gotoXY(TAB1, y);
+    ansi.print(status.raw, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.print(battery.I2CError.note);
+    ansi.gotoXY(3, y+1);
+    ansi.print("Status: ");
+    ansi.gotoXY(TAB1, y+1);
+    ansi.println(status.failure + " " + status.permfailure);
+    ansi.gotoXY(3, y+2);
+    ansi.print("Charge FET:");
+    ansi.gotoXY(TAB1, y+2);
+    ansi.println(status.chg_fet ? "On" : "Off");
+    ansi.gotoXY(3, y+3);
+    ansi.print("Discharge FET:");
+    ansi.gotoXY(TAB1, y+3);
+    ansi.println(status.dsg_fet ? "On" : "Off");
+
+    BatteryMode mode = battery.batteryMode(); // We need to read this first to determine output ranges further on
+
+    ansi.print("Remaining Capacity Alarm (0x01):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.remainingCapacityAlarm());
+    ansi.print(mode.capacity_mode ? " 10mWh" : " mAh");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Remaining Time Alarm (0x02):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.remainingTimeAlarm());
+    ansi.print(" minutes");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Battery Modes (0x03):"); 
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(mode.raw, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+    ansi.print("  Internal Charge Controller:");
+    ansi.gotoXY(TAB1, y+1);
+    ansi.println(mode.internal_charge_controller ? "Supported" : "Not Supported");
+    ansi.print("  Primary Battery Support:");
+    ansi.gotoXY(TAB1, y+2);
+    ansi.println(mode.primary_battery_support ? "Supported" : "Not Supported");
+    ansi.print("  Condition Flag:");
+    ansi.gotoXY(TAB1, y+3);
+    ansi.println(mode.condition_flag ? "Cycle Requested" : "Battery OK");
+    ansi.print("  Internal Charge Controller:");
+    ansi.gotoXY(TAB1, y+4);
+    ansi.println(mode.charge_controller_enabled ? "Enabled" : "Disabled");
+    ansi.print("  Primary Battery:");
+    ansi.gotoXY(TAB1, y+5);
+    ansi.println(mode.primary_battery ? "Operating in primary role" : "Operating in secondary role");
+    ansi.print("  Alarm Mode:");
+    ansi.gotoXY(TAB1, y+6);
+    ansi.println(mode.alarm_mode ? "Disabled AlarmWarning broadcast" : "Enabled AlarmWarning broadcasts");
+    ansi.print("  Charger Mode:");
+    ansi.gotoXY(TAB1, y+7);
+    ansi.println(mode.charger_mode ? "Disabled broadcasts" : "Enabled broadcasts");
+    ansi.print("  Capacity Mode:");
+    ansi.gotoXY(TAB1, y+8);
+    ansi.println(mode.capacity_mode ? "In 10mW or 10mWh" : "In mA or mAh");
+
+    ansi.print("At Rate (0x04):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.atRate());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("At Rate Time To Full (0x05):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.atRateTimeToFull());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("At Rate Time To Empty (0x06):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.atRateTimeToEmpty());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("At Rate OK (0x07):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.atRateOK() ? "true" : "false");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Temperature (0x08):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.temperature(), 1);
+    ansi.print(" Kelvin");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Temperature:");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.temperatureC(), 1);
+    ansi.print(" Celsius");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Temperature:");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.temperatureF());
+    ansi.print(" Fahrenheit");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Voltage (0x09):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    float voltage = (float)battery.voltage()/1000;
+    ansi.print(voltage);
+    ansi.print(" V");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Current (0x0a):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.current());
+    ansi.print(" mA");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Average Current (0x0b):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.averageCurrent());
+    ansi.print(" mA");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Max Error (0x0c):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.maxError());
+    ansi.print("%");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Relative State Of Charge (0x0d):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.relativeStateOfCharge());
+    ansi.print("% of Full Capacity");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Absolute State Of Charge (0x0e):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.absoluteStateOfCharge());
+    ansi.print("% of Full Capacity");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Remaining Capacity (0x0f):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.remainingCapacity());
+    ansi.print(mode.capacity_mode ? " 10mW" : " mA");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Full Capacity (0x10):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.fullCapacity());
+    ansi.print(mode.capacity_mode ? " 10mWh" : " mAh");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Run Time To Empty (0x11):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.runTimeToEmpty());
+    ansi.print(" minutes");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Average Time To Empty (0x12):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.avgTimeToEmpty());
+    ansi.print(" minutes");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Average Time To Full (0x13):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.avgTimeToFull());
+    ansi.print(" minutes");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Desired Charging Current (0x14):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.chargingCurrent());
+    ansi.print(" mA");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Desired Charging Voltage (0x15):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.chargingVoltage());
+    ansi.print(" mV");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Battery Status (0x16):");
+    ansi.readCursorPosition(x, y);
+    BatteryStatus stat = battery.batteryStatus();
+    ansi.gotoXY(TAB1, y);
+    ansi.print(stat.raw, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+    ansi.print("  Over Charged Alarm:");
+    ansi.gotoXY(TAB1, y+1);
+    ansi.println(stat.over_charged_alarm ? "Battery fully charged" : "Cleared");
+    ansi.print("  Terminate Charge Alarm:");
+    ansi.gotoXY(TAB1, y+2);
+    ansi.println(stat.term_charge_alarm ? "Suspend charging" : "No charging, alarm cleared");
+    ansi.print("  Over Temperature Alarm:");
+    ansi.gotoXY(TAB1, y+3);
+    ansi.println(stat.over_temp_alarm ? "Above limit" : "Within acceptable range");
+    ansi.print("  Terminate Discharge Alarm:");
+    ansi.gotoXY(TAB1, y+4);
+    ansi.println(stat.term_discharge_alarm ? "Capacity depleted" : "Discharge not detected");
+    ansi.print("  Remaining Capacity Alarm:");
+    ansi.gotoXY(TAB1, y+5);
+    ansi.println(stat.rem_capacity_alarm ? "True" : "False or 0");
+    ansi.print("  Remaining Time Alarm:");
+    ansi.gotoXY(TAB1, y+6);
+    ansi.println(stat.rem_time_alarm ? "True" : "False or 0");
+    ansi.print("  Initialized:");
+    ansi.gotoXY(TAB1, y+7);
+    ansi.println(stat.initialized ? "First calibrated" : "Calibration or configuration lost");
+    ansi.print("  Discharging:");
+    ansi.gotoXY(TAB1, y+8);
+    ansi.println(stat.discharging ? "True" : "False");
+    ansi.print("  Fully Charged:");
+    ansi.gotoXY(TAB1, y+9);
+    ansi.println(stat.fully_charged ? "True" : "False");
+    ansi.print("  Fully Discharged:");
+    ansi.gotoXY(TAB1, y+10);
+    ansi.println(stat.fully_discharged ? "True" : "False");
+
+    ansi.print("Cycle Count (0x17):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.cycleCount());
+    ansi.print(" times");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Design Capacity (0x18):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.designCapacity());
+    ansi.print(mode.capacity_mode ? " 10mWh" : " mAh");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Design Voltage (0x19):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    voltage = (float)battery.designVoltage()/1000;
+    ansi.print(voltage);
+    ansi.print(" V");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Protocol (0x1a):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.specificationInfo());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Manufacture Date (0x1b): ");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.manufactureDate());
+    ansi.print(" ");
+    ansi.print(battery.manufactureDay());
+    ansi.print("-");
+    ansi.print(battery.manufactureMonth());
+    ansi.print("-");
+    ansi.print(battery.manufactureYear());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Serial Number (0x1c):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.serialNumber());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Manufacturer Name (0x20):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.manufacturerName());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Device Name (0x21):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.deviceName());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Device Chemistry (0x22):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.deviceChemistry());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("Manufacturer Data (0x23):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    ansi.print(battery.manufacturerData());
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    // Following functions are not part of the smart battery specification version 1.1
+
+    ansi.print("voltageCellOne (0x3f):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    voltage = (float)battery.voltageCellOne()/1000;
+    ansi.print(voltage);
+    ansi.print(" V");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("voltageCellTwo (0x3e):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    voltage = (float)battery.voltageCellTwo()/1000;
+    ansi.print(voltage);
+    ansi.print(" V");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("voltageCellThree (0x3d):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    voltage = (float)battery.voltageCellThree()/1000;
+    ansi.print(voltage);
+    ansi.print(" V");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+
+    ansi.print("voltageCellFour (0x3c):");
+    ansi.readCursorPosition(x, y);
+    ansi.gotoXY(TAB1, y);
+    voltage = (float)battery.voltageCellFour()/1000;
+    ansi.print(voltage);
+    ansi.print(" V");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+}
+
+void Display_bq2020z9xx(ArduinoSMBus& battery) {
+  uint16_t x, y; // x and y position
+
+  ansi.print("FET's status (0x46):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB1, y);
+  FETcontrol fets = battery.FETControl();
+  if (battery.I2CError.nr) ansi.println("Not valid, is device unsealed ?");
+  else { 
+    ansi.print(fets.raw, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+    ansi.print("  Charge FET:");
+    ansi.gotoXY(TAB1, y+1);
+    ansi.println(fets.chg?"On":"Off");
+    ansi.print("  DisCharge FET:");
+    ansi.gotoXY(TAB1, y+2);
+    ansi.println(fets.dsg?"On":"Off");
+  }
+
+  ansi.print("State Of Health (0x4f):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB1, y);
+  uint16_t data = battery.stateOfHealth();
+  if (battery.I2CError.nr) ansi.println("Not valid, is device unsealed ?");
+  else { 
+    ansi.print(data + "%");
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+  }
+
+  ansi.print("Safety Alert (0x50):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB1, y);
+  data = battery.Safetyalert().raw;
+  if (battery.I2CError.nr) ansi.println("Not valid, is device unsealed ?");
+  else { 
+    ansi.print(data, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+  }
+
+  ansi.print("Safety Status (0x51):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB1, y);
+  data = battery.Safetystatus().raw;
+  if (battery.I2CError.nr) ansi.println("Not valid, is device unsealed ?");
+  else { 
+    ansi.print(data, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+  }
+
+  ansi.print("PF Alert (0x52):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB1, y);
+  data = battery.PFalert().raw;
+  if (battery.I2CError.nr) ansi.println("Not valid, is device unsealed ?");
+  else { 
+    ansi.print(data, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+  }
+
+  ansi.print("PF Status (0x53):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB1, y);
+  data = battery.PFstatus().raw;
+  if (battery.I2CError.nr) ansi.println("Not valid, is device unsealed ?");
+  else { 
+    ansi.print(data, HEX);
+    ansi.gotoXY(TAB2, y);
+    ansi.println(battery.I2CError.note);
+  }
+}

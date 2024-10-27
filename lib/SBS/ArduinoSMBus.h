@@ -13,6 +13,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <string.h>
+#include "../ansi/ansi.h"
 
 #define BLOCKLENGTH 20 // Maximum of data stream to be read
 
@@ -319,3 +320,6 @@ private:
   void writeRegister(uint8_t reg, uint16_t data);
   void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
 };
+
+void Display_standard(ArduinoSMBus&);
+void Display_bq2020z9xx(ArduinoSMBus&);
