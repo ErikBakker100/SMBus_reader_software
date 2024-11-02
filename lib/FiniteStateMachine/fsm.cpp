@@ -1,6 +1,6 @@
 #include "fsm.h"
 
-static ANSI ansi(&Serial);
+static uint8_t batteryaddress {0};
 
 // class Command
 
@@ -46,7 +46,7 @@ void CommandState::update () {
 }*/
 
 void menuState::enter(Command& command) {
-    ansi.println("Menu");
+    displayMainmenu();
 }
 
 //class I2c Scan = 2
@@ -55,7 +55,10 @@ void menuState::enter(Command& command) {
 }*/
 
 void scanState::enter(Command& command) {
-    ansi.println("Scan");
+    displaySmallmenu();
+    batteryaddress = i2cscan();
+    displayBatteryNr(batteryaddress);
+    battery.setBatteryAddress(batteryaddress);
 }
 
 //class standard = 3
@@ -64,7 +67,8 @@ void scanState::enter(Command& command) {
 }*/
 
 void standardState::enter(Command& command) {
-    ansi.println("Standard");
+    displaySmallmenu();
+    Display_standard(battery);
 }
 
 // class extended = 4
@@ -73,5 +77,6 @@ void standardState::enter(Command& command) {
 }*/
 
 void extendedState::enter(Command& command) {
-    ansi.println("Extended");
+    displaySmallmenu();
+    Display_bq2020z9xx(battery);
 }
