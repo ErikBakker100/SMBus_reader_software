@@ -29,7 +29,7 @@ class CmdBufferObject
      * Clear buffer and set defaults.
      */
     CmdBufferObject()
-        : m_endChar(CMDBUFFER_CHAR_LF),
+        : m_endChar(CMDBUFFER_CHAR_CR),
           m_bsChar(CMDBUFFER_CHAR_BS),
           m_dataOffset(0),
           m_echo(false)

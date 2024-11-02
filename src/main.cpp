@@ -10,9 +10,6 @@
  */
 
 #include <Arduino.h>
-#include "../lib/SBS/ArduinoSMBus.h"
-#include "../lib/i2cscanner/i2cscanner.h"
-#include "../lib/ansi/ansi.h"
 #include "../lib/FiniteStateMachine/fsm.h"
 #include "../lib/CmdParser/CmdBuffer.hpp"
 #include "../lib/CmdParser/CmdParser.hpp"
@@ -21,41 +18,35 @@
 #define TAB2 40
 #define TAB3 65
 
-static ArduinoSMBus battery;
-static ANSI ansi(&Serial);
+//static ArduinoSMBus battery;
 static uint8_t batteryaddress {0};
 Command command;
 CmdBuffer<64> cmdBuffer;
 CmdParser cmdParser;
 
-uint8_t findbatteryaddress();
-void displaymenu();
+//uint8_t findbatteryaddress();
+// void displaymenu();
 
 void setup() {
   Serial.begin(115200);
-  command.handleInput(1); // display menu
-  displaymenu();
-  cmdBuffer.getStringFromBuffer()
+  cmdBuffer.setEcho(true);
+  command.update();
 }
 
 void loop() {
-  if(cmdBuffer.readFromSerial(&ansi)) {
-    ansi.print("received: ");
-    ansi.println(cmdBuffer.getStringFromBuffer());
-    cmdBuffer.clear();
-  }
-  (batteryaddress == 0) batteryaddress = findbatteryaddress();
-  if (ansi.available()) {
-    uint8_t toets = ansi.read();
-    switch (toets) {
-      case 0x31: // 1 is entered
-        displaymenu();  
-        Display_standard(battery);
-        break;
-    }
-  }
+//  command.update();
+  if (cmdBuffer.readFromSerial(&Serial)) {
+    if (cmdParser.parseCmd(&cmdBuffer) != CMDPARSER_ERROR) {
+      String com = cmdParser.getCommand();
+      uint8_t i = com.toInt();
+      command.handleInput(i);
+      cmdBuffer.clear();
+    } else Serial.println("Parser error!");
+  } else Serial.println("timeout");
+//  (batteryaddress == 0) batteryaddress = findbatteryaddress();
 }
 
+/*
 uint8_t findbatteryaddress() {
   uint16_t x, y; // x and y position
   uint8_t address = i2cscan();
@@ -76,3 +67,5 @@ void displaymenu() {
   ansi.print("1 = display standard, ");
   ansi.println();
 }
+
+*/

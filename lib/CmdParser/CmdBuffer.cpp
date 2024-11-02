@@ -34,7 +34,6 @@ bool CmdBufferObject::readFromSerial(Stream *serial, uint32_t timeOut)
     ////
     // process serial reading
     do {
-
         // if data in serial input buffer
         while (serial->available()) {
 
@@ -67,7 +66,6 @@ bool CmdBufferObject::readSerialChar(Stream *serial)
 {
     uint8_t  readChar;
     uint8_t *buffer = this->getBuffer();
-
     // UART initialize?
     if (serial == NULL) {
         return false;

@@ -1,5 +1,8 @@
 #pragma once
 #include <Arduino.h>
+#include "../ansi/ansi.h"
+#include "../SBS/ArduinoSMBus.h"
+#include "../i2cscanner/i2cscanner.h"
 
 class CommandState;
 
@@ -24,23 +27,23 @@ protected:
 class menuState : public CommandState {
 public:
     virtual void enter(Command&);
-    virtual CommandState* handleInput(Command&, uint8_t);
+//    virtual CommandState* handleInput(Command&, uint8_t);
 };
 
 class scanState : public CommandState {
 public:
     virtual void enter(Command &);
-    virtual CommandState* handleInput(Command&, uint8_t);
+//    virtual CommandState* handleInput(Command&, uint8_t);
 };
 
 class standardState : public CommandState {
 public:
     virtual void enter(Command &);
-    virtual CommandState* handleInput(Command&, uint8_t);
+//    virtual CommandState* handleInput(Command&, uint8_t);
 };
 
 class extendedState : public CommandState {
 public:
     virtual void enter(Command&);
-    virtual CommandState* handleInput(Command&, uint8_t);
+//    virtual CommandState* handleInput(Command&, uint8_t);
 };
