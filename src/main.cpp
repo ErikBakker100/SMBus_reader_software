@@ -13,25 +13,38 @@
 #include "../lib/SBS/ArduinoSMBus.h"
 #include "../lib/i2cscanner/i2cscanner.h"
 #include "../lib/ansi/ansi.h"
+#include "../lib/FiniteStateMachine/fsm.h"
+#include "../lib/CmdParser/CmdBuffer.hpp"
+#include "../lib/CmdParser/CmdParser.hpp"
 
-#define TAB1 40
-#define TAB2 65
-
+#define TAB1 3
+#define TAB2 40
+#define TAB3 65
 
 static ArduinoSMBus battery;
 static ANSI ansi(&Serial);
-uint8_t batteryaddress {0};
+static uint8_t batteryaddress {0};
+Command command;
+CmdBuffer<64> cmdBuffer;
+CmdParser cmdParser;
 
 uint8_t findbatteryaddress();
 void displaymenu();
 
 void setup() {
   Serial.begin(115200);
+  command.handleInput(1); // display menu
   displaymenu();
+  cmdBuffer.getStringFromBuffer()
 }
 
 void loop() {
-  if (batteryaddress == 0) batteryaddress = findbatteryaddress();
+  if(cmdBuffer.readFromSerial(&ansi)) {
+    ansi.print("received: ");
+    ansi.println(cmdBuffer.getStringFromBuffer());
+    cmdBuffer.clear();
+  }
+  (batteryaddress == 0) batteryaddress = findbatteryaddress();
   if (ansi.available()) {
     uint8_t toets = ansi.read();
     switch (toets) {
