@@ -435,7 +435,7 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
   if (battery.I2CError.nr) ansi.println("NACK, is device unsealed ?");
   else { 
     ansi.print(fets.raw, HEX);
-    ansi.gotoXY(TAB2, y);
+    ansi.gotoXY(TAB3, y);
     ansi.print(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
     ansi.print("Charge FET:");
@@ -443,7 +443,7 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
     ansi.println(fets.chg?"On":"Off");
     ansi.gotoXY(TAB1, y+2);
     ansi.print("DisCharge FET:");
-    ansi.gotoXY(TAB2, y);
+    ansi.gotoXY(TAB2, y+2);
     ansi.println(fets.dsg?"On":"Off");
   }
 
@@ -507,4 +507,5 @@ void displaySealstatus(ArduinoSMBus& battery) {
   if (battery.BatError.nr) ansi.println(battery.BatError.note);
   ansi.println(status.ss?"sealed mode enabled":"sealed mode disabled");
   ansi.println(status.fas?"full access mode enabled":"full access mode disabled");
+  ansi.println(battery.unsealKey(), HEX);
 }

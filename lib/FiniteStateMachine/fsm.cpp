@@ -82,7 +82,8 @@ void standardState::enter(Command& command) {
 
 void extendedState::enter(Command& command) {
     displaySmallmenu();
-    display_bq2020z9xx(battery);
+    if (batteryaddress > 0) display_bq2020z9xx(battery);
+    else Serial.println("\n\tPlease Search for address of the Battery first.");
 }
 
 // class unseal = 5
@@ -92,8 +93,12 @@ void extendedState::enter(Command& command) {
 
 void unsealState::enter(Command& command) {
     displaySmallmenu();
-    battery.manufacturerAccessUnseal(UNSEALA, UNSEALB);
-    displaySealstatus(battery);
+    if (batteryaddress > 0) {
+        battery.manufacturerAccessUnseal(UNSEALA, UNSEALB);
+        displaySealstatus(battery);
+    }
+    else Serial.println("\n\tPlease Search for address of the Battery first.");
+
 }
 
 // class seal = 6
@@ -103,6 +108,9 @@ void unsealState::enter(Command& command) {
 
 void sealState::enter(Command& command) {
     displaySmallmenu();
-    battery.manufacturerAccessSeal();
-    displaySealstatus(battery);
+    if (batteryaddress > 0) {
+        battery.manufacturerAccessSeal();
+        displaySealstatus(battery);
+    }
+    else Serial.println("\n\tPlease Search for address of the Battery first.");
 }
