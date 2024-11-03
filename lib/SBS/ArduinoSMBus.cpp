@@ -44,6 +44,8 @@ void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
  * @return void
  */
 void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b) {
+  writeRegister(MANUFACTURER_ACCESS, UnSealKey_a);
+  writeRegister(MANUFACTURER_ACCESS, UnSealKey_b);
 }
 
 /**
