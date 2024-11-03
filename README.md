@@ -1,4 +1,4 @@
-#SMbus bq20z9xx reader
+# SMbus bq20z9xx reader
 Reading data from a bq20z9xx smart battery controller via the SMBus (version 1.1) protocol. Using an ESP32
 The serial output can be displayed via an Ansi terminal (f.e. putty)
 Set Baudrate to 115200
