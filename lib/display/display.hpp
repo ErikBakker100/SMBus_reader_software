@@ -15,5 +15,4 @@ void displaySmallmenu();
 void displayBatteryNr(uint8_t address);
 void display_standard(ArduinoSMBus& battery);
 void display_bq2020z9xx(ArduinoSMBus& battery);
-void displayUnseal(ArduinoSMBus& battery);
-void displaySeal(ArduinoSMBus& battery);
+void displaySealstatus(ArduinoSMBus& battery);

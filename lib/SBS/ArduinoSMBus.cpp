@@ -130,7 +130,7 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
  * This command is only available when the bq20z90/bq20z95 is in Unsealed or Full Access mode.
  * @return void
  */
-void ArduinoSMBus::manufacturerAccessSealDevice(uint16_t code) {
+void ArduinoSMBus::manufacturerAccessSeal(uint16_t code) {
   writeRegister(MANUFACTURER_ACCESS, code);
 }
 
@@ -736,19 +736,23 @@ PFStatus ArduinoSMBus::PFstatus() {
 OperationStatus ArduinoSMBus::Operationstatus() {
   OperationStatus status{0};
   uint16_t data = readRegister(OPERATIONSTATUS);
-  status.raw = data;
-  status.qen = data & (1 <<0 ); 
-  status.vok = data & (1 << 1);
-  status.r_dis = data & (1 << 2);
-  status.xdsgi = data & (1 << 4);
-  status.xdsg = data & (1 << 5);
-  status.dsg = data & (1 << 6);
-  status.wake = data & (1 << 7);
-  status.ldmd = data & (1 << 10);
-  status.csv = data & (1 << 12);
-  status.ss = data & (1 << 13);
-  status.fas = data & (1 << 14);
-  status.pres = data & (1 << 15);
+  
+  if (data <= 0xf7f7 ) {
+    status.raw = data;
+    status.qen = data & (1 <<0 ); 
+    status.vok = data & (1 << 1);
+    status.r_dis = data & (1 << 2);
+    status.xdsgi = data & (1 << 4);
+    status.xdsg = data & (1 << 5);
+    status.dsg = data & (1 << 6);
+    status.wake = data & (1 << 7);
+    status.ldmd = data & (1 << 10);
+    status.csv = data & (1 << 12);
+    status.ss = data & (1 << 13);
+    status.fas = data & (1 << 14);
+    status.pres = data & (1 << 15);
+    BatErrorCode(0); // ok
+  } else BatErrorCode(7); // Unknown error
   return status;
 }
 

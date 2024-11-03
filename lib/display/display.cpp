@@ -15,8 +15,6 @@ void displayMainmenu() {
 void displaySmallmenu() {
     ansi.clearScreen();
     ansi.println(" 1=Menu, 2=Search, 3=Standard, 4=Extended, 5=Unseal, 6=Seal");
-    ansi.printLine();
-    ansi.println();
 }
 
 void displayBatteryNr(uint8_t address) {
@@ -504,10 +502,9 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
   }
 }
 
-void displayUnseal(ArduinoSMBus& battery) {
-  ansi.print("Unsealed");
-}
-
-void displaySeal(ArduinoSMBus& battery) {
-  ansi.print("Sealed");
+void displaySealstatus(ArduinoSMBus& battery) {
+  OperationStatus status = battery.Operationstatus();
+  if (battery.BatError.nr) ansi.println(battery.BatError.note);
+  ansi.println(status.ss?"sealed mode enabled":"sealed mode disabled");
+  ansi.println(status.fas?"full access mode enabled":"full access mode disabled");
 }

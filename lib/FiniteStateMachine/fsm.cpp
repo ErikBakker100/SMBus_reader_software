@@ -93,7 +93,7 @@ void extendedState::enter(Command& command) {
 void unsealState::enter(Command& command) {
     displaySmallmenu();
     battery.manufacturerAccessUnseal(UNSEALA, UNSEALB);
-    displayUnseal(battery);
+    displaySealstatus(battery);
 }
 
 // class seal = 6
@@ -103,6 +103,6 @@ void unsealState::enter(Command& command) {
 
 void sealState::enter(Command& command) {
     displaySmallmenu();
-    battery.manufacturerAccessSealDevice();
-    displaySeal(battery);
+    battery.manufacturerAccessSeal();
+    displaySealstatus(battery);
 }

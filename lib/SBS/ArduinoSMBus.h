@@ -219,7 +219,7 @@ struct OperationStatus {
   uint16_t raw;                 /**< Data read */
   bool pres;                    /**< Low indicating that the system is present (battery inserted). */
   bool fas;                     /**< Low means full access security mode. */
-  bool ss;                      /**< Sealed security mode. */    
+  bool ss;                      /**< True  is Sealed security mode. */    
   bool csv;                     /**< Data Flash checksum value has been generated. */   
   bool ldmd;                    /**< Load mode for Impedance Track modeling. 0 = constant current, 1 = constant power. */      
   bool wake;                    /**< bq20z90/bq20z95 WAKE mode . */          
@@ -261,7 +261,7 @@ public:
   uint16_t manufacturerAccessFirmware(uint16_t = 0x0002); // command 0x00
   uint16_t manufacturerAccessHardware(uint16_t = 0x0003); // command 0x00
   ManufacturerBatStatus manufacturerAccessBatStatus(uint16_t = 0x0006); // command 0x00
-  void manufacturerAccessSealDevice(uint16_t = 0x0020); // command 0x00
+  void manufacturerAccessSeal(uint16_t = 0x0020); // command 0x00
   uint16_t remainingCapacityAlarm(); // command 0x01
   uint16_t remainingTimeAlarm(); // command 0x02
   BatteryMode batteryMode(); // command 0x03
