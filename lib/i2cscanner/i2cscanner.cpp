@@ -44,9 +44,9 @@
 */
 
 uint8_t i2cscan() {
-  byte error{0}, address{0}, prev{0};
+  byte error{0}, address{0}, prev{5};
   Serial.println("Scanning...");
-
+  String message {""};
   for(address = 0; address < 128; address++ )
   {
     // The i2c_scanner uses the return value of
@@ -55,44 +55,30 @@ uint8_t i2cscan() {
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
     if (error != prev) {
-      String message;
       switch (error) {
         case 0:
-          message = "device found ";
+          message = "found";
           break;
         case 1:
           message = "data too long";
           break;
         case 2:
-          message = "received NACK";
+          message = "NACK";
           break;
         case 3:
-          message = "received NACK";
+          message = "NACK";
           break;
         default:
-          message = "other        ";
+          message = "other";
       }
-      Serial.print(message);
       prev = error;
     }
-    if (error == 0)
-    { 
-      Serial.println("");
-      Serial.print(" at address 0x");
-      if (address<0x10) Serial.print("0");
-      Serial.print(address,HEX);
-      Serial.println("  !");
-      break;
-    }
-    else if (error==4)
-    {
-      Serial.println("");
-      Serial.print("Unknown error at address 0x");
-      if (address<0x10) Serial.print("0");
-      Serial.println(address,HEX);
-    }
+    Serial.print(address < 0x10 ? "0x0": "0x");
+    Serial.print(address, HEX);
+    Serial.println(" " + message);
+    if (error == 0) break;
   }
-  if (address == 127) {
+  if (address >= 0x7f) {
     Serial.println("No I2C devices found\n");
     address=0;
   }

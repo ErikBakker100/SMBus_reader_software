@@ -34,6 +34,9 @@ CommandState* CommandState::handleInput (Command& command, uint8_t input) {
     else if (input == 2) return new scanState;
     else if (input == 3) return new standardState;
     else if (input == 4) return new extendedState;
+    else if (input == 5) return new unsealState;
+    else if (input == 6) return new sealState;
+
     return nullptr;
 }
 
@@ -57,8 +60,8 @@ void menuState::enter(Command& command) {
 void scanState::enter(Command& command) {
     displaySmallmenu();
     batteryaddress = i2cscan();
-    displayBatteryNr(batteryaddress);
     battery.setBatteryAddress(batteryaddress);
+    displayBatteryNr(batteryaddress);
 }
 
 //class standard = 3
@@ -68,7 +71,8 @@ void scanState::enter(Command& command) {
 
 void standardState::enter(Command& command) {
     displaySmallmenu();
-    Display_standard(battery);
+    if (batteryaddress > 0) display_standard(battery);
+    else Serial.println("\n\tPlease Search for address of the Battery first.");
 }
 
 // class extended = 4
@@ -78,5 +82,27 @@ void standardState::enter(Command& command) {
 
 void extendedState::enter(Command& command) {
     displaySmallmenu();
-    Display_bq2020z9xx(battery);
+    display_bq2020z9xx(battery);
+}
+
+// class unseal = 5
+/*CommandState* unsealState::handleInput (Command& command, uint8_t input) {
+    return nullptr;
+}*/
+
+void unsealState::enter(Command& command) {
+    displaySmallmenu();
+    battery.manufacturerAccessUnseal(UNSEALA, UNSEALB);
+    displayUnseal(battery);
+}
+
+// class seal = 6
+/*CommandState* sealState::handleInput (Command& command, uint8_t input) {
+    return nullptr;
+}*/
+
+void sealState::enter(Command& command) {
+    displaySmallmenu();
+    battery.manufacturerAccessSealDevice();
+    displaySeal(battery);
 }

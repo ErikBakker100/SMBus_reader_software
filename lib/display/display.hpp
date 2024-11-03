@@ -1,6 +1,6 @@
 #pragma once
 
-#define TAB1 3
+#define TAB1 5
 #define TAB2 40
 #define TAB3 65
 
@@ -13,6 +13,7 @@ static ANSI ansi(&Serial);
 void displayMainmenu();
 void displaySmallmenu();
 void displayBatteryNr(uint8_t address);
-
-void Display_standard(ArduinoSMBus& battery);
-void Display_bq2020z9xx(ArduinoSMBus& battery);
+void display_standard(ArduinoSMBus& battery);
+void display_bq2020z9xx(ArduinoSMBus& battery);
+void displayUnseal(ArduinoSMBus& battery);
+void displaySeal(ArduinoSMBus& battery);

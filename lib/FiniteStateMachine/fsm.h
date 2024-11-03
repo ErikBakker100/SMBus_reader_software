@@ -4,10 +4,6 @@
 #include "../i2cscanner/i2cscanner.h"
 #include "../display/display.hpp"
 
-#define TAB1 3
-#define TAB2 40
-#define TAB3 65
-
 static ArduinoSMBus battery;
 
 class CommandState;
@@ -49,6 +45,18 @@ public:
 };
 
 class extendedState : public CommandState {
+public:
+    virtual void enter(Command&);
+//    virtual CommandState* handleInput(Command&, uint8_t);
+};
+
+class unsealState : public CommandState {
+public:
+    virtual void enter(Command&);
+//    virtual CommandState* handleInput(Command&, uint8_t);
+};
+
+class sealState : public CommandState {
 public:
     virtual void enter(Command&);
 //    virtual CommandState* handleInput(Command&, uint8_t);
