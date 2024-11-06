@@ -58,10 +58,10 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.println(battery.I2CError.note);
 
     ansi.print("Man. Battery Status (0x00 -> 0x0006):");
-    ansi.readCursorPosition(x, y);
     ManufacturerBatStatus status = battery.manufacturerAccessBatStatus();
+    ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
-    ansi.print(status.raw, HEX);
+    ansi.print(status.raw, BIN);
     ansi.gotoXY(TAB3, y);
     ansi.print(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
@@ -98,7 +98,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.print("Battery Modes (0x03):"); 
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
-    ansi.print(mode.raw, HEX);
+    ansi.print(mode.raw, BIN);
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
@@ -124,11 +124,11 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.gotoXY(TAB1, y+6);
     ansi.print("Alarm Mode:");
     ansi.gotoXY(TAB2, y+6);
-    ansi.println(mode.alarm_mode ? "Disabled AlarmWarning broadcast" : "Enabled AlarmWarning broadcasts");
+    ansi.println(mode.alarm_mode ? "Broadcasts disabled " : "Broadcasts enabled ");
     ansi.gotoXY(TAB1, y+7);
     ansi.print("Charger Mode:");
     ansi.gotoXY(TAB2, y+7);
-    ansi.println(mode.charger_mode ? "Disabled broadcasts" : "Enabled broadcasts");
+    ansi.println(mode.charger_mode ? "Broadcasts disabled " : "Broadcasts enabled ");
     ansi.gotoXY(TAB1, y+8);
     ansi.print("Capacity Mode:");
     ansi.gotoXY(TAB2, y+8);
@@ -138,6 +138,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
     ansi.print(battery.atRate());
+    ansi.print(mode.capacity_mode ? "x10mW" : "mA");
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
 
@@ -145,6 +146,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
     ansi.print(battery.atRateTimeToFull());
+    ansi.print(" minutes");
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
 
@@ -152,6 +154,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
     ansi.print(battery.atRateTimeToEmpty());
+    ansi.print(" minutes");
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
 
@@ -227,7 +230,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
     ansi.print(battery.remainingCapacity());
-    ansi.print(mode.capacity_mode ? " 10mW" : " mA");
+    ansi.print(mode.capacity_mode ? "x10mWh" : " mAh");
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
 
@@ -235,7 +238,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
     ansi.print(battery.fullCapacity());
-    ansi.print(mode.capacity_mode ? " 10mWh" : " mAh");
+    ansi.print(mode.capacity_mode ? "x10mWh" : " mAh");
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
 
@@ -283,7 +286,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     BatteryStatus stat = battery.batteryStatus();
     ansi.gotoXY(TAB2, y);
-    ansi.print(stat.raw, HEX);
+    ansi.print(stat.raw, BIN);
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
@@ -339,7 +342,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
     ansi.print(battery.designCapacity());
-    ansi.print(mode.capacity_mode ? " 10mWh" : " mAh");
+    ansi.print(mode.capacity_mode ? "x10mWh" : " mAh");
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
 
@@ -383,7 +386,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.print(battery.manufacturerName());
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
-
+    
     ansi.print("Device Name (0x21):");
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);

@@ -1,7 +1,7 @@
 /**
  * @file main.cpp
  * @author Christopher Lee (clee@unitedconsulting.com)
- * @brief Example arduino code to read battery data from an SMBus battery and print to serial output.
+ * @brief Arduino code to read battery data from an SMBus battery and print to serial output.
  * @version 1.1
  * @date 2024-03-06
  *

@@ -44,27 +44,8 @@ void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
  * @return void
  */
 void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b) {
-//  writeRegister(MANUFACTURER_ACCESS, UnSealKey_a);
-//  writeRegister(MANUFACTURER_ACCESS, UnSealKey_b);
-// write lower part then higher part
-uint8_t al{0x14}, ah{0x04}, bl{0x72}, bh{0x36};
- Wire.beginTransmission(_batteryAddress);
-  Wire.write(MANUFACTURER_ACCESS);
-  Wire.write(ah);
-  Serial.print(ah, HEX);
-  Wire.write(al);
-  Serial.print(al, HEX);
-  Serial.print(" ");
-  I2Ccode(Wire.endTransmission());
-  Serial.print(I2CError.note + " ");
-  Wire.beginTransmission(_batteryAddress);
-  Wire.write(MANUFACTURER_ACCESS);
-  Wire.write(bh);
-  Serial.print(bh, HEX);
-  Wire.write(bl);
-  Serial.print(bl, HEX);
-  I2Ccode(Wire.endTransmission());
-  Serial.println(" " + I2CError.note);
+  writeRegister(MANUFACTURER_ACCESS, UnSealKey_a);
+  writeRegister(MANUFACTURER_ACCESS, UnSealKey_b);
 }
 
 /**
@@ -104,42 +85,76 @@ uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
  * @return ManufacturerBatteryStatus
  */
 ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
-  ManufacturerBatStatus status{0};
-  writeRegister(MANUFACTURER_ACCESS, code);
-  uint16_t data = readRegister(MANUFACTURER_ACCESS);
-  status.raw = data;
-
-  if ((data & 0x000f) == 0) status.failure = "Wake Up.";
-  else if ((data & 0x000f) == 1) status.failure = "Normal Discharge";
-  else if ((data & 0x000f) == 3) status.failure = "Pre-Charge";
-  else if ((data & 0x000f) == 5) status.failure = "Charge";
-  else if ((data & 0x000f) == 7) status.failure = "Charge Termination";
-  else if ((data & 0x000f) == 8) status.failure = "Fault Charge Terminate";
-  else if ((data & 0x000f) == 9) status.failure = "Permanent Failure, ";
-  else if ((data & 0x000f) == 10) status.failure = "Overcurrent";
-  else if ((data & 0x000f) == 11) status.failure = "Overtemperature";
-  else if ((data & 0x000f) == 12) status.failure = "Battery Failure";
-  else if ((data & 0x000f) == 13) status.failure = "Sleep";
-  else if ((data & 0x000f) == 15) status.failure = "Battery Removed";
+  ManufacturerBatStatus status;
+  status.failure = "";
   status.permfailure = "";
-  if (data >> 14 == 0) {
+  writeRegister(MANUFACTURER_ACCESS, code);
+  status.raw = highByte(readRegister(MANUFACTURER_ACCESS)); // we only are interested in the upper 8 bitsif ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
+  switch (status.raw & 0x0f) {
+    case 0: 
+      status.failure = "Wake up";
+      break;
+    case 1:
+      status.failure = "Normal Discharge";
+      break;
+    case 3:
+      status.failure = "Pre-Charge";
+      break;
+    case 5:
+      status.failure = "Charge";
+      break;
+    case 7:
+      status.failure = "Charge Termination";
+      break;
+    case 8:
+      status.failure = "Fault Charge Terminate";
+      break;
+    case 9: 
+      status.failure = "Permanent Failure, ";
+      switch (((status.raw >> 4) & 0x3)) {
+        case 0:
+          status.permfailure = "Fuse is blown";
+          break;
+        case 1:
+          status.permfailure = "Cell imbalance failure";
+          break;
+        case 2:
+          status.permfailure = "Safety voltage failure";
+          break;
+        default:
+          status.permfailure = "FET failure";
+      }
+      break;
+    case 10:
+      status.failure = "Overcurrent";
+      break;
+    case 11:
+      status.failure = "Overtemperature";
+      break;
+    case 12:
+      status.failure = "Battery Failure";
+      break;
+    case 13:
+      status.failure = "Sleep";
+      break;
+    case 15:
+      status.failure = "Battery Removed";
+      break;
+    default:
+      status.failure = "Unknown";
+  }
+  if (status.raw >> 6 == 0) {
     status.chg_fet = true;
     status.dsg_fet = true; }
-  else if (data >> 14 == 1) {
+  else if (status.raw >> 6 == 1) {
     status.chg_fet = false;
     status.dsg_fet = true; }
-  else if (data >> 14 == 2) {
+  else if (status.raw >> 6 == 2) {
     status.chg_fet = false;
     status.dsg_fet = false; }
   else {
     status.chg_fet = true;
     status.dsg_fet = false; }
-  if ((data & 0x000f) == 9) { // Permanent Failure
-    if (((data >> 12) & 0xc) == 0) status.permfailure = "Fuse is blown";
-    else if (((data >> 12) & 0xc) == 1) status.permfailure = "Cell imbalance failure";
-    else if (((data >> 12) & 0xc) == 2) status.permfailure = "Safety voltage failure";
-    else status.permfailure = "FET failure";
-  }
   return status;
 }
 
@@ -188,20 +203,17 @@ uint16_t ArduinoSMBus::remainingTimeAlarm() {
  * - capacity_mode: bit 15 of the mode register
  */
 BatteryMode ArduinoSMBus::batteryMode() {
-  // Read the battery mode from the device...
-  uint16_t mode = readRegister(BATTERY_MODE);
-  // Create a BatteryMode struct and set its fields based on the mode
-  BatteryMode batteryMode;
-  batteryMode.internal_charge_controller = mode & 0x0001;
-  batteryMode.primary_battery_support = (mode >> 1) & 0x0001;
-  batteryMode.condition_flag = (mode >> 7) & 0x0001;
-  batteryMode.charge_controller_enabled = (mode >> 8) & 0x0001;
-  batteryMode.primary_battery = (mode >> 9) & 0x0001;
-  batteryMode.alarm_mode = (mode >> 13) & 0x0001;
-  batteryMode.charger_mode = (mode >> 14) & 0x0001;
-  batteryMode.capacity_mode = (mode >> 15) & 0x0001;
-  // Return the struct
-  return batteryMode;
+  BatteryMode mode;                    /**> Create a BatteryMode struct and set its fields based on the mode */
+  mode.raw = readRegister(BATTERY_MODE); /**> Read the raw data battery mode from the device. */
+  mode.internal_charge_controller = mode.raw & 0x0001;
+  mode.primary_battery_support = (mode.raw >> 1) & 0x0001;
+  mode.condition_flag = (mode.raw >> 7) & 0x0001;
+  mode.charge_controller_enabled = (mode.raw >> 8) & 0x0001;
+  mode.primary_battery = (mode.raw >> 9) & 0x0001;
+  mode.alarm_mode = (mode.raw >> 13) & 0x0001;
+  mode.charger_mode = (mode.raw >> 14) & 0x0001;
+  mode.capacity_mode = (mode.raw >> 15) & 0x0001;
+  return mode;
 }
 
 /**
@@ -412,19 +424,18 @@ uint16_t ArduinoSMBus::chargingVoltage() {
  * @return BatteryStatus A struct containing the status of each bit in the BatteryStatus register.
  */
 BatteryStatus ArduinoSMBus::batteryStatus() {
-  uint16_t data = readRegister(BATTERY_STATUS);
   BatteryStatus status;
-
-  status.over_charged_alarm = data & (1 << 15);
-  status.term_charge_alarm = data & (1 << 14);
-  status.over_temp_alarm = data & (1 << 12);
-  status.term_discharge_alarm = data & (1 << 11);
-  status.rem_capacity_alarm = data & (1 << 9);
-  status.rem_time_alarm = data & (1 << 8);
-  status.initialized = data & (1 << 7);
-  status.discharging = data & (1 << 6);
-  status.fully_charged = data & (1 << 5);
-  status.fully_discharged = data & (1 << 4);
+  status.raw = readRegister(BATTERY_STATUS);
+  status.over_charged_alarm = status.raw & (1 << 15);
+  status.term_charge_alarm = status.raw & (1 << 14);
+  status.over_temp_alarm = status.raw & (1 << 12);
+  status.term_discharge_alarm = status.raw & (1 << 11);
+  status.rem_capacity_alarm = status.raw & (1 << 9);
+  status.rem_time_alarm = status.raw & (1 << 8);
+  status.initialized = status.raw & (1 << 7);
+  status.discharging = status.raw & (1 << 6);
+  status.fully_charged = status.raw & (1 << 5);
+  status.fully_discharged = status.raw & (1 << 4);
   return status;
 }
 
@@ -467,12 +478,9 @@ uint16_t ArduinoSMBus::designVoltage() {
 String ArduinoSMBus::specificationInfo() {
   uint16_t data = readRegister(SPECIFICATIONINFO);
   data &= 0x00ff;
-  String info{"Version: "};
-  info += String(data, HEX);
-//  if (data & 0x08) info += "Version: 1.0.";
-//  if (data & 0x02) info += "Version: 1.1.";
-//  if (data & 0x03) info += "Version: 1.1 with optional PEC support.";
-//  if (data & 0x10) info += "Version: 1.0 and 1.1.";
+  String info = String((data & 0xf0) >> 4);
+  info += ".";
+  info += String(data & 0x0f);
   return info;
 }
 
@@ -529,10 +537,10 @@ uint16_t ArduinoSMBus::serialNumber() {
  * @return const char* 
  */
 const char* ArduinoSMBus::manufacturerName() {
-  static char manufacturerName[BLOCKLENGTH]; // 20 characters plus null terminator
-  readBlock(MANUFACTURER_NAME, reinterpret_cast<uint8_t*>(manufacturerName), BLOCKLENGTH-2);
-  manufacturerName[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
-  return manufacturerName;
+  static char data[BLOCKLENGTH]; // 20 characters plus null terminator
+  readBlock(MANUFACTURER_NAME, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
+  data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
+  return data;
 }
 
 /**
@@ -541,10 +549,10 @@ const char* ArduinoSMBus::manufacturerName() {
  * @return const char* 
  */
 const char* ArduinoSMBus::deviceName() {
-  static char deviceName[BLOCKLENGTH]; // Assuming the device name is up to 20 characters long
-  readBlock(DEVICE_NAME, reinterpret_cast<uint8_t*>(deviceName), BLOCKLENGTH-2);
-  deviceName[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
-  return deviceName;
+  static char data[BLOCKLENGTH]; // Assuming the device name is up to 20 characters long
+  readBlock(DEVICE_NAME, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
+  data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
+  return data;
 }
 
 /**
@@ -553,10 +561,10 @@ const char* ArduinoSMBus::deviceName() {
  * @return const char* 
  */
 const char* ArduinoSMBus::deviceChemistry() {
-  static char deviceChemistry[BLOCKLENGTH];
-  readBlock(DEVICE_CHEMISTRY, reinterpret_cast<uint8_t*>(deviceChemistry), BLOCKLENGTH-2);
-  deviceChemistry[BLOCKLENGTH-1] = '\0';
-  return deviceChemistry;
+  static char data[BLOCKLENGTH];
+  readBlock(DEVICE_CHEMISTRY, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
+  data[BLOCKLENGTH-1] = '\0';
+  return data;
 }
 
 /**
@@ -864,24 +872,18 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
   I2Ccode(Wire.endTransmission());
-
-  delay(10); // Add a small delay to give the device time to prepare the data
+  delay(20); // Add a small delay to give the device time to prepare the data
   uint8_t datalength = length + 1;
   uint8_t count = Wire.requestFrom(_batteryAddress, datalength); // Request one extra byte for the length
-
   if (Wire.available()) {
     count = Wire.read(); // The first byte is the length of the block, it returns the number of bytes received.
   }
-
   for (uint8_t i = 0; i < count && i < length; i++) {
     if (Wire.available()) {
       data[i] = Wire.read();
     }
   }
-  data[count] = '\0'; //terminate the string
-  
-  uint16_t status = readRegister(BATTERY_STATUS);
-  BatErrorCode(status &= 0x0007);
+  data[count+1] = '\0'; //terminate the string
 }
 
 /**
