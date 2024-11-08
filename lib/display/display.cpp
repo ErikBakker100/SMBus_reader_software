@@ -8,13 +8,12 @@ void displayMainmenu() {
     ansi.println("4 = Extended registers,   ");
     ansi.println("5 = Unseal Battery,       ");
     ansi.println("6 = Seal Battery,         ");
-    ansi.printLine();
-    ansi.println();
+    ansi.println("7 = Clear Permanent Failure");
 }
 
 void displaySmallmenu() {
     ansi.clearScreen();
-    ansi.println(" 1=Menu, 2=Search, 3=Standard, 4=Extended, 5=Unseal, 6=Seal");
+    ansi.println(" 1=Menu, 2=Search, 3=Standard, 4=Extended, 5=Unseal, 6=Seal, 7=Clear PF");
 }
 
 void displayBatteryNr(uint8_t address) {
@@ -37,8 +36,12 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.print("bq20z");
     ansi.print(battery.manufacturerAccessType(), HEX);
     ansi.gotoXY(TAB3, y);
-    ansi.println(battery.I2CError.note);
-
+    if (battery.I2CError.nr) {
+      ansi.print(battery.I2CError.note);
+      battery.BatErrorCode();
+      ansi.println(" " + battery.BatError.note);
+    } else ansi.println(battery.I2CError.note);
+    
     ansi.print("Firmware version (0x00 -> 0x0002):");
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
@@ -57,11 +60,12 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
 
-    ansi.print("Man. Battery Status (0x00 -> 0x0006):");
+    ansi.print("Battery Status (0x00 -> 0x0006):");
     ManufacturerBatStatus status = battery.manufacturerAccessBatStatus();
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
-    ansi.print(status.raw, BIN);
+    ansi.print(prntBits(highByte(status.raw)));
+    ansi.print(prntBits(lowByte(status.raw)));
     ansi.gotoXY(TAB3, y);
     ansi.print(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
@@ -98,7 +102,8 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.print("Battery Modes (0x03):"); 
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
-    ansi.print(mode.raw, BIN);
+    ansi.print(prntBits(highByte(mode.raw)));
+    ansi.print(prntBits(lowByte(mode.raw)));
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
@@ -286,7 +291,8 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     BatteryStatus stat = battery.batteryStatus();
     ansi.gotoXY(TAB2, y);
-    ansi.print(stat.raw, BIN);
+    ansi.print(prntBits(highByte(stat.raw)));
+    ansi.print(prntBits(lowByte(stat.raw)));
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
@@ -404,9 +410,49 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.print("Manufacturer Data (0x23):");
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
-    ansi.print(battery.manufacturerData());
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
+    const char* data = battery.manufacturerData();
+    ansi.gotoXY(TAB1, y+1);
+    ansi.print("Pack Lot Code:");
+    ansi.gotoXY(TAB2, y+1);
+    ansi.print(data[0] + data[1], HEX);
+    ansi.gotoXY(TAB1, y+2);
+    ansi.print("PCB Lot Code:");
+    ansi.gotoXY(TAB2, y+2);
+    ansi.print(data[2] + data[3], HEX);
+    ansi.gotoXY(TAB1, y+3);
+    ansi.print("Firmware Version:");
+    ansi.gotoXY(TAB2, y+3);
+    ansi.print(data[4] + data[5], HEX);
+    ansi.gotoXY(TAB1, y+4);
+    ansi.print("Hardware Revision:");
+    ansi.gotoXY(TAB2, y+4);
+    ansi.print(data[6] + data[7], HEX);
+    ansi.gotoXY(TAB1, y+5);
+    ansi.print("Cell Revision:");
+    ansi.gotoXY(TAB2, y+5);
+    ansi.print(data[8] + data[9], HEX);
+    ansi.gotoXY(TAB1, y+6);
+    ansi.print("Partial Reset Counter:");
+    ansi.gotoXY(TAB2, y+6);
+    ansi.print(data[10], HEX);
+    ansi.gotoXY(TAB1, y+7);
+    ansi.print("Full Reset Counter:");
+    ansi.gotoXY(TAB2, y+7);
+    ansi.print(data[11], HEX);
+    ansi.gotoXY(TAB1, y+8);
+    ansi.print("Watchdog Reset Counter:");
+    ansi.gotoXY(TAB2, y+8);
+    ansi.print(data[12], HEX);
+    ansi.gotoXY(TAB1, y+9);
+    ansi.print("Check Sum:");
+    ansi.gotoXY(TAB2, y+9);
+    ansi.print(data[13], HEX);
+    ansi.gotoXY(TAB1, y+10);
+    ansi.print("String Length Byte:");
+    ansi.gotoXY(TAB2, y+10);
+    ansi.println(data[14], HEX);
 
     // Following functions are not part of the smart battery specification version 1.1
 
@@ -437,7 +483,8 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
   FETcontrol fets = battery.FETControl();
   if (battery.I2CError.nr) ansi.println("NACK, is device unsealed ?");
   else { 
-    ansi.print(fets.raw, HEX);
+    ansi.print(prntBits(highByte(fets.raw)));
+    ansi.print(prntBits(lowByte(fets.raw)));
     ansi.gotoXY(TAB3, y);
     ansi.print(battery.I2CError.note);
     ansi.gotoXY(TAB1, y+1);
@@ -466,7 +513,8 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
   data = battery.Safetyalert().raw;
   if (battery.I2CError.nr) ansi.println("NACK, is device unsealed ?");
   else { 
-    ansi.print(data, HEX);
+    ansi.print(prntBits(highByte(data)));
+    ansi.print(prntBits(lowByte(data)));
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
   }
@@ -477,7 +525,8 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
   data = battery.Safetystatus().raw;
   if (battery.I2CError.nr) ansi.println("NACK, is device unsealed ?");
   else { 
-    ansi.print(data, HEX);
+    ansi.print(prntBits(highByte(data)));
+    ansi.print(prntBits(lowByte(data)));
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
   }
@@ -488,7 +537,8 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
   data = battery.PFalert().raw;
   if (battery.I2CError.nr) ansi.println("NACK, is device unsealed ?");
   else { 
-    ansi.print(data, HEX);
+    ansi.print(prntBits(highByte(data)));
+    ansi.print(prntBits(lowByte(data)));
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
   }
@@ -499,7 +549,8 @@ void display_bq2020z9xx(ArduinoSMBus& battery) {
   data = battery.PFstatus().raw;
   if (battery.I2CError.nr) ansi.println("NACK, is device unsealed ?");
   else { 
-    ansi.print(data, HEX);
+    ansi.print(prntBits(highByte(data)));
+    ansi.print(prntBits(lowByte(data)));
     ansi.gotoXY(TAB3, y);
     ansi.println(battery.I2CError.note);
   }
@@ -511,4 +562,11 @@ void displaySealstatus(ArduinoSMBus& battery) {
   ansi.println(status.ss?"sealed mode enabled":"sealed mode disabled");
   ansi.println(status.fas?"full access mode enabled":"full access mode disabled");
   ansi.println(battery.unsealKey(), HEX);
+}
+
+static char* prntBits(uint8_t b) {
+  static char bits[9];
+  for(int i = 7; i >= 0; i--) bits[7-i] = bitRead(b,i)? '1': '0'; // bitRead, 0 = right most bit
+  bits[8]='\0';
+  return bits;
 }

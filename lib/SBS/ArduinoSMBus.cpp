@@ -89,8 +89,8 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
   status.failure = "";
   status.permfailure = "";
   writeRegister(MANUFACTURER_ACCESS, code);
-  status.raw = highByte(readRegister(MANUFACTURER_ACCESS)); // we only are interested in the upper 8 bitsif ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
-  switch (status.raw & 0x0f) {
+  status.raw = readRegister(MANUFACTURER_ACCESS); // we only are interested in the upper 8 bitsif ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
+  switch (highByte(status.raw) & 0x0f) {
     case 0: 
       status.failure = "Wake up";
       break;
@@ -111,7 +111,7 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
       break;
     case 9: 
       status.failure = "Permanent Failure, ";
-      switch (((status.raw >> 4) & 0x3)) {
+      switch (((highByte(status.raw) >> 4) & 0x03)) {
         case 0:
           status.permfailure = "Fuse is blown";
           break;
@@ -143,13 +143,13 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
     default:
       status.failure = "Unknown";
   }
-  if (status.raw >> 6 == 0) {
+  if (highByte(status.raw) >> 6 == 0) {
     status.chg_fet = true;
     status.dsg_fet = true; }
-  else if (status.raw >> 6 == 1) {
+  else if (highByte(status.raw) >> 6 == 1) {
     status.chg_fet = false;
     status.dsg_fet = true; }
-  else if (status.raw >> 6 == 2) {
+  else if (highByte(status.raw) >> 6 == 2) {
     status.chg_fet = false;
     status.dsg_fet = false; }
   else {
@@ -549,8 +549,8 @@ const char* ArduinoSMBus::manufacturerName() {
  * @return const char* 
  */
 const char* ArduinoSMBus::deviceName() {
-  static char data[BLOCKLENGTH]; // Assuming the device name is up to 20 characters long
-  readBlock(DEVICE_NAME, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
+  static char data[BLOCKLENGTH];
+  readBlock(DEVICE_NAME, reinterpret_cast<uint8_t*>(data), 7);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
 }
@@ -562,7 +562,7 @@ const char* ArduinoSMBus::deviceName() {
  */
 const char* ArduinoSMBus::deviceChemistry() {
   static char data[BLOCKLENGTH];
-  readBlock(DEVICE_CHEMISTRY, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
+  readBlock(DEVICE_CHEMISTRY, reinterpret_cast<uint8_t*>(data), 4);
   data[BLOCKLENGTH-1] = '\0';
   return data;
 }
@@ -574,7 +574,7 @@ const char* ArduinoSMBus::deviceChemistry() {
  */
 const char* ArduinoSMBus::manufacturerData() {
   static char data[BLOCKLENGTH];
-  readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
+  readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), 14);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
 }
@@ -763,29 +763,25 @@ PFStatus ArduinoSMBus::PFstatus() {
 OperationStatus ArduinoSMBus::Operationstatus() {
   OperationStatus status{0};
   uint16_t data = readRegister(OPERATIONSTATUS);
-  
-  if (data <= 0xf7f7 ) {
-    status.raw = data;
-    status.qen = data & (1 <<0 ); 
-    status.vok = data & (1 << 1);
-    status.r_dis = data & (1 << 2);
-    status.xdsgi = data & (1 << 4);
-    status.xdsg = data & (1 << 5);
-    status.dsg = data & (1 << 6);
-    status.wake = data & (1 << 7);
-    status.ldmd = data & (1 << 10);
-    status.csv = data & (1 << 12);
-    status.ss = data & (1 << 13);
-    status.fas = data & (1 << 14);
-    status.pres = data & (1 << 15);
-    BatErrorCode(0); // ok
-  } else BatErrorCode(7); // Unknown error
+  status.raw = data;
+  status.qen = data & (1 <<0 ); 
+  status.vok = data & (1 << 1);
+  status.r_dis = data & (1 << 2);
+  status.xdsgi = data & (1 << 4);
+  status.xdsg = data & (1 << 5);
+  status.dsg = data & (1 << 6);
+  status.wake = data & (1 << 7);
+  status.ldmd = data & (1 << 10);
+  status.csv = data & (1 << 12);
+  status.ss = data & (1 << 13);
+  status.fas = data & (1 << 14);
+  status.pres = data & (1 << 15);
   return status;
 }
 
 /**
  * @brief Read Unseal Key.
- * The bq20z90/bq20z95 Unseal KEy can be read when in unsealed mode 
+ * The bq20z90/bq20z95 Unseal Key can be read when in unsealed mode 
  * The order of the bytes, when entered in ManufacturerAccess, is the 
  * reverse of what is written to or read from the part. For example, 
  * if the 1st and 2nd word of the UnSealKey block read returns 0x1234 and 
@@ -820,8 +816,9 @@ uint32_t ArduinoSMBus::unsealKey() {
  * @param void
  * @return void 
  */
-void ArduinoSMBus::ClearPermanentFailure() {
-
+void ArduinoSMBus::ClearPermanentFailure(uint8_t a, uint8_t b) {
+  writeRegister(MANUFACTURER_ACCESS, a);
+  writeRegister(MANUFACTURER_ACCESS, b);
 }
 
 /**
@@ -835,7 +832,7 @@ int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   Wire.write(reg);
   I2Ccode(Wire.endTransmission());
   
-  delay(10);
+  //delay(10);
   
   uint8_t datalength = 2;
   Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
@@ -871,10 +868,10 @@ void ArduinoSMBus::writeRegister(uint8_t reg, uint16_t data) {
 void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
-  I2Ccode(Wire.endTransmission());
-  delay(20); // Add a small delay to give the device time to prepare the data
-  uint8_t datalength = length + 1;
-  uint8_t count = Wire.requestFrom(_batteryAddress, datalength); // Request one extra byte for the length
+  I2Ccode(Wire.endTransmission(true));
+  //delay(10); // Add a small delay to give the device time to prepare the data
+  uint8_t datalength = length + 1; // Request one extra byte for the length byte
+  uint8_t count = Wire.requestFrom(_batteryAddress, datalength); // returns the number of bytes returned from the peripheral device
   if (Wire.available()) {
     count = Wire.read(); // The first byte is the length of the block, it returns the number of bytes received.
   }
@@ -893,8 +890,8 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
  * 
  * @return String.
  */
-void ArduinoSMBus::BatErrorCode(uint8_t code) {
-  code &= 0x07;
+void ArduinoSMBus::BatErrorCode() {
+  uint16_t code = readRegister(BATTERY_STATUS) & 0x0007;
   if (code != BatError.nr) {
     BatError.nr = code;
     switch (code) {
