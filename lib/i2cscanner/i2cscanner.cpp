@@ -44,10 +44,17 @@
 */
 
 uint8_t i2cscan() {
+  return i2cscan(0, 127);
+} 
+
+uint8_t i2cscan(uint8_t first, uint8_t last) {
   byte error{0}, address{0}, prev{5};
-  Serial.println("Scanning...");
+  Serial.print("Scanning from "); 
+  Serial.print(first);
+  Serial.print(" to ");
+  Serial.println(last);
   String message {""};
-  for(address = 0; address < 128; address++ )
+  for(address = first; address <= last; address++ )
   {
     // The i2c_scanner uses the return value of
     // the Write.endTransmisstion to see if

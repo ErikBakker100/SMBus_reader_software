@@ -31,11 +31,9 @@ uint16_t CmdParser::parseCmd(uint8_t *buffer, size_t bufferSize)
     // init buffer
     m_buffer     = buffer;
     m_bufferSize = bufferSize;
-
     ////
     // Run Parser
     for (size_t i = 0; i < bufferSize; i++) {
-
         // end
         if (buffer[i] == 0x00 || m_paramCount == 0xFFFE) {
             if (i > 0 && buffer[i - 1] != 0x00) {
@@ -56,13 +54,11 @@ uint16_t CmdParser::parseCmd(uint8_t *buffer, size_t bufferSize)
         else if (!isString && m_useKeyValue && buffer[i] == CMDPARSER_CHAR_EQ) {
             buffer[i] = 0x00;
         }
-
         // count
         if (i > 0 && buffer[i] == 0x00 && buffer[i - 1] != 0x00) {
             m_paramCount++;
         }
     }
-
     return m_paramCount;
 }
 

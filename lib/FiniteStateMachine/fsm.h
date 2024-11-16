@@ -3,6 +3,8 @@
 #include "../SBS/ArduinoSMBus.h"
 #include "../i2cscanner/i2cscanner.h"
 #include "../display/display.hpp"
+#include "../CmdParser/CmdBuffer.hpp"
+#include "../CmdParser/CmdParser.hpp"
 
 static ArduinoSMBus battery;
 
@@ -11,10 +13,11 @@ class CommandState;
 class Command{
 public:
     Command();
-    virtual void handleInput(uint8_t);
+    virtual void handleInput(CmdBuffer<64>);
     virtual void update();
 private:
     CommandState* state_;
+
 };
 
 class CommandState {

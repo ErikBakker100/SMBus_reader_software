@@ -1,6 +1,7 @@
 #include "fsm.h"
 
 static uint8_t batteryaddress {0};
+CmdParser cmd;
 
 // class Command
 
@@ -8,9 +9,11 @@ Command::Command() {
     state_ = new menuState;
 }
 
-void Command::handleInput (uint8_t input) {
-    Serial.print(input, DEC);
-    CommandState* state = state_->handleInput(*this, input);
+void Command::handleInput (CmdBuffer<64> buffer) {
+    if (cmd.parseCmd(&buffer) == CMDPARSER_ERROR) return;
+    String com = cmd.getCommand();
+    uint8_t i = com.toInt();
+    CommandState* state = state_->handleInput(*this, i);
     if (state != nullptr) {
         delete state_;
         state_ = state;
@@ -60,7 +63,14 @@ void menuState::enter(Command& command) {
 
 void scanState::enter(Command& command) {
     displaySmallmenu();
-    batteryaddress = i2cscan();
+    if(cmd.getParamCount() == 3) {
+        uint8_t first, second;
+        String param = cmd.getCmdParam(1);
+        first = param.toInt();
+        param = cmd.getCmdParam(2);
+        second = param.toInt();
+        if (first <= second) batteryaddress = i2cscan(first, second);
+    } else batteryaddress = i2cscan();
     battery.setBatteryAddress(batteryaddress);
     displayBatteryNr(batteryaddress);
 }

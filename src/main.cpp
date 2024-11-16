@@ -16,7 +16,6 @@
 
 Command command;
 CmdBuffer<64> cmdBuffer;
-CmdParser cmdParser;
 
 void setup() {
   Serial.begin(115200);
@@ -26,11 +25,7 @@ void setup() {
 
 void loop() {
   if (cmdBuffer.readFromSerial(&Serial)) {
-    if (cmdParser.parseCmd(&cmdBuffer) != CMDPARSER_ERROR) {
-      String com = cmdParser.getCommand();
-      uint8_t i = com.toInt();
-      command.handleInput(i);
+      command.handleInput(cmdBuffer);
       cmdBuffer.clear();
-    } else Serial.println("Parser error!");
-  }
+  } else Serial.println("Parser error!");
 }

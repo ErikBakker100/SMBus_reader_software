@@ -781,7 +781,7 @@ OperationStatus ArduinoSMBus::Operationstatus() {
 
 /**
  * @brief Read Unseal Key.
- * The bq20z90/bq20z95 Unseal Key can be read when in unsealed mode 
+ * The bq20z90/bq20z95 Unseal Key can be read when in full access mode 
  * The order of the bytes, when entered in ManufacturerAccess, is the 
  * reverse of what is written to or read from the part. For example, 
  * if the 1st and 2nd word of the UnSealKey block read returns 0x1234 and 
@@ -816,7 +816,7 @@ uint32_t ArduinoSMBus::unsealKey() {
  * @param void
  * @return void 
  */
-void ArduinoSMBus::ClearPermanentFailure(uint8_t a, uint8_t b) {
+void ArduinoSMBus::ClearPermanentFailure(uint16_t a, uint16_t b) {
   writeRegister(MANUFACTURER_ACCESS, a);
   writeRegister(MANUFACTURER_ACCESS, b);
 }
@@ -831,9 +831,6 @@ int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
   I2Ccode(Wire.endTransmission());
-  
-  //delay(10);
-  
   uint8_t datalength = 2;
   Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
   
@@ -869,7 +866,6 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
   I2Ccode(Wire.endTransmission(true));
-  //delay(10); // Add a small delay to give the device time to prepare the data
   uint8_t datalength = length + 1; // Request one extra byte for the length byte
   uint8_t count = Wire.requestFrom(_batteryAddress, datalength); // returns the number of bytes returned from the peripheral device
   if (Wire.available()) {
@@ -907,10 +903,10 @@ void ArduinoSMBus::BatErrorCode() {
                                                    attempt to access an unsupported optional manufacturer function code. */
         break;
       case 3:
-        BatError.note = "usupported";         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
+        BatError.note = "unsupported";         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
         break;
       case 4:
-        BatError.note = "accessDenied";       /**< The Smart Battery detected an attempt to write to a read only function code. */
+        BatError.note = "access denied";       /**< The Smart Battery detected an attempt to write to a read only function code. */
         break;
       case 5:
         BatError.note = "over-, under-flow";  /**< The Smart Battery detected a data overflow or under flow. */
@@ -919,7 +915,7 @@ void ArduinoSMBus::BatErrorCode() {
         BatError.note = "badSize";            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
         break;
       case 7: 
-        BatError.note = "unknownerror";       /**< The Smart Battery detected an unidentifiable error. */
+        BatError.note = "unknown";       /**< The Smart Battery detected an unidentifiable error. */
     }
   }
 }
