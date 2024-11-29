@@ -48,7 +48,7 @@ void display_standard(ArduinoSMBus& battery) {
     ansi.readCursorPosition(x, y);
     ansi.gotoXY(TAB2, y);
     uint16_t version = battery.manufacturerAccessFirmware();
-    ansi.print((uint8_t)version >> 8 , HEX);
+    ansi.print(version >> 8 , HEX);
     ansi.print(".");
     ansi.print((uint8_t)version & 0x00ff);
     ansi.gotoXY(TAB3, y);
