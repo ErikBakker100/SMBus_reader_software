@@ -10,6 +10,7 @@
  */
 
 #include "ArduinoSMBus.h"
+#include <bitset>
 #define BACKGROUND ansi.black
 #define TAB1 40
 #define TAB2 65
@@ -89,7 +90,7 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
   status.failure = "";
   status.permfailure = "";
   writeRegister(MANUFACTURER_ACCESS, code);
-  status.raw = readRegister(MANUFACTURER_ACCESS); // we only are interested in the upper 8 bitsif ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
+  status.raw = readRegister(MANUFACTURER_ACCESS); // we only are interested in the upper 8 bits if ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
   switch (highByte(status.raw) & 0x0f) {
     case 0: 
       status.failure = "Wake up";
@@ -830,10 +831,9 @@ void ArduinoSMBus::ClearPermanentFailure(uint16_t a, uint16_t b) {
 int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
-  I2Ccode(Wire.endTransmission());
+  I2Ccode(Wire.endTransmission(false));
   uint8_t datalength = 2;
   Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
-  
   if(Wire.available()) {
     return Wire.read() | (Wire.read() << 8);
   } else {

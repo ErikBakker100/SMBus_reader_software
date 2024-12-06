@@ -2,18 +2,19 @@
 
 void displayMainmenu() {
     ansi.clearScreen();
-    ansi.println("1 = Menu,                 This menu");
-    ansi.println("2 = Search address,       Find address, use 2 x x for start and end address.");
-    ansi.println("3 = Standard registers,   Registers as defined in rev 1.1 of the smart battery data specification.");
-    ansi.println("4 = Extended registers,   ");
-    ansi.println("5 = Unseal Battery,       ");
-    ansi.println("6 = Seal Battery,         ");
-    ansi.println("7 = Clear Permanent Failure");
+    ansi.println("1 = Menu,                   This menu");
+    ansi.println("2 = Search address,         Find address, use 2 x x for start and end address.");
+    ansi.println("3 = Standard registers,     Registers as defined in rev 1.1 of the smart battery data specification.");
+    ansi.println("4 = Extended registers,     ");
+    ansi.println("5 = Unseal Battery,         ");
+    ansi.println("6 = Seal Battery,           ");
+    ansi.println("7 = Clear Permanent Failure ");
+    ansi.println("8 = Specify Command         ");
 }
 
 void displaySmallmenu() {
     ansi.clearScreen();
-    ansi.println(" 1=Menu, 2=Search, 3=Standard, 4=Extended, 5=Unseal, 6=Seal, 7=Clear PF");
+    ansi.println(" 1=Menu, 2=Search, 3=Standard, 4=Extended, 5=Unseal, 6=Seal, 7=Clear PF, 8=Specify Command");
 }
 
 static char* prntBits(uint8_t b);
@@ -756,4 +757,21 @@ static char* prntBits(uint8_t b) {
   for(int i = 7; i >= 0; i--) bits[7-i] = bitRead(b,i)? '1': '0'; // bitRead, 0 = right most bit
   bits[8]='\0';
   return bits;
+}
+
+void displayBatteryStatus(ArduinoSMBus& battery) {
+    ansi.print("Battery Status (0x16):");
+    uint16_t x, y;
+    ansi.readCursorPosition(x, y);
+    battery.remainingCapacity();
+    BatteryStatus stat = battery.batteryStatus();
+    ansi.gotoXY(TAB2, y);
+    ansi.print(prntBits(highByte(stat.raw)));
+    ansi.print(prntBits(lowByte(stat.raw)));
+    ansi.gotoXY(TAB3, y);
+    if (battery.I2CError.nr) {
+      ansi.print(battery.I2CError.note);
+      battery.BatErrorCode();
+      ansi.println(" " + battery.BatError.note);
+    } else ansi.println(battery.I2CError.note);
 }

@@ -40,6 +40,7 @@ CommandState* CommandState::handleInput (Command& command, uint8_t input) {
     else if (input == 5) return new unsealState;
     else if (input == 6) return new sealState;
     else if (input == 7) return new clearpfState;
+    else if (input == 8) return new specifycommandState;
 
     return nullptr;
 }
@@ -136,4 +137,23 @@ void clearpfState::enter(Command& command) {
     if (batteryaddress > 0) battery.ClearPermanentFailure(PFCLEARA, PFCLEARB);
     else Serial.println("\n\tPlease Search for address of the Battery first.");
     Serial.println("done!");
+}
+
+// class specify command = 8
+/*CommandState* specifycommand::handleInput (Command& command, uint8_t input) {
+    return nullptr;
+}*/
+
+void specifycommandState::enter(Command& command) {
+    displaySmallmenu();
+
+//    if (batteryaddress > 0) {
+//        if(cmd.getParamCount() == 2) {
+//            String reg = cmd.getCmdParam(1);
+//            if (reg = "BatteryStatus") {
+                displayBatteryStatus(battery);
+//            }
+//        } else Serial.println("Command not found");
+//    } else Serial.println("\n\tPlease Search for address of the Battery first.");
+//    Serial.println("done!");
 }

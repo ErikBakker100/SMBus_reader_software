@@ -17,7 +17,6 @@ public:
     virtual void update();
 private:
     CommandState* state_;
-
 };
 
 class CommandState {
@@ -65,6 +64,11 @@ public:
 //    virtual CommandState* handleInput(Command&, uint8_t);
 };
 class clearpfState : public CommandState {
+public:
+    virtual void enter(Command&);
+//    virtual CommandState* handleInput(Command&, uint8_t);
+};
+class specifycommandState : public CommandState {
 public:
     virtual void enter(Command&);
 //    virtual CommandState* handleInput(Command&, uint8_t);

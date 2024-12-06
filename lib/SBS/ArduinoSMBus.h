@@ -18,9 +18,9 @@
 #define BLOCKLENGTH 20 /**< Maximum of data stream bytes which could be read */
 #define UNSEALA 0x0414 /**< Unseal Key a */
 #define UNSEALB 0x3672 /**< Unseal Key b */
-#define PFCLEARA 0x2673 /**< Permanent Falilure Clear Key A */
-#define PFCLEARB 0x1712 /**< Permanent Falilure Clear Key B */
- //Usable Commands
+#define PFCLEARA 0x2673 /**< Permanent Failure Clear Key A or 0x0001 , 0x0102*/
+#define PFCLEARB 0x1712 /**< Permanent Failure Clear Key B */
+//Usable Commands
 #define MANUFACTURER_ACCESS 0x00
 #define REMAINING_CAPACITY_ALARM 0x01
 #define REMAINING_TIME_ALARM 0x02
