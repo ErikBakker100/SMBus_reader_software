@@ -10,7 +10,6 @@
  */
 
 #include "ArduinoSMBus.h"
-#include <bitset>
 #define BACKGROUND ansi.black
 #define TAB1 40
 #define TAB2 65
@@ -45,8 +44,8 @@ void ArduinoSMBus::setBatteryAddress(uint8_t batteryAddress) {
  * @return void
  */
 void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b) {
-  writeRegister(MANUFACTURER_ACCESS, UnSealKey_a);
-  writeRegister(MANUFACTURER_ACCESS, UnSealKey_b);
+  writeRegister(BQ20Z9xx_COMMAND.UnsealDevice.reg, UnSealKey_a);
+  writeRegister(BQ20Z9xx_COMMAND.UnsealDevice.reg, UnSealKey_b);
 }
 
 /**
@@ -55,8 +54,8 @@ void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSea
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
-  writeRegister(MANUFACTURER_ACCESS, code);
-  return readRegister(MANUFACTURER_ACCESS);
+  writeRegister(BQ20Z9xx_COMMAND.DeviceType.reg, BQ20Z9xx_COMMAND.DeviceType.system_data);
+  return readRegister(SBS_COMMAND.BatteryStatus.reg);
 }
 
 /**
@@ -66,8 +65,8 @@ uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code) {
-  writeRegister(MANUFACTURER_ACCESS, code);
-  return readRegister(MANUFACTURER_ACCESS);
+  writeRegister(BQ20Z9xx_COMMAND.FirmwareVersion.reg, BQ20Z9xx_COMMAND.FirmwareVersion.system_data);
+  return readRegister(SBS_COMMAND.BatteryStatus.reg);
 }
 
 /**
@@ -76,8 +75,8 @@ uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code) {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
-  writeRegister(MANUFACTURER_ACCESS, code);
-  return readRegister(MANUFACTURER_ACCESS);
+  writeRegister(BQ20Z9xx_COMMAND.HardwareVersion.reg, BQ20Z9xx_COMMAND.HardwareVersion.system_data);
+  return readRegister(SBS_COMMAND.BatteryStatus.reg);
 }
 
 /**
@@ -85,12 +84,12 @@ uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
  * Content determined by the Smart Battery's manufacturer. 
  * @return ManufacturerBatteryStatus
  */
-ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
-  ManufacturerBatStatus status;
+ManufacturerStatus ArduinoSMBus::manufacturerStatus(uint16_t code) {
+  ManufacturerStatus status;
   status.failure = "";
   status.permfailure = "";
-  writeRegister(MANUFACTURER_ACCESS, code);
-  status.raw = readRegister(MANUFACTURER_ACCESS); // we only are interested in the upper 8 bits if ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
+  writeRegister(BQ20Z9xx_COMMAND.ManufacturerStatus.reg, BQ20Z9xx_COMMAND.ManufacturerStatus.system_data);
+  status.raw = readRegister(BQ20Z9xx_COMMAND.ManufacturerStatus.reg); // we only are interested in the upper 8 bits if ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
   switch (highByte(status.raw) & 0x0f) {
     case 0: 
       status.failure = "Wake up";
@@ -166,7 +165,7 @@ ManufacturerBatStatus ArduinoSMBus::manufacturerAccessBatStatus(uint16_t code) {
  * @return void
  */
 void ArduinoSMBus::manufacturerAccessSeal(uint16_t code) {
-  writeRegister(MANUFACTURER_ACCESS, code);
+  writeRegister(BQ20Z9xx_COMMAND.SealDevice.reg, BQ20Z9xx_COMMAND.SealDevice.system_data);
 }
 
 /**
@@ -175,7 +174,7 @@ void ArduinoSMBus::manufacturerAccessSeal(uint16_t code) {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::remainingCapacityAlarm() {
-  return readRegister(REMAINING_CAPACITY_ALARM);
+  return readRegister(SBS_COMMAND.RemainingCapacityAlarm.reg);
 }
 
 /**
@@ -184,37 +183,20 @@ uint16_t ArduinoSMBus::remainingCapacityAlarm() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::remainingTimeAlarm() {
-  return readRegister(REMAINING_TIME_ALARM);
+  return readRegister(SBS_COMMAND.RemainingTimeAlarm.reg);
 }
 
 /**
  * @brief Get the battery's mode.
  * 
  * This method reads the battery's mode register, which contains various settings and status bits.
- * It then creates a BatteryMode struct and sets its fields based on the bits in the mode.
+ * It sets BatteryMode fields based on the bits in the mode.
  * 
- * @return BatteryMode A struct containing the following fields:
- * - internal_charge_controller: bit 0 of the mode register
- * - primary_battery_support: bit 1 of the mode register
- * - condition_flag: bit 7 of the mode register
- * - charge_controller_enabled: bit 8 of the mode register
- * - primary_battery: bit 9 of the mode register
- * - alarm_mode: bit 13 of the mode register
- * - charger_mode: bit 14 of the mode register
- * - capacity_mode: bit 15 of the mode register
+ * @return void
  */
-BatteryMode ArduinoSMBus::batteryMode() {
-  BatteryMode mode;                    /**> Create a BatteryMode struct and set its fields based on the mode */
-  mode.raw = readRegister(BATTERY_MODE); /**> Read the raw data battery mode from the device. */
-  mode.internal_charge_controller = mode.raw & 0x0001;
-  mode.primary_battery_support = (mode.raw >> 1) & 0x0001;
-  mode.condition_flag = (mode.raw >> 7) & 0x0001;
-  mode.charge_controller_enabled = (mode.raw >> 8) & 0x0001;
-  mode.primary_battery = (mode.raw >> 9) & 0x0001;
-  mode.alarm_mode = (mode.raw >> 13) & 0x0001;
-  mode.charger_mode = (mode.raw >> 14) & 0x0001;
-  mode.capacity_mode = (mode.raw >> 15) & 0x0001;
-  return mode;
+void ArduinoSMBus::batteryMode() {
+  BatteryMode.raw = readRegister(SBS_COMMAND.BatteryMode.reg); /**> Read the raw data battery mode from the device. */
+  return;
 }
 
 /**
@@ -223,7 +205,7 @@ BatteryMode ArduinoSMBus::batteryMode() {
  * @return int16_t 
  */
 int16_t ArduinoSMBus::atRate() {
-  return readRegister(ATRATE);
+  return readRegister(SBS_COMMAND.AtRate.reg);
 }
 
 /**
@@ -232,7 +214,7 @@ int16_t ArduinoSMBus::atRate() {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::atRateTimeToFull() {
-  return readRegister(ATRATETIMETOFULL);
+  return readRegister(SBS_COMMAND.AtRateTimeToFull.reg);
 }
 
 /**
@@ -241,7 +223,7 @@ uint16_t ArduinoSMBus::atRateTimeToFull() {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::atRateTimeToEmpty() {
-  return readRegister(ATRATETIMETOEMPTY);
+  return readRegister(SBS_COMMAND.AtRateTimeToEmpty.reg);
 }
 
 /**
@@ -250,7 +232,7 @@ uint16_t ArduinoSMBus::atRateTimeToEmpty() {
  * @return bool
  */
 bool ArduinoSMBus::atRateOK() {
-  return readRegister(ATRATEOK);
+  return readRegister(SBS_COMMAND.AtRate.reg);
 }
 
 /**
@@ -259,7 +241,7 @@ bool ArduinoSMBus::atRateOK() {
  * @return float 
  */
 float ArduinoSMBus::temperature() {
-  return readRegister(TEMPERATURE)/10;
+  return readRegister(SBS_COMMAND.Temperature.reg)/10;
 }
 
 /**
@@ -268,11 +250,8 @@ float ArduinoSMBus::temperature() {
  * @return float 
  */
 float ArduinoSMBus::temperatureC() {
-  float temperatureKelvin = readRegister(TEMPERATURE)/10;
+  float temperatureKelvin = readRegister(SBS_COMMAND.Temperature.reg)/10;
   return temperatureKelvin - 273.15;
-  
-//  uint16_t temperatureCelsius = temperatureKelvin - 2731; // Convert from Kelvin to Celsius
-//  return temperatureCelsius;
 }
 
 /**
@@ -281,12 +260,9 @@ float ArduinoSMBus::temperatureC() {
  * @return float 
  */
 float ArduinoSMBus::temperatureF() {
-  float temperatureKelvin = readRegister(TEMPERATURE)/10;
+  float temperatureKelvin = readRegister(SBS_COMMAND.Temperature.reg)/10;
   ;
   return temperatureKelvin - 459.67;
-
-//  uint16_t temperatureFahrenheit = (temperatureKelvin * 18 - 45967) / 10; // Convert from Kelvin to Fahrenheit
-//  return temperatureFahrenheit;
 }
 
 /**
@@ -295,7 +271,7 @@ float ArduinoSMBus::temperatureF() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::voltage() {
-  return readRegister(VOLTAGE);
+  return readRegister(SBS_COMMAND.Voltage.reg);
 }
 
 /**
@@ -304,7 +280,7 @@ uint16_t ArduinoSMBus::voltage() {
  * @return uint16_t 
  */
 int16_t ArduinoSMBus::current() {
-  return readRegister(CURRENT);
+  return readRegister(SBS_COMMAND.Current.reg);
 }
 
 /**
@@ -313,7 +289,7 @@ int16_t ArduinoSMBus::current() {
  * @return uint16_t 
  */
 int16_t ArduinoSMBus::averageCurrent() {
-  return readRegister(AVERAGE_CURRENT);
+  return readRegister(SBS_COMMAND.AverageCurrent.reg);
 }
 
 /**
@@ -322,7 +298,7 @@ int16_t ArduinoSMBus::averageCurrent() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::maxError() {
-  return readRegister(MAX_ERROR);
+  return readRegister(SBS_COMMAND.MaxError.reg);
 }
 
 /**
@@ -331,7 +307,7 @@ uint16_t ArduinoSMBus::maxError() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::relativeStateOfCharge() {
-  uint16_t data = readRegister(REL_STATE_OF_CHARGE);
+  uint16_t data = readRegister(SBS_COMMAND.RelativeStateOfCharge.reg);
   data &= 0x00ff;
   return data;
 }
@@ -342,7 +318,7 @@ uint16_t ArduinoSMBus::relativeStateOfCharge() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::absoluteStateOfCharge() {
-  uint16_t data = readRegister(ABS_STATE_OF_CHARGE);
+  uint16_t data = readRegister(SBS_COMMAND.AbsoluteStateOfCharge.reg);
   data &= 0x00ff;
   return data;
 }
@@ -355,7 +331,7 @@ uint16_t ArduinoSMBus::absoluteStateOfCharge() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::remainingCapacity() {
-  return readRegister(REM_CAPACITY);
+  return readRegister(SBS_COMMAND.RemainingCapacity.reg);
 }
 
 /**
@@ -366,7 +342,7 @@ uint16_t ArduinoSMBus::remainingCapacity() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::fullCapacity() {
-  return readRegister(FULL_CAPACITY);
+  return readRegister(SBS_COMMAND.FullChargeCapacity.reg);
 }
 
 /**
@@ -375,7 +351,7 @@ uint16_t ArduinoSMBus::fullCapacity() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::runTimeToEmpty() {
-  return readRegister(RUN_TIME_TO_EMPTY);
+  return readRegister(SBS_COMMAND.RunTimeToEmpty.reg);
 }
 
 /**
@@ -384,7 +360,7 @@ uint16_t ArduinoSMBus::runTimeToEmpty() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::avgTimeToEmpty() {
-  return readRegister(AVG_TIME_TO_EMPTY);
+  return readRegister(SBS_COMMAND.AverageTimeToEmpty.reg);
 }
 
 /**
@@ -393,7 +369,7 @@ uint16_t ArduinoSMBus::avgTimeToEmpty() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::avgTimeToFull() {
-  return readRegister(AVG_TIME_TO_FULL);
+  return readRegister(SBS_COMMAND.AverageTimeToFull.reg);
 }
 
 /**
@@ -402,7 +378,7 @@ uint16_t ArduinoSMBus::avgTimeToFull() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::chargingCurrent() {
-  return readRegister(CHARGING_CURRENT);
+  return readRegister(SBS_COMMAND.ChargingCurrent.reg);
 }
 
 /**
@@ -411,7 +387,7 @@ uint16_t ArduinoSMBus::chargingCurrent() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::chargingVoltage() {
-  return readRegister(CHARGING_VOLTAGE);
+  return readRegister(SBS_COMMAND.ChargingVoltage.reg);
 }
 
 /**
@@ -424,20 +400,9 @@ uint16_t ArduinoSMBus::chargingVoltage() {
  * 
  * @return BatteryStatus A struct containing the status of each bit in the BatteryStatus register.
  */
-BatteryStatus ArduinoSMBus::batteryStatus() {
-  BatteryStatus status;
-  status.raw = readRegister(BATTERY_STATUS);
-  status.over_charged_alarm = status.raw & (1 << 15);
-  status.term_charge_alarm = status.raw & (1 << 14);
-  status.over_temp_alarm = status.raw & (1 << 12);
-  status.term_discharge_alarm = status.raw & (1 << 11);
-  status.rem_capacity_alarm = status.raw & (1 << 9);
-  status.rem_time_alarm = status.raw & (1 << 8);
-  status.initialized = status.raw & (1 << 7);
-  status.discharging = status.raw & (1 << 6);
-  status.fully_charged = status.raw & (1 << 5);
-  status.fully_discharged = status.raw & (1 << 4);
-  return status;
+void ArduinoSMBus::batteryStatus() {
+  BatteryStatus.raw = readRegister(SBS_COMMAND.BatteryStatus.reg);
+  return;
 }
 
 /**
@@ -447,7 +412,7 @@ BatteryStatus ArduinoSMBus::batteryStatus() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::cycleCount() {
-  return readRegister(CYCLE_COUNT);
+  return readRegister(SBS_COMMAND.CycleCount.reg);
 }
 
 /**
@@ -458,7 +423,7 @@ uint16_t ArduinoSMBus::cycleCount() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::designCapacity() {
-  return readRegister(DESIGN_CAPACITY);
+  return readRegister(SBS_COMMAND.DesignCapacity.reg);
 }
 
 /**
@@ -467,7 +432,7 @@ uint16_t ArduinoSMBus::designCapacity() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::designVoltage() {
-  return readRegister(DESIGN_VOLTAGE);
+  return readRegister(SBS_COMMAND.DesignVoltage.reg);
 }
 
 /**
@@ -477,7 +442,7 @@ uint16_t ArduinoSMBus::designVoltage() {
  * @return String 
  */
 String ArduinoSMBus::specificationInfo() {
-  uint16_t data = readRegister(SPECIFICATIONINFO);
+  uint16_t data = readRegister(SBS_COMMAND.SpecificationInfo.reg);
   data &= 0x00ff;
   String info = String((data & 0xf0) >> 4);
   info += ".";
@@ -492,7 +457,7 @@ String ArduinoSMBus::specificationInfo() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::manufactureDate() {
-  return readRegister(MANUFACTURE_DATE);
+  return readRegister(SBS_COMMAND.ManufactureDate.reg);
 }
 
 /**
@@ -529,7 +494,7 @@ int ArduinoSMBus::manufactureYear() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::serialNumber() {
-  return readRegister(SERIAL_NUMBER);
+  return readRegister(SBS_COMMAND.SerialNumber.reg);
 }
 
 /**
@@ -539,7 +504,7 @@ uint16_t ArduinoSMBus::serialNumber() {
  */
 const char* ArduinoSMBus::manufacturerName() {
   static char data[BLOCKLENGTH]; // 20 characters plus null terminator
-  readBlock(MANUFACTURER_NAME, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
+  readBlock(SBS_COMMAND.ManufacturerName.reg, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
 }
@@ -551,7 +516,7 @@ const char* ArduinoSMBus::manufacturerName() {
  */
 const char* ArduinoSMBus::deviceName() {
   static char data[BLOCKLENGTH];
-  readBlock(DEVICE_NAME, reinterpret_cast<uint8_t*>(data), 7);
+  readBlock(SBS_COMMAND.DeviceName.reg, reinterpret_cast<uint8_t*>(data), 7);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
 }
@@ -563,7 +528,7 @@ const char* ArduinoSMBus::deviceName() {
  */
 const char* ArduinoSMBus::deviceChemistry() {
   static char data[BLOCKLENGTH];
-  readBlock(DEVICE_CHEMISTRY, reinterpret_cast<uint8_t*>(data), 4);
+  readBlock(SBS_COMMAND.DeviceChemistry.reg, reinterpret_cast<uint8_t*>(data), 4);
   data[BLOCKLENGTH-1] = '\0';
   return data;
 }
@@ -575,7 +540,7 @@ const char* ArduinoSMBus::deviceChemistry() {
  */
 const char* ArduinoSMBus::manufacturerData() {
   static char data[BLOCKLENGTH];
-  readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), 14);
+  readBlock(SBS_COMMAND.ManufacturerData.reg, reinterpret_cast<uint8_t*>(data), 14);
   data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
   return data;
 }
@@ -586,7 +551,7 @@ const char* ArduinoSMBus::manufacturerData() {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::voltageCellFour() {
-  return readRegister(VOLTAGECELLFOUR);
+  return readRegister(SBS_COMMAND.OptionalMfgFunction4.reg);
 }
 
 /**
@@ -595,7 +560,7 @@ uint16_t ArduinoSMBus::voltageCellFour() {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::voltageCellThree() {
-  return readRegister(VOLTAGECELLTHREE);
+  return readRegister(SBS_COMMAND.OptionalMfgFunction3.reg);
 }
 
 /**
@@ -604,7 +569,7 @@ uint16_t ArduinoSMBus::voltageCellThree() {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::voltageCellTwo() {
-  return readRegister(VOLTAGECELLTWO);
+  return readRegister(SBS_COMMAND.OptionalMfgFunction2.reg);
 }
 
 /**
@@ -613,7 +578,7 @@ uint16_t ArduinoSMBus::voltageCellTwo() {
  * @return uint16_t
  */
 uint16_t ArduinoSMBus::voltageCellOne() {
-  return readRegister(VOLTAGECELLONE);
+  return readRegister(SBS_COMMAND.OptionalMfgFunction1.reg);
 }
 
 /**
@@ -624,7 +589,7 @@ uint16_t ArduinoSMBus::voltageCellOne() {
  */
 FETcontrol ArduinoSMBus::FETControl() {
   FETcontrol fets;
-  uint16_t data = readRegister(FETCONTROL);
+  uint16_t data = readRegister(BQ20Z9xx_COMMAND.FETControl.reg);
   fets.raw = static_cast<uint8_t>(data & 0x00FF);
   fets.od = data & (1 << 4);
   fets.zvchg = data & (1 << 3);
@@ -640,7 +605,7 @@ FETcontrol ArduinoSMBus::FETControl() {
  * @return uint16_t 
  */
 uint16_t ArduinoSMBus::stateOfHealth() {
-  return readRegister(STATE_OF_HEALTH);
+  return readRegister(BQ20Z9xx_COMMAND.StateOfHealth.reg);
 }
 
 /**
@@ -652,7 +617,7 @@ uint16_t ArduinoSMBus::stateOfHealth() {
  */
 SafetyAlert ArduinoSMBus::Safetyalert() {
   SafetyAlert status{0};
-  uint16_t data = readRegister(SAFETYALERT);
+  uint16_t data = readRegister(BQ20Z9xx_COMMAND.SafetyAlert.reg);
   status.raw = data;
   status.scd = data & (1 << 0);
   status.scc = data & (1 << 1);
@@ -680,7 +645,7 @@ SafetyAlert ArduinoSMBus::Safetyalert() {
  */
 SafetyStatus ArduinoSMBus::Safetystatus() {
   SafetyStatus status{0};
-  uint16_t data = readRegister(SAFETYSTATUS);
+  uint16_t data = readRegister(BQ20Z9xx_COMMAND.SafetyStatus.reg);
   status.raw = data;
   status.scd = data & (1 << 0);
   status.scc = data & (1 << 1);
@@ -709,7 +674,7 @@ SafetyStatus ArduinoSMBus::Safetystatus() {
  */
 PFAlert ArduinoSMBus::PFalert() {
   PFAlert status{0};
-  uint16_t data = readRegister(PFALERT);
+  uint16_t data = readRegister(BQ20Z9xx_COMMAND.PFAlert.reg);
   status.raw = data;
   status.pfin = data & (1 << 0);
   status.sov = data & (1 << 1);
@@ -736,7 +701,7 @@ PFAlert ArduinoSMBus::PFalert() {
  */
 PFStatus ArduinoSMBus::PFstatus() {
   PFStatus status{0};
-  uint16_t data = readRegister(PFSTATUS);
+  uint16_t data = readRegister(BQ20Z9xx_COMMAND.PFStatus.reg);
   status.raw = data;
   status.pfin = data & (1 << 0);
   status.sov = data & (1 << 1);
@@ -763,7 +728,7 @@ PFStatus ArduinoSMBus::PFstatus() {
  */
 OperationStatus ArduinoSMBus::Operationstatus() {
   OperationStatus status{0};
-  uint16_t data = readRegister(OPERATIONSTATUS);
+  uint16_t data = readRegister(BQ20Z9xx_COMMAND.OperationStatus.reg);
   status.raw = data;
   status.qen = data & (1 <<0 ); 
   status.vok = data & (1 << 1);
@@ -795,7 +760,7 @@ OperationStatus ArduinoSMBus::Operationstatus() {
  */
 uint32_t ArduinoSMBus::unsealKey() {
   uint8_t data[4]{0};
-  readBlock(UNSEALKEY, data, 4);
+  readBlock(BQ20Z9xx_COMMAND.UnSealKey.reg, data, 4);
   uint32_t key{0};
   key &= data[0] << 16;
   key &= data[1] << 24;
@@ -818,8 +783,8 @@ uint32_t ArduinoSMBus::unsealKey() {
  * @return void 
  */
 void ArduinoSMBus::ClearPermanentFailure(uint16_t a, uint16_t b) {
-  writeRegister(MANUFACTURER_ACCESS, a);
-  writeRegister(MANUFACTURER_ACCESS, b);
+  writeRegister(BQ20Z9xx_COMMAND.PermanentFailClear.reg, a);
+  writeRegister(BQ20Z9xx_COMMAND.PermanentFailClear.reg, b);
 }
 
 /**
@@ -831,7 +796,7 @@ void ArduinoSMBus::ClearPermanentFailure(uint16_t a, uint16_t b) {
 int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
-  I2Ccode(Wire.endTransmission(false));
+  i2ccode = Wire.endTransmission(false);
   uint8_t datalength = 2;
   Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
   if(Wire.available()) {
@@ -852,7 +817,7 @@ void ArduinoSMBus::writeRegister(uint8_t reg, uint16_t data) {
   Wire.write(reg);
   Wire.write(lowByte(data));
   Wire.write(highByte(data));
-  I2Ccode(Wire.endTransmission());
+  i2ccode = Wire.endTransmission(true);
 }
 
 /**
@@ -865,7 +830,7 @@ void ArduinoSMBus::writeRegister(uint8_t reg, uint16_t data) {
 void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
   Wire.beginTransmission(_batteryAddress);
   Wire.write(reg);
-  I2Ccode(Wire.endTransmission(true));
+  i2ccode = Wire.endTransmission(false);
   uint8_t datalength = length + 1; // Request one extra byte for the length byte
   uint8_t count = Wire.requestFrom(_batteryAddress, datalength); // returns the number of bytes returned from the peripheral device
   if (Wire.available()) {
@@ -877,70 +842,4 @@ void ArduinoSMBus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
     }
   }
   data[count+1] = '\0'; //terminate the string
-}
-
-/**
- * @brief Check if the battery status is OK.
- * Check for any alarm conditions in the battery status. These include over charge, 
- * termination charge, over temperature, termination discharge alarms. If any of these alarms are set, the battery is not OK.
- * 
- * @return String.
- */
-void ArduinoSMBus::BatErrorCode() {
-  uint16_t code = readRegister(BATTERY_STATUS) & 0x0007;
-  if (code != BatError.nr) {
-    BatError.nr = code;
-    switch (code) {
-      case 0:
-        BatError.note = "ok";                 /**< The Smart Battery processed the function code without detecting any errors. */
-        break;
-      case 1:
-        BatError.note = "busy";               /**< The Smart Battery is unable to process the function code at this time. */
-        break;
-      case 2:
-        BatError.note = "reserved";           /**< The Smart Battery detected an attempt to read orwrite to a function code
-                                                   reserved by this version of the specification. The Smart Battery detected an
-                                                   attempt to access an unsupported optional manufacturer function code. */
-        break;
-      case 3:
-        BatError.note = "unsupported";         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
-        break;
-      case 4:
-        BatError.note = "access denied";       /**< The Smart Battery detected an attempt to write to a read only function code. */
-        break;
-      case 5:
-        BatError.note = "over-, under-flow";  /**< The Smart Battery detected a data overflow or under flow. */
-        break;
-      case 6:
-        BatError.note = "badSize";            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
-        break;
-      case 7: 
-        BatError.note = "unknown";       /**< The Smart Battery detected an unidentifiable error. */
-    }
-  }
-}
-
-void ArduinoSMBus::I2Ccode(uint8_t code) {
-  code &= 0x05;
-  if (I2CError.nr != code) {
-    I2CError.nr = code;
-    switch (code) {
-      case 0:
-        I2CError.note = "ok";
-        break;
-      case 1:
-        I2CError.note = "data too long";
-        break;
-      case 2:
-        I2CError.note = "NACK on tx address";
-        break;
-      case 3:
-        I2CError.note = "NACK on tx data";
-        break;
-      case 4:
-        I2CError.note = "other";
-      case 5:
-        I2CError.note = "timeout";
-    }
-  }
 }

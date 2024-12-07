@@ -48,7 +48,7 @@ uint8_t i2cscan() {
 } 
 
 uint8_t i2cscan(uint8_t first, uint8_t last) {
-  byte error{0}, address{0}, prev{5};
+  uint8_t error{0}, address{0};
   Serial.print("Scanning from "); 
   Serial.print(first);
   Serial.print(" to ");
@@ -56,33 +56,12 @@ uint8_t i2cscan(uint8_t first, uint8_t last) {
   String message {""};
   for(address = first; address <= last; address++ )
   {
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
+    // The i2c_scanner uses the return value of the Write.endTransmisstion to see if a device did acknowledge to the address.
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
-    if (error != prev) {
-      switch (error) {
-        case 0:
-          message = "found";
-          break;
-        case 1:
-          message = "data too long";
-          break;
-        case 2:
-          message = "NACK";
-          break;
-        case 3:
-          message = "NACK";
-          break;
-        default:
-          message = "other";
-      }
-      prev = error;
-    }
     Serial.print(address < 0x10 ? "0x0": "0x");
     Serial.print(address, HEX);
-    Serial.println(" " + message);
+    Serial.println(" " + I2Ccode[error]);
     if (error == 0) break;
   }
   if (address >= 0x7f) {

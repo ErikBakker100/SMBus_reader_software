@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include "../ansi/ansi.h"
 #include "../SBS/ArduinoSMBus.h"
+#include "../i2cscanner/i2cscanner.h"
 
 static ANSI ansi(&Serial);
 

@@ -6,7 +6,7 @@
 #include "../CmdParser/CmdBuffer.hpp"
 #include "../CmdParser/CmdParser.hpp"
 
-static ArduinoSMBus battery;
+ArduinoSMBus battery;
 
 class CommandState;
 
