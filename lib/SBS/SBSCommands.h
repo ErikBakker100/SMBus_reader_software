@@ -120,7 +120,6 @@ struct {
   // would indicate that the battery is a model MBC101.*/
   command DeviceChemistry {"DeviceChemistry()", 0x22, DEVICEINFO}; /**> This function returns a character string that contains the battery's chemistry.  For example, if the
   // DeviceChemistry() function returns "NiMH," the battery pack would contain nickel metal hydride cells.*/
-  command ManufacturerData {"ManufacturerData()", 0x23, DEVICEINFO}; /**> This function allows access to the manufacturer data contained in the battery (data).*/
   command OptionalMfgFunction4 {"OptionalMfgFunction4)", 0x3c, DEVICEINFO}; /**> */
   command OptionalMfgFunction3 {"OptionalMfgFunction3)", 0x3d, DEVICEINFO}; /**> */
   command OptionalMfgFunction2 {"OptionalMfgFunction2)", 0x3e, DEVICEINFO}; /**> */

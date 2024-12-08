@@ -69,7 +69,7 @@ public:
   const char* manufacturerName(); // command 0x20
   const char* deviceName(); // command 0x21
   const char* deviceChemistry(); // command 0x22
-  const char* manufacturerData(); // command 0x23
+  void manufacturerData(); // command 0x23
   uint16_t voltageCellFour(); // command 0x3c
   uint16_t voltageCellThree(); // command 0x3d
   uint16_t voltageCellTwo(); // command 0x3e
@@ -91,6 +91,7 @@ public:
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
   void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
+  String device;
 };
 
 void Display_standard(ArduinoSMBus&);

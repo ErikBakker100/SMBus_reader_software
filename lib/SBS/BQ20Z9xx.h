@@ -15,7 +15,7 @@
 
 /**
  * @struct command
- * @brief Extended zcommands pecific for the BQ20Z9xx
+ * @brief Extended commands pecific for the BQ20Z9xx
  */
 struct {
     struct command{
@@ -55,11 +55,31 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
   If the command fails 4 seconds must pass before the command can be reissued.*/
   command FullAccessDevice {"FullAccessDevice()", 0x00, 0x0000, SET}; /**> Instructs the bq20z90/bq20z95 to enable full access to all SBS functions and data flash space and set the
   [FAS] flag. This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the FullAccessKey first followed by the 2nd word of the FullAccessKey.*/
+  command ManufacturerData {"ManufacturerData()", 0x23, 0x0000, DEVICEINFO}; /**> This function allows access to the manufacturer data contained in the battery (data).*/
+  /**
+  * @struct manufacturerdata
+  * @brief This read- or write-word function allows direct control of the FETs for test purposes.
+  */
+  union {
+    char raw[15];                 /**< Data read */
+    struct {
+      uint16_t PackLotCode;
+      uint16_t PCBLotCode;
+      uint16_t FirmwareVersion;
+      uint16_t HardwareRevision;
+      uint16_t CellRevision;
+      uint8_t PartialResetCounter;
+      uint8_t FullResetCounter;
+      uint8_t WatchdogResetCounter;
+      uint8_t CheckSum;
+    } bytes;
+  }manufacturerdata;
+
   command FETControl {"FETControl()", 0x46, 0x0000, SET}; /**> This read- or write-word function allows direct control of the FETs for test purposes.*/
   /**
- * @union fetcontrol
- * @brief This read- or write-word function allows direct control of the FETs for test purposes.
- */
+  * @union fetcontrol
+  * @brief This read- or write-word function allows direct control of the FETs for test purposes.
+  */
   union {
     uint16_t raw;                 /**< Data read */
     struct {

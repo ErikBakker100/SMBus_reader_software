@@ -1,9 +1,9 @@
 /**
  * @file ArduinoSMBus.cpp
- * @author Christopher Lee (clee@unitedconsulting.com)
+ * @author Christopher Lee (clee@unitedconsulting.com), modified extensively
  * @brief Function definitions for the ArduinoSMBus class.
- * @version 1.1
- * @date 2024-03-06
+ * @version 2.0
+ * @date 12-2024
  * 
  * @copyright Copyright (c) 2024
  * 
@@ -465,18 +465,6 @@ const char* ArduinoSMBus::deviceChemistry() {
 }
 
 /**
- * @brief Get the manufacturer data.
- * Returns the string the manufacturer has programmed.
- * @return string 
- */
-const char* ArduinoSMBus::manufacturerData() {
-  static char data[BLOCKLENGTH];
-  readBlock(SBS_COMMAND.ManufacturerData.reg, reinterpret_cast<uint8_t*>(data), 14);
-  data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
-  return data;
-}
-
-/**
  * @brief Get the battery's cell 4 voltage.
  * Returns the nominal voltage of cell 4, in mV.
  * @return uint16_t
@@ -510,6 +498,17 @@ uint16_t ArduinoSMBus::voltageCellTwo() {
  */
 uint16_t ArduinoSMBus::voltageCellOne() {
   return readRegister(SBS_COMMAND.OptionalMfgFunction1.reg);
+}
+
+/**
+ * @brief Get the manufacturer data.
+ * Returns a struct with the manufacturer data.
+ * @return void 
+ */
+void ArduinoSMBus::manufacturerData() {
+  readBlock(BQ20Z9xx_COMMAND.ManufacturerData.reg, reinterpret_cast<uint8_t*>(BQ20Z9xx_COMMAND.manufacturerdata.raw), 14);
+  BQ20Z9xx_COMMAND.manufacturerdata.raw[14] = '\0';   
+  return;
 }
 
 /**
