@@ -9,9 +9,9 @@
  *
  */
 #pragma once
+
 #include <Arduino.h>
 #include "CommandsClassifiers.h"
-#include <bit>
 
 struct {
   struct command{
@@ -85,7 +85,7 @@ struct {
 }SBS_COMMAND;
 
  /**
- * @union BatteryMode
+ * @union batterymode
  * @brief A struct to hold various battery mode flags.
  */
 union {
@@ -102,15 +102,15 @@ union {
     uint16_t charger_mode               : 1; /**< True to enable chargingCurrent and chargingVoltage broadcasts to host, false to disable. BIT 14 (Read/Write) */
     uint16_t capacity_mode              : 1; /**< True to report in mA or mAh, false to report in 10mW or 10mWh units. BIT 15 (Read/Write) */
   } bits;
-}BatteryMode;
+}batterymode;
 
 /**
- * @union BatteryStatus
+ * @union batterystatus
  * @brief A struct to hold various battery status flags.
  *
  * This struct holds various flags that represent the battery status.
  */
-union {
+union  {
   uint16_t raw;
   struct  {
     uint16_t error_codes                : 4; /**< */
@@ -127,13 +127,18 @@ union {
     uint16_t term_charge_alarm          : 1; /**< True if the termination charge alarm is set, false otherwise. Corresponds to bit 14 of the BatteryStatus register. */
     uint16_t over_charged_alarm         : 1; /**< True if the battery is overcharged, false otherwise. Corresponds to bit 15 of the BatteryStatus register. */
   } bits;
-}BatteryStatus;
+}batterystatus;
 
-String ErrorCodes[8] {
+/**
+ * @union errorcodes
+ * @brief Holds the description of the various battery status error_codes (see batterystatus).
+ *
+ */
+static String errorcodes[8] {
   "ok",                 /**< The Smart Battery processed the function code without detecting any errors. */
   "busy",               /**< The Smart Battery is unable to process the function code at this time. */
   "reserved",           /**< The Smart Battery detected an attempt to read orwrite to a function code reserved by this version of the specification.
-  The Smart Battery detected an attempt to access an unsupported optional manufacturer function code. */
+The Smart Battery detected an attempt to access an unsupported optional manufacturer function code. */
   "unsupported",         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
   "access denied",       /**< The Smart Battery detected an attempt to write to a read only function code. */
   "over-, under-flow",  /**< The Smart Battery detected a data overflow or under flow. */

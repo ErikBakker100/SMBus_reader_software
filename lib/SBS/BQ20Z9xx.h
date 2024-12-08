@@ -10,31 +10,28 @@
  */
 #pragma once
 #include <Arduino.h>
-#include "SBSCommands.h"
-#include <bit>
-
 struct {
     struct command{
     String name;
     uint8_t reg;
     uint16_t system_data;
   };
-  command DeviceType {"DeviceType()", SBS_COMMAND.ManufacturerAccess.reg, 0x0001};
-  command FirmwareVersion {"FirmwareVersion()", SBS_COMMAND.ManufacturerAccess.reg, 0x0002};
-  command HardwareVersion {"HardwareVersion()", SBS_COMMAND.ManufacturerAccess.reg, 0x0003};
+  command DeviceType {"DeviceType()", 0x00, 0x0001};
+  command FirmwareVersion {"FirmwareVersion()", 0x00, 0x0002};
+  command HardwareVersion {"HardwareVersion()", 0x00, 0x0003};
   command ManufacturerStatus {"ManufacturerStatus()", SBS_COMMAND.ManufacturerAccess.reg, 0x0006};
-  command ChemistryID {"ChemistryID()", SBS_COMMAND.ManufacturerAccess.reg, 0x0008};
+  command ChemistryID {"ChemistryID()", 0x00, 0x0008};
   /**> The commands in this section cause the bq20z90/bq20z95 to take actions when written. No data is returned.*/
-  command Shutdown {"Shutdown()", SBS_COMMAND.ManufacturerAccess.reg, 0x0010}; /**> Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.*/
-  command Sleep {"Sleep()", SBS_COMMAND.ManufacturerAccess.reg, 0x0011}; /**> Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.*/
-  command SealDevice {"SealDevice()", SBS_COMMAND.ManufacturerAccess.reg, 0x0020}; /**> Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.*/
-  command PermanentFailClear {"PermanentFailClear(PFKey)", SBS_COMMAND.ManufacturerAccess.reg}; /**> This 2 step command needs to be written to ManufacturerAccess in following order: 1st word of the PFKey
+  command Shutdown {"Shutdown()", 0x00, 0x0010}; /**> Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.*/
+  command Sleep {"Sleep()", 0x00, 0x0011}; /**> Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.*/
+  command SealDevice {"SealDevice()", 0x00, 0x0020}; /**> Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.*/
+  command PermanentFailClear {"PermanentFailClear(PFKey)", 0x00}; /**> This 2 step command needs to be written to ManufacturerAccess in following order: 1st word of the PFKey
   first followed by the 2nd word of the PFKey. If the command fails 4 seconds must pass before the command can be reissued. It instructs the bq20z90/bq20z95 to clear
   the PFStatus, clear the [PF] flag, clear the Fuse Flag, reset the SAFE pin, and unlock the data flash for writes.*/
-  command UnsealDevice {"UnsealDevice()", SBS_COMMAND.ManufacturerAccess.reg}; /**> Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
+  command UnsealDevice {"UnsealDevice()", 0x00}; /**> Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
   This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the UnSealKey first followed by the 2nd word of the UnSealKey.
   If the command fails 4 seconds must pass before the command can be reissued.*/
-  command FullAccessDevice {"FullAccessDevice()", SBS_COMMAND.ManufacturerAccess.reg, }; /**> Instructs the bq20z90/bq20z95 to enable full access to all SBS functions and data flash space and set the
+  command FullAccessDevice {"FullAccessDevice()", 0x00}; /**> Instructs the bq20z90/bq20z95 to enable full access to all SBS functions and data flash space and set the
   [FAS] flag. This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the FullAccessKey first followed by the 2nd word of the FullAccessKey.*/
   command FETControl {"FETControl()", 0x46}; /**> This read- or write-word function allows direct control of the FETs for test purposes.*/
   command StateOfHealth {"StateOfHealth()", 0x4f}; /**> This read word function returns the state of health of the battery in %.*/

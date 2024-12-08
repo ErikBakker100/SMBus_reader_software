@@ -195,7 +195,7 @@ uint16_t ArduinoSMBus::remainingTimeAlarm() {
  * @return void
  */
 void ArduinoSMBus::batteryMode() {
-  BatteryMode.raw = readRegister(SBS_COMMAND.BatteryMode.reg); /**> Read the raw data battery mode from the device. */
+  batterymode.raw = readRegister(SBS_COMMAND.BatteryMode.reg); /**> Read the raw data battery mode from the device. */
   return;
 }
 
@@ -401,7 +401,7 @@ uint16_t ArduinoSMBus::chargingVoltage() {
  * @return BatteryStatus A struct containing the status of each bit in the BatteryStatus register.
  */
 void ArduinoSMBus::batteryStatus() {
-  BatteryStatus.raw = readRegister(SBS_COMMAND.BatteryStatus.reg);
+  batterystatus.raw = readRegister(SBS_COMMAND.BatteryStatus.reg);
   return;
 }
 

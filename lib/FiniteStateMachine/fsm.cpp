@@ -2,6 +2,7 @@
 
 static uint8_t batteryaddress {0};
 CmdParser cmd;
+ArduinoSMBus battery;
 
 // class Command
 
