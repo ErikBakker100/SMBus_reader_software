@@ -95,7 +95,7 @@ void standardState::enter(Command& command) {
 
 void extendedState::enter(Command& command) {
     displaySmallmenu();
-    if (batteryaddress > 0) display_bq2020z9xx(battery);
+    if (batteryaddress > 0) display_bq20z9xx(battery);
     else Serial.println("\n\tPlease Search for address of the Battery first.");
 }
 

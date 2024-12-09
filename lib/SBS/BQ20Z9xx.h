@@ -11,13 +11,14 @@
 #pragma once
 
 #include <Arduino.h>
+#include <string.h>
 #include "CommandsClassifiers.h"
 
 /**
  * @struct command
  * @brief Extended commands pecific for the BQ20Z9xx
  */
-struct {
+struct bq20z9xx_command{
     struct command{
     String name;
     uint8_t reg;
@@ -61,7 +62,7 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
   * @brief This read- or write-word function allows direct control of the FETs for test purposes.
   */
   union {
-    char raw[15];                 /**< Data read */
+    char raw[16];                 /**< Data read */
     struct {
       uint16_t PackLotCode;
       uint16_t PCBLotCode;
@@ -72,6 +73,7 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint8_t FullResetCounter;
       uint8_t WatchdogResetCounter;
       uint8_t CheckSum;
+      uint8_t Length;
     } bytes;
   }manufacturerdata;
 
@@ -234,7 +236,7 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
 
   command UnSealKey {"UnSealKey()", 0x60, 0x0000, SET}; /**> This read- or write-block command allows the user to change the Unseal key for the Sealed-to-Unsealed security-state transition.
   This function is only available when the bq20z90/bq20z95 is in the Full-Access mode*/
-}BQ20Z9xx_COMMAND;
+};
 
 /**
  * @union statecodes

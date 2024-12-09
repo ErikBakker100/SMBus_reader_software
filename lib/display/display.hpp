@@ -2,7 +2,7 @@
 
 #define TAB1 5
 #define TAB2 40
-#define TAB3 65
+#define TAB3 70
 
 #include <Arduino.h>
 #include "../ansi/ansi.h"
@@ -15,8 +15,10 @@ void displayMainmenu();
 void displaySmallmenu();
 void displayBatteryNr(uint8_t address);
 void display_sbscommands(ArduinoSMBus& battery);
-void display_bq2020z9xx(ArduinoSMBus& battery);
+void display_bq20z9xx(ArduinoSMBus& battery);
 void displaySealstatus(ArduinoSMBus& battery);
 void displayBatteryStatus(ArduinoSMBus& battery);
-char* prntBits(uint8_t b);
+void printBits(uint8_t);
+void printBits(uint16_t);
+
 

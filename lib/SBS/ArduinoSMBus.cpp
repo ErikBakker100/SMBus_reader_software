@@ -10,8 +10,6 @@
  */
 
 #include "ArduinoSMBus.h"
-#include "SBSCommands.h"
-#include "BQ20Z9xx.h"
 #define BACKGROUND ansi.black
 #define TAB1 40
 #define TAB2 65
@@ -57,7 +55,7 @@ void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSea
  */
 uint16_t ArduinoSMBus::manufacturerAccessType() {
   writeRegister(BQ20Z9xx_COMMAND.DeviceType.reg, BQ20Z9xx_COMMAND.DeviceType.system_data);
-  return readRegister(SBS_COMMAND.BatteryStatus.reg);
+  return readRegister(BQ20Z9xx_COMMAND.DeviceType.reg);
 }
 
 /**
@@ -68,7 +66,7 @@ uint16_t ArduinoSMBus::manufacturerAccessType() {
  */
 uint16_t ArduinoSMBus::manufacturerAccessFirmware() {
   writeRegister(BQ20Z9xx_COMMAND.FirmwareVersion.reg, BQ20Z9xx_COMMAND.FirmwareVersion.system_data);
-  return readRegister(SBS_COMMAND.BatteryStatus.reg);
+  return readRegister(BQ20Z9xx_COMMAND.FirmwareVersion.reg);
 }
 
 /**
@@ -78,7 +76,7 @@ uint16_t ArduinoSMBus::manufacturerAccessFirmware() {
  */
 uint16_t ArduinoSMBus::manufacturerAccessHardware() {
   writeRegister(BQ20Z9xx_COMMAND.HardwareVersion.reg, BQ20Z9xx_COMMAND.HardwareVersion.system_data);
-  return readRegister(SBS_COMMAND.BatteryStatus.reg);
+  return readRegister(BQ20Z9xx_COMMAND.HardwareVersion.reg);
 }
 
 /**
@@ -129,7 +127,7 @@ uint16_t ArduinoSMBus::remainingTimeAlarm() {
  * @return void
  */
 void ArduinoSMBus::batteryMode() {
-  SBS_COMMAND.batterymode.raw = readRegister(SBS_COMMAND.BatteryMode.reg); /**> Read the raw data battery mode from the device. */
+  SBS_COMMAND.batterymode.raw = readRegister(SBS_COMMAND.BatteryMode.reg); /**> Read the raw data battery mode from the device. */;
   return;
 }
 
@@ -508,8 +506,8 @@ uint16_t ArduinoSMBus::voltageCellOne() {
  * @return void 
  */
 void ArduinoSMBus::manufacturerData() {
-  readBlock(BQ20Z9xx_COMMAND.ManufacturerData.reg, reinterpret_cast<uint8_t*>(BQ20Z9xx_COMMAND.manufacturerdata.raw), 14);
-  BQ20Z9xx_COMMAND.manufacturerdata.raw[14] = '\0';   
+  readBlock(BQ20Z9xx_COMMAND.ManufacturerData.reg, reinterpret_cast<uint8_t*>(BQ20Z9xx_COMMAND.manufacturerdata.raw), 15);
+  BQ20Z9xx_COMMAND.manufacturerdata.raw[15] = '\0';   
   return;
 }
 
@@ -644,7 +642,7 @@ int16_t ArduinoSMBus::readRegister(uint8_t reg) {
   uint8_t datalength = 2;
   Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
   if(Wire.available()) {
-    return Wire.read() | (Wire.read() << 8);
+    return (Wire.read() | Wire.read() << 8);
   } else {
     return 0;
   }

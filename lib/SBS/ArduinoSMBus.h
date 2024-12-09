@@ -10,7 +10,7 @@
  */
 #pragma once
 
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <Wire.h>
 #include <string.h>
 #include "../ansi/ansi.h"
@@ -86,6 +86,8 @@ public:
   void ClearPermanentFailure(uint16_t key_a, uint16_t key_b);
   uint8_t baterrorcode; // Error code returned by battery
   uint8_t i2ccode; // Error code returned by I2C
+  sbs_command SBS_COMMAND;
+  bq20z9xx_command BQ20Z9xx_COMMAND;
   private:
   uint8_t _batteryAddress;
   int16_t readRegister(uint8_t reg);

@@ -11,9 +11,10 @@
 #pragma once
 
 #include <Arduino.h>
+#include <string.h>
 #include "CommandsClassifiers.h"
 
-struct {
+struct sbs_command{
   struct command{
     String name;
     uint8_t reg;
@@ -124,7 +125,7 @@ struct {
   command OptionalMfgFunction3 {"OptionalMfgFunction3)", 0x3d, DEVICEINFO}; /**> */
   command OptionalMfgFunction2 {"OptionalMfgFunction2)", 0x3e, DEVICEINFO}; /**> */
   command OptionalMfgFunction1 {"OptionalMfgFunction1)", 0x3f, DEVICEINFO}; /**> */
-}SBS_COMMAND;
+};
 
 /**
  * @union errorcodes
