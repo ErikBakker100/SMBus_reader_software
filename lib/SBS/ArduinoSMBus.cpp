@@ -10,6 +10,8 @@
  */
 
 #include "ArduinoSMBus.h"
+#include "SBSCommands.h"
+#include "BQ20Z9xx.h"
 #define BACKGROUND ansi.black
 #define TAB1 40
 #define TAB2 65
