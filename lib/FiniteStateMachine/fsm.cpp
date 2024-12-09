@@ -84,7 +84,7 @@ void scanState::enter(Command& command) {
 
 void standardState::enter(Command& command) {
     displaySmallmenu();
-    if (batteryaddress > 0) display_standard(battery);
+    if (batteryaddress > 0) display_sbscommands(battery);
     else Serial.println("\n\tPlease Search for address of the Battery first.");
 }
 

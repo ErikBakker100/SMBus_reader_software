@@ -28,11 +28,11 @@ public:
   ArduinoSMBus();
   void setBatteryAddress(uint8_t batteryAddress);
   void manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b); // command 0x00
-  uint16_t manufacturerAccessType(uint16_t = 0x0001); // command 0x00
-  uint16_t manufacturerAccessFirmware(uint16_t = 0x0002); // command 0x00
-  uint16_t manufacturerAccessHardware(uint16_t = 0x0003); // command 0x00
-  ManufacturerStatus manufacturerStatus(uint16_t = 0x0006); // command 0x00
-  void manufacturerAccessSeal(uint16_t = 0x0020); // command 0x00
+  uint16_t manufacturerAccessType(); // command 0x00
+  uint16_t manufacturerAccessFirmware(); // command 0x00
+  uint16_t manufacturerAccessHardware(); // command 0x00
+  void manufacturerStatus(); // command 0x00
+  void manufacturerAccessSeal(); // command 0x00
   uint16_t remainingCapacityAlarm(); // command 0x01
   uint16_t remainingTimeAlarm(); // command 0x02
   void batteryMode(); // command 0x03
@@ -69,19 +69,19 @@ public:
   const char* manufacturerName(); // command 0x20
   const char* deviceName(); // command 0x21
   const char* deviceChemistry(); // command 0x22
-  const char* manufacturerData(); // command 0x23
+  void manufacturerData(); // command 0x23
   uint16_t voltageCellFour(); // command 0x3c
   uint16_t voltageCellThree(); // command 0x3d
   uint16_t voltageCellTwo(); // command 0x3e
   uint16_t voltageCellOne(); // command 0x3f
   // following are extended SBS commands which are only available when the bq20z90/bq20z95 device is in unsealed mode.
-  FETcontrol FETControl(); // command 0x46
+  void FETControl(); // command 0x46
   uint16_t stateOfHealth(); // command 0x4f
-  SafetyAlert Safetyalert(); // command 0x50
-  SafetyStatus Safetystatus(); // command 0x51
-  PFAlert PFalert(); // command 0x52
-  PFStatus PFstatus(); // command 0x53
-  OperationStatus Operationstatus(); // command 0x54
+  void Safetyalert(); // command 0x50
+  void Safetystatus(); // command 0x51
+  void PFalert(); // command 0x52
+  void PFstatus(); // command 0x53
+  void Operationstatus(); // command 0x54
   uint32_t unsealKey(); // command 0x60
   void ClearPermanentFailure(uint16_t key_a, uint16_t key_b);
   uint8_t baterrorcode; // Error code returned by battery
@@ -91,6 +91,7 @@ public:
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
   void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
+  String device;
 };
 
 void Display_standard(ArduinoSMBus&);

@@ -1,9 +1,9 @@
 /**
  * @file ArduinoSMBus.cpp
- * @author Christopher Lee (clee@unitedconsulting.com)
+ * @author Christopher Lee (clee@unitedconsulting.com), modified extensively
  * @brief Function definitions for the ArduinoSMBus class.
- * @version 1.1
- * @date 2024-03-06
+ * @version 2.0
+ * @date 12-2024
  * 
  * @copyright Copyright (c) 2024
  * 
@@ -55,7 +55,7 @@ void ArduinoSMBus::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSea
  * Content determined by the Smart Battery's manufacturer.
  * @return uint16_t
  */
-uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
+uint16_t ArduinoSMBus::manufacturerAccessType() {
   writeRegister(BQ20Z9xx_COMMAND.DeviceType.reg, BQ20Z9xx_COMMAND.DeviceType.system_data);
   return readRegister(SBS_COMMAND.BatteryStatus.reg);
 }
@@ -66,7 +66,7 @@ uint16_t ArduinoSMBus::manufacturerAccessType(uint16_t code) {
  * least-significant byte (LSB) = sub-decimal integer, e.g.: 0x0120 = version 01.20.
  * @return uint16_t
  */
-uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code) {
+uint16_t ArduinoSMBus::manufacturerAccessFirmware() {
   writeRegister(BQ20Z9xx_COMMAND.FirmwareVersion.reg, BQ20Z9xx_COMMAND.FirmwareVersion.system_data);
   return readRegister(SBS_COMMAND.BatteryStatus.reg);
 }
@@ -76,7 +76,7 @@ uint16_t ArduinoSMBus::manufacturerAccessFirmware(uint16_t code) {
  * Content determined by the Smart Battery's manufacturer. Returns the hardware version stored in a single byte of reserved data flash.
  * @return uint16_t
  */
-uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
+uint16_t ArduinoSMBus::manufacturerAccessHardware() {
   writeRegister(BQ20Z9xx_COMMAND.HardwareVersion.reg, BQ20Z9xx_COMMAND.HardwareVersion.system_data);
   return readRegister(SBS_COMMAND.BatteryStatus.reg);
 }
@@ -84,80 +84,12 @@ uint16_t ArduinoSMBus::manufacturerAccessHardware(uint16_t code) {
 /**
  * @brief implementation specific. For TI bq20z90/bq20z95 Returns the Battery Status.
  * Content determined by the Smart Battery's manufacturer. 
- * @return ManufacturerBatteryStatus
+ * @return void
  */
-ManufacturerStatus ArduinoSMBus::manufacturerStatus(uint16_t code) {
-  ManufacturerStatus status;
-  status.failure = "";
-  status.permfailure = "";
+void ArduinoSMBus::manufacturerStatus() {
   writeRegister(BQ20Z9xx_COMMAND.ManufacturerStatus.reg, BQ20Z9xx_COMMAND.ManufacturerStatus.system_data);
-  status.raw = readRegister(BQ20Z9xx_COMMAND.ManufacturerStatus.reg); // we only are interested in the upper 8 bits if ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
-  switch (highByte(status.raw) & 0x0f) {
-    case 0: 
-      status.failure = "Wake up";
-      break;
-    case 1:
-      status.failure = "Normal Discharge";
-      break;
-    case 3:
-      status.failure = "Pre-Charge";
-      break;
-    case 5:
-      status.failure = "Charge";
-      break;
-    case 7:
-      status.failure = "Charge Termination";
-      break;
-    case 8:
-      status.failure = "Fault Charge Terminate";
-      break;
-    case 9: 
-      status.failure = "Permanent Failure, ";
-      switch (((highByte(status.raw) >> 4) & 0x03)) {
-        case 0:
-          status.permfailure = "Fuse is blown";
-          break;
-        case 1:
-          status.permfailure = "Cell imbalance failure";
-          break;
-        case 2:
-          status.permfailure = "Safety voltage failure";
-          break;
-        default:
-          status.permfailure = "FET failure";
-      }
-      break;
-    case 10:
-      status.failure = "Overcurrent";
-      break;
-    case 11:
-      status.failure = "Overtemperature";
-      break;
-    case 12:
-      status.failure = "Battery Failure";
-      break;
-    case 13:
-      status.failure = "Sleep";
-      break;
-    case 15:
-      status.failure = "Battery Removed";
-      break;
-    default:
-      status.failure = "Unknown";
-  }
-  if (highByte(status.raw) >> 6 == 0) {
-    status.chg_fet = true;
-    status.dsg_fet = true; }
-  else if (highByte(status.raw) >> 6 == 1) {
-    status.chg_fet = false;
-    status.dsg_fet = true; }
-  else if (highByte(status.raw) >> 6 == 2) {
-    status.chg_fet = false;
-    status.dsg_fet = false; }
-  else {
-    status.chg_fet = true;
-    status.dsg_fet = false; }
-  return status;
+  BQ20Z9xx_COMMAND.manufacturerstatus.raw = readRegister(BQ20Z9xx_COMMAND.ManufacturerStatus.reg); // we only are interested in the upper 8 bits if ((status.raw & 0x0f) == 0) status.failure = "Wake Up.";
+  return;
 }
 
 /**
@@ -166,7 +98,7 @@ ManufacturerStatus ArduinoSMBus::manufacturerStatus(uint16_t code) {
  * This command is only available when the bq20z90/bq20z95 is in Unsealed or Full Access mode.
  * @return void
  */
-void ArduinoSMBus::manufacturerAccessSeal(uint16_t code) {
+void ArduinoSMBus::manufacturerAccessSeal() {
   writeRegister(BQ20Z9xx_COMMAND.SealDevice.reg, BQ20Z9xx_COMMAND.SealDevice.system_data);
 }
 
@@ -192,12 +124,12 @@ uint16_t ArduinoSMBus::remainingTimeAlarm() {
  * @brief Get the battery's mode.
  * 
  * This method reads the battery's mode register, which contains various settings and status bits.
- * It sets BatteryMode fields based on the bits in the mode.
+ * It sets batterymode fields based on the bits in the mode.
  * 
  * @return void
  */
 void ArduinoSMBus::batteryMode() {
-  batterymode.raw = readRegister(SBS_COMMAND.BatteryMode.reg); /**> Read the raw data battery mode from the device. */
+  SBS_COMMAND.batterymode.raw = readRegister(SBS_COMMAND.BatteryMode.reg); /**> Read the raw data battery mode from the device. */
   return;
 }
 
@@ -263,7 +195,6 @@ float ArduinoSMBus::temperatureC() {
  */
 float ArduinoSMBus::temperatureF() {
   float temperatureKelvin = readRegister(SBS_COMMAND.Temperature.reg)/10;
-  ;
   return temperatureKelvin - 459.67;
 }
 
@@ -403,7 +334,7 @@ uint16_t ArduinoSMBus::chargingVoltage() {
  * @return BatteryStatus A struct containing the status of each bit in the BatteryStatus register.
  */
 void ArduinoSMBus::batteryStatus() {
-  batterystatus.raw = readRegister(SBS_COMMAND.BatteryStatus.reg);
+  SBS_COMMAND.batterystatus.raw = readRegister(SBS_COMMAND.BatteryStatus.reg);
   return;
 }
 
@@ -536,18 +467,6 @@ const char* ArduinoSMBus::deviceChemistry() {
 }
 
 /**
- * @brief Get the manufacturer data.
- * Returns the string the manufacturer has programmed.
- * @return string 
- */
-const char* ArduinoSMBus::manufacturerData() {
-  static char data[BLOCKLENGTH];
-  readBlock(SBS_COMMAND.ManufacturerData.reg, reinterpret_cast<uint8_t*>(data), 14);
-  data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
-  return data;
-}
-
-/**
  * @brief Get the battery's cell 4 voltage.
  * Returns the nominal voltage of cell 4, in mV.
  * @return uint16_t
@@ -584,20 +503,25 @@ uint16_t ArduinoSMBus::voltageCellOne() {
 }
 
 /**
- * @brief Get the current FET Status from the battery.
- * Returns the current operation status struct 
- * This command is not supported by all batteries.
- * @return FETcontrol 
+ * @brief Get the manufacturer data.
+ * Returns a struct with the manufacturer data.
+ * @return void 
  */
-FETcontrol ArduinoSMBus::FETControl() {
-  FETcontrol fets;
-  uint16_t data = readRegister(BQ20Z9xx_COMMAND.FETControl.reg);
-  fets.raw = static_cast<uint8_t>(data & 0x00FF);
-  fets.od = data & (1 << 4);
-  fets.zvchg = data & (1 << 3);
-  fets.chg = data & (1 << 2);
-  fets.dsg = data & (1 << 1);
-  return fets; 
+void ArduinoSMBus::manufacturerData() {
+  readBlock(BQ20Z9xx_COMMAND.ManufacturerData.reg, reinterpret_cast<uint8_t*>(BQ20Z9xx_COMMAND.manufacturerdata.raw), 14);
+  BQ20Z9xx_COMMAND.manufacturerdata.raw[14] = '\0';   
+  return;
+}
+
+/**
+ * @brief Get the current FET Status from the battery.
+ * fills a fetcontrol union 
+ * This command is not supported by all batteries.
+ * @return void 
+ */
+void ArduinoSMBus::FETControl() {
+  BQ20Z9xx_COMMAND.fetcontrol.raw = readRegister(BQ20Z9xx_COMMAND.FETControl.reg);
+  return; 
 }
 
 /**
@@ -612,139 +536,57 @@ uint16_t ArduinoSMBus::stateOfHealth() {
 
 /**
  * @brief Returns indications of pending safety issues.
- * This read-word function returns indications of pending safety issues, such as running safety timers, or fail 
+ * This read-word function fills a safetyalert union indicating pending safety issues, such as running safety timers, or fail 
  * counters that are nonzero but have not reached the required time or value to trigger a SafetyStatus failure.
  * This command is not supported by all batteries.
- * @return SafetyAlert 
+ * @return void 
  */
-SafetyAlert ArduinoSMBus::Safetyalert() {
-  SafetyAlert status{0};
-  uint16_t data = readRegister(BQ20Z9xx_COMMAND.SafetyAlert.reg);
-  status.raw = data;
-  status.scd = data & (1 << 0);
-  status.scc = data & (1 << 1);
-  status.aocd = data & (1 << 2);
-  status.wdf = data & (1 << 3);
-  status.hwdg = data & (1 << 4);
-  status.pf = data & (1 << 5);
-  status.cov = data & (1 << 6);
-  status.cuv = data & (1 << 7);
-  status.pov = data & (1 << 8);
-  status.puv = data & (1 << 9);
-  status.occ2 = data & (1 << 10);
-  status.ocd2 = data & (1 << 11);
-  status.occ = data & (1 << 12);
-  status.ocd = data & (1 << 13);
-  status.otc = data & (1 << 14);
-  status.otd = data & (1 << 15);
-  return status;
+void ArduinoSMBus::Safetyalert() {
+  BQ20Z9xx_COMMAND.safetyalert.raw = readRegister(BQ20Z9xx_COMMAND.SafetyAlert.reg);
+  return;
 }
 
 /**
- * @brief Returns the status of the 1st level safety features.
+ * @brief Fills a safetystaus union with the status of the 1st level safety features.
  * This command is not supported by all batteries.
- * @return SafetyStatus 
+ * @return void
  */
-SafetyStatus ArduinoSMBus::Safetystatus() {
-  SafetyStatus status{0};
-  uint16_t data = readRegister(BQ20Z9xx_COMMAND.SafetyStatus.reg);
-  status.raw = data;
-  status.scd = data & (1 << 0);
-  status.scc = data & (1 << 1);
-  status.aocd = data & (1 << 2);
-  status.wdf = data & (1 << 3);
-  status.hwdg = data & (1 << 4);
-  status.pf = data & (1 << 5);
-  status.cov = data & (1 << 6);
-  status.cuv = data & (1 << 7);
-  status.pov = data & (1 << 8);
-  status.puv = data & (1 << 9);
-  status.occ2 = data & (1 << 10);
-  status.ocd2 = data & (1 << 11);
-  status.occ = data & (1 << 12);
-  status.ocd = data & (1 << 13);
-  status.otc = data & (1 << 14);
-  status.otd = data & (1 << 15);
-  return status;
+void ArduinoSMBus::Safetystatus() {
+  BQ20Z9xx_COMMAND.safetystatus.raw = readRegister(BQ20Z9xx_COMMAND.SafetyStatus.reg);
+  return;
 }
 
 /**
- * @brief Returns indications of pending safety issues.
+ * @brief Fills a pfalert union indicating pending safety issues.
  * This read-word function returns indications of pending safety issues, such as running safety timers that
  * have not reached the required time to trigger a PFAlert failure
- * @return PFAlert 
+ * @return void 
  */
-PFAlert ArduinoSMBus::PFalert() {
-  PFAlert status{0};
-  uint16_t data = readRegister(BQ20Z9xx_COMMAND.PFAlert.reg);
-  status.raw = data;
-  status.pfin = data & (1 << 0);
-  status.sov = data & (1 << 1);
-  status.sotc = data & (1 << 2);
-  status.sotd = data & (1 << 3);
-  status.cim = data & (1 << 4);
-  status.cfetf = data & (1 << 5);
-  status.dfetf = data & (1 << 6);
-  status.dff = data & (1 << 7);
-  status.ace_c = data & (1 << 8);
-  status.afe_p = data & (1 << 9);
-  status.socc = data & (1 << 10);
-  status.socd = data & (1 << 11);
-  status.sopt = data & (1 << 12);
-  status.fbf = data & (1 << 15);
-  return status;
+void ArduinoSMBus::PFalert() {
+  BQ20Z9xx_COMMAND.pfalert.raw = readRegister(BQ20Z9xx_COMMAND.PFAlert.reg);
+  return;
 }
 
 /**
- * @brief Get the data from the permanent failure status register.
+ * @brief Fills a pfstatus with data from the permanent failure status register.
  * Returns the source of the bq20z90/bq20z95 permanent-failure condition.
  * This command is not supported by all batteries.
- * @return PFStatus
+ * @return void
  */
-PFStatus ArduinoSMBus::PFstatus() {
-  PFStatus status{0};
-  uint16_t data = readRegister(BQ20Z9xx_COMMAND.PFStatus.reg);
-  status.raw = data;
-  status.pfin = data & (1 << 0);
-  status.sov = data & (1 << 1);
-  status.sotc = data & (1 << 2);
-  status.sotd = data & (1 << 3);
-  status.cim = data & (1 << 4);
-  status.cfetf = data & (1 << 5);
-  status.dfetf = data & (1 << 6);
-  status.dff = data & (1 << 7);
-  status.afe_c = data & (1 << 8);
-  status.afe_p = data & (1 << 9);
-  status.socc = data & (1 << 10);
-  status.socd = data & (1 << 11);
-  status.sopt = data & (1 << 12);
-  status.fbf = data & (1 << 15);
-  return status;
+void ArduinoSMBus::PFstatus() {
+  BQ20Z9xx_COMMAND.pfstatus.raw = readRegister(BQ20Z9xx_COMMAND.PFStatus.reg);
+  return;
 }
 
 /**
- * @brief Get the current Operation Status from the battery.
- * Returns the current operation status struct 
+ * @brief fills an operationstatus union with the current Operation Status from the battery.
+ *  
  * This command is not supported by all batteries.
- * @return uint16_t 
+ * @return void 
  */
-OperationStatus ArduinoSMBus::Operationstatus() {
-  OperationStatus status{0};
-  uint16_t data = readRegister(BQ20Z9xx_COMMAND.OperationStatus.reg);
-  status.raw = data;
-  status.qen = data & (1 <<0 ); 
-  status.vok = data & (1 << 1);
-  status.r_dis = data & (1 << 2);
-  status.xdsgi = data & (1 << 4);
-  status.xdsg = data & (1 << 5);
-  status.dsg = data & (1 << 6);
-  status.wake = data & (1 << 7);
-  status.ldmd = data & (1 << 10);
-  status.csv = data & (1 << 12);
-  status.ss = data & (1 << 13);
-  status.fas = data & (1 << 14);
-  status.pres = data & (1 << 15);
-  return status;
+void ArduinoSMBus::Operationstatus() {
+  BQ20Z9xx_COMMAND.operationstatus.raw = readRegister(BQ20Z9xx_COMMAND.OperationStatus.reg);
+  return;
 }
 
 /**
