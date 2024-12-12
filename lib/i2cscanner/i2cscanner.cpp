@@ -68,5 +68,6 @@ uint8_t i2cscan(uint8_t first, uint8_t last) {
     Serial.println("No I2C devices found\n");
     address=0;
   }
+  batteryAddress = address;
   return address;
 }

@@ -14,6 +14,7 @@
 #include "../lib/CmdParser/CmdBuffer.hpp"
 #include "../lib/CmdParser/CmdParser.hpp"
 
+ANSI ansi(&Serial);
 Command command;
 CmdBuffer<64> cmdBuffer;
 

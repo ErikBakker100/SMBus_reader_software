@@ -148,13 +148,13 @@ void clearpfState::enter(Command& command) {
 void specifycommandState::enter(Command& command) {
     displaySmallmenu();
 
-//    if (batteryaddress > 0) {
-//        if(cmd.getParamCount() == 2) {
-//            String reg = cmd.getCmdParam(1);
-//            if (reg = "BatteryStatus") {
+    if (batteryaddress > 0) {
+        if(cmd.getParamCount() == 2) {
+            String reg = cmd.getCmdParam(1);
+            if (reg = "BatteryStatus") {
                 displayBatteryStatus(battery);
-//            }
-//        } else Serial.println("Command not found");
-//    } else Serial.println("\n\tPlease Search for address of the Battery first.");
-//    Serial.println("done!");
+            }
+        } else Serial.println("Command not found");
+    } else Serial.println("\n\tPlease Search for address of the Battery first.");
+    Serial.println("done!");
 }

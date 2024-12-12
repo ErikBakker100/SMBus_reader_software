@@ -1,7 +1,7 @@
 /**
  * @file SBSCommands.h
  * @author 
- * @brief 
+ * @brief defines the functions for the Smart Battery Specifications. To be used as a base class.
  * @version 1.0
  * @date 12-2024
  *
@@ -13,6 +13,63 @@
 #include <Arduino.h>
 #include <string.h>
 #include "CommandsClassifiers.h"
+#include "SMBus.h"
+
+class smbuscommands : public smbus{
+public:
+  smbuscommands();
+
+  uint16_t remainingCapacityAlarm();      // command 0x01
+  uint16_t remainingTimeAlarm();          // command 0x02
+  uint16_t batteryMode();                 // command 0x03
+  int16_t atRate();                       // command 0x04
+  uint16_t atRateTimeToFull();            // command 0x05
+  uint16_t atRateTimeToEmpty();           // command 0x06
+  bool atRateOK();                        // command 0x07 
+  float temperature();                    // command 0x08, in Kelvin
+  float temperatureC();
+  float temperatureF();
+  uint16_t voltage();                     // command 0x09
+  int16_t current();                      // command 0x0a
+  int16_t averageCurrent();               // command 0x0b
+  uint16_t maxError();                    // command 0x0c
+  uint16_t relativeStateOfCharge();       // command 0x0d
+  uint16_t absoluteStateOfCharge();       // command 0x0e
+  uint16_t remainingCapacity();           // command 0x0f
+  uint16_t fullCapacity();                // command 0x10
+  uint16_t runTimeToEmpty();              // command 0x11
+  uint16_t avgTimeToEmpty();              // command 0x12
+  uint16_t avgTimeToFull();               // command 0x13
+  uint16_t chargingCurrent();             // command 0x14
+  uint16_t chargingVoltage();             // command 0x15
+  void batteryStatus();                   // command 0x16
+  uint16_t cycleCount();                  // command 0x17
+  uint16_t designCapacity();              // command 0x18
+  uint16_t designVoltage();               // command 0x19
+  String specificationInfo();             // command 0x1a
+  uint16_t manufactureDate();             // command 0x1b
+  uint8_t manufactureDay();
+  uint8_t manufactureMonth();
+  int manufactureYear();
+  uint16_t serialNumber();                // command 0x1c
+  const char* manufacturerName();         // command 0x20
+  const char* deviceName();               // command 0x21
+  const char* deviceChemistry();          // command 0x22
+  void manufacturerData();                // command 0x23
+  uint16_t voltageCellFour();             // command 0x3c
+  uint16_t voltageCellThree();            // command 0x3d
+  uint16_t voltageCellTwo();              // command 0x3e
+  uint16_t voltageCellOne();              // command 0x3f
+  
+  private:
+};
+
+void Display_standard(ArduinoSMBus&);
+void Display_bq2020z9xx(ArduinoSMBus&);
+
+
+
+
 
 struct sbs_command{
   struct command{

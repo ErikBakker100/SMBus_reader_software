@@ -12,7 +12,37 @@
 
 #include <Arduino.h>
 #include <string.h>
-#include "CommandsClassifiers.h"
+#include "../SMB/SMBCommands.h"
+
+#define UNSEALA 0x0414 /**< Unseal Key a */
+#define UNSEALB 0x3672 /**< Unseal Key b */
+#define PFCLEARA 0x2673 /**< Permanent Failure Clear Key A or 0x0001 , 0x0102*/
+#define PFCLEARB 0x1712 /**< Permanent Failure Clear Key B */
+
+void manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b); // command 0x00
+uint16_t manufacturerAccessType(); // command 0x00
+uint16_t manufacturerAccessFirmware(); // command 0x00
+uint16_t manufacturerAccessHardware(); // command 0x00
+void manufacturerStatus(); // command 0x00
+void manufacturerAccessSeal(); // command 0x00
+
+
+
+// following are extended SBS commands which are only available when the bq20z90/bq20z95 device is in unsealed mode.
+  void FETControl(); // command 0x46
+  uint16_t stateOfHealth(); // command 0x4f
+  void Safetyalert(); // command 0x50
+  void Safetystatus(); // command 0x51
+  void PFalert(); // command 0x52
+  void PFstatus(); // command 0x53
+  void Operationstatus(); // command 0x54
+  uint32_t unsealKey(); // command 0x60
+  void ClearPermanentFailure(uint16_t key_a, uint16_t key_b);
+  uint8_t baterrorcode; // Error code returned by battery
+  uint8_t i2ccode; // Error code returned by I2C
+  sbs_command SBS_COMMAND;
+  bq20z9xx_command BQ20Z9xx_COMMAND;
+
 
 /**
  * @struct command
