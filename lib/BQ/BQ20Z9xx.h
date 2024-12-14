@@ -14,51 +14,41 @@
 #include <string.h>
 #include "../SMB/SMBCommands.h"
 
-#define UNSEALA 0x0414 /**< Unseal Key a */
-#define UNSEALB 0x3672 /**< Unseal Key b */
-#define PFCLEARA 0x2673 /**< Permanent Failure Clear Key A or 0x0001 , 0x0102*/
-#define PFCLEARB 0x1712 /**< Permanent Failure Clear Key B */
+#define UNSEALA                     0x0414 /**< Unseal Key a */
+#define UNSEALB                     0x3672 /**< Unseal Key b */
+#define FULLACCESSA                 0xffff
+#define FULLACCESSB                 0xffff
+#define PFCLEARA                    0x2673 /**< Permanent Failure Clear Key A or 0x0001 , 0x0102*/
+#define PFCLEARB                    0x1712 /**< Permanent Failure Clear Key B */
 
-void manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b); // command 0x00
-uint16_t manufacturerAccessType(); // command 0x00
-uint16_t manufacturerAccessFirmware(); // command 0x00
-uint16_t manufacturerAccessHardware(); // command 0x00
-void manufacturerStatus(); // command 0x00
-void manufacturerAccessSeal(); // command 0x00
-
-
-
-// following are extended SBS commands which are only available when the bq20z90/bq20z95 device is in unsealed mode.
-  void FETControl(); // command 0x46
-  uint16_t stateOfHealth(); // command 0x4f
-  void Safetyalert(); // command 0x50
-  void Safetystatus(); // command 0x51
-  void PFalert(); // command 0x52
-  void PFstatus(); // command 0x53
-  void Operationstatus(); // command 0x54
-  uint32_t unsealKey(); // command 0x60
-  void ClearPermanentFailure(uint16_t key_a, uint16_t key_b);
-  uint8_t baterrorcode; // Error code returned by battery
-  uint8_t i2ccode; // Error code returned by I2C
-  sbs_command SBS_COMMAND;
-  bq20z9xx_command BQ20Z9xx_COMMAND;
-
+#define MANUFACTURERACCESSTYPE      0x01
+#define MANUFACTURERACCESSFIRMWARE  0x02
+#define MANUFACTURERACCESSHARDWARE  0x03
+#define MANUFACTURERACCESSTATUS     0x06
+#define MANUFACTURERACCESSCHEMISTRY 0x08
+#define MANUFACTURERACCESSSHUTDOWN  0x10
+#define MANUFACTURERACCESSSLEEP     0x11
+#define MANUFACTURERACCESSSEAL      0x20
+#define FETCONTROL                  0x46
+#define STATEOFHEALTH               0x4f
+#define SAFETYALERT                 0x50
+#define SAFETYSTATUS                0x51
+#define PFALERT                     0x52
+#define PFSTATUS                    0x53
+#define OPERATIONSTATUS             0x54
+#define UNSEALKEY                   0x60
 
 /**
- * @struct command
+ * @class command
  * @brief Extended commands pecific for the BQ20Z9xx
  */
-struct bq20z9xx_command{
-    struct command{
-    String name;
-    uint8_t reg;
-    uint16_t system_data;    
-    uint8_t monitor_group;
-  };
-  command DeviceType {"DeviceType()", 0x00, 0x0001, DEVICEINFO};
-  command FirmwareVersion {"FirmwareVersion()", 0x00, 0x0002, DEVICEINFO};
-  command HardwareVersion {"HardwareVersion()", 0x00, 0x0003, DEVICEINFO};
-  command ManufacturerStatus {"ManufacturerStatus()", 0x00, 0x0006, DEVICEINFO}; /**> This function is available while the bq20z90/bq20z95 is in normal operation. This 16-bit word reports the battery status. */
+class bq20z9xxcommands : public smbuscommands{
+  public:
+  bq20z9xxcommands(uint8_t address);
+  uint16_t manufacturerAccessType(); // command 0x00 0x01
+  uint16_t manufacturerAccessFirmware(); // command 0x00
+  uint16_t manufacturerAccessHardware(); // command 0x00
+  uint16_t manufacturerStatus(); // command 0x00
   /**
   * @union manufacturerstatus
   * @brief 
@@ -72,21 +62,12 @@ struct bq20z9xx_command{
       uint16_t fet     : 2; /**< Indicates the state of the charge and discharge FETs */
     } bits;
   }manufacturerstatus;
-
-command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
   /**> The commands in this section cause the bq20z90/bq20z95 to take actions when written. No data is returned.*/
-  command Shutdown {"Shutdown()", 0x00, 0x0010, SET}; /**> Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.*/
-  command Sleep {"Sleep()", 0x00, 0x0011, SET}; /**> Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.*/
-  command SealDevice {"SealDevice()", 0x00, 0x0020, SET}; /**> Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.*/
-  command PermanentFailClear {"PermanentFailClear(PFKey)", 0x00, 0x0000, SET}; /**> This 2 step command needs to be written to ManufacturerAccess in following order: 1st word of the PFKey
-  first followed by the 2nd word of the PFKey. If the command fails 4 seconds must pass before the command can be reissued. It instructs the bq20z90/bq20z95 to clear
-  the PFStatus, clear the [PF] flag, clear the Fuse Flag, reset the SAFE pin, and unlock the data flash for writes.*/
-  command UnsealDevice {"UnsealDevice()", 0x00, 0x0000, SET}; /**> Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
-  This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the UnSealKey first followed by the 2nd word of the UnSealKey.
-  If the command fails 4 seconds must pass before the command can be reissued.*/
-  command FullAccessDevice {"FullAccessDevice()", 0x00, 0x0000, SET}; /**> Instructs the bq20z90/bq20z95 to enable full access to all SBS functions and data flash space and set the
-  [FAS] flag. This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the FullAccessKey first followed by the 2nd word of the FullAccessKey.*/
-  command ManufacturerData {"ManufacturerData()", 0x23, 0x0000, DEVICEINFO}; /**> This function allows access to the manufacturer data contained in the battery (data).*/
+  uint16_t manufacturerAccessSeal();
+  uint16_t manufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
+  uint16_t manufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
+  uint16_t manufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
+  char* manufacturerData();       // command 0x23
   /**
   * @struct manufacturerdata
   * @brief This read- or write-word function allows direct control of the FETs for test purposes.
@@ -106,8 +87,8 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint8_t Length;
     } bytes;
   }manufacturerdata;
-
-  command FETControl {"FETControl()", 0x46, 0x0000, SET}; /**> This read- or write-word function allows direct control of the FETs for test purposes.*/
+  // following are extended SBS commands which are only available when the bq20z90/bq20z95 device is in unsealed mode.
+  uint16_t FETControl(); // command 0x46
   /**
   * @union fetcontrol
   * @brief This read- or write-word function allows direct control of the FETs for test purposes.
@@ -123,10 +104,8 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint16_t       : 11;        /**> Reserved and must be programmed to 0 */
     } bits;
   }fetcontrol;
-  command StateOfHealth {"StateOfHealth()", 0x4f, 0x0000, DEVICEINFO}; /**> This read word function returns the state of health of the battery in %.*/
-  command SafetyAlert {"SafetyAlert()", 0x50, 0x0000, DEVICEINFO}; /**> This read-word function returns indications of pending safety issues, such as running safety timers, or fail counters that are 
-  nonzero but have not reached the required time or value to trigger a SafetyStatus failure.*/
-  
+  uint16_t stateOfHealth(); // command 0x4f
+  uint16_t Safetyalert(); // command 0x50
   /**
  * @union safetyalert
  * @brief A struct to hold the flags of the pending safety issues register.
@@ -152,12 +131,11 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint16_t otd  : 1;          /**< Discharge overtemperature alert. */
     } bits;
   }safetyalert;
-
+  uint16_t Safetystatus();        // command 0x51
   /**
   * @union safetystatus
   * @brief A struct to hold the flags of the 1st level safety features register.
   */
-  command SafetyStatus {"SafetyStatus()", 0x51, 0x0000, DEVICEINFO}; /**> This read word function returns the status of the 1st level safety features.*/
   union {
     uint16_t raw;                 /**< Data read */
     struct {
@@ -179,9 +157,7 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint16_t otd  : 1;          /**< Discharge overtemperature condition. */
     } bits;
   }safetystatus;
-
-  command PFAlert {"PFAlert()", 0x52, 0x0000, DEVICEINFO}; /**> This read-word function returns indications of pending safety issues, such as running safety timers that have not reached the required 
-  time to trigger a PFAlert failure.*/
+  uint16_t PFalert(); // command 0x52
   /**
    * @union pfalert
    * @brief A struct to hold the flags of the pending safety issues register.
@@ -207,8 +183,7 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint16_t fbf   : 1;         /**< Fuse Blow Failure alert. */
     } bits;
   }pfalert;
-  
-  command PFStatus {"PFStatus()", 0x53, 0x0000, DEVICEINFO}; /**> The permanent failure status register indicates the source of the bq20z90/bq20z95 permanent-failure condition.*/
+  uint16_t PFstatus(); // command 0x53
   /**
    * @union pfstatus
    * @brief A struct to hold the permanent failure status register flags.
@@ -235,8 +210,7 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint16_t fbf   : 1;         /**< Fuse Blow Failure. */
     } bits;
   }pfstatus;
-
-  command OperationStatus {"OperationStatus()", 0x54, 0x0000, DEVICEINFO}; /**> This read-word function returns the current operation status of the bq20z90/bq20z95.*/
+  uint16_t Operationstatus();     // command 0x54
   /**
    * @union operationstatus
    * @brief A struct to hold the operation status flags.
@@ -258,18 +232,40 @@ command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
       uint16_t ldmd  : 1;         /**< Load mode for Impedance Track modeling. 0 = constant current, 1 = constant power. */      
       uint16_t       : 1;         /**> Reserved */
       uint16_t csv   : 1;         /**< Data Flash checksum value has been generated. */   
-      uint16_t ss    : 1;         /**< True  is Sealed security mode. */    
+      uint16_t ss    : 1;         /**< True is Sealed security mode. */    
       uint16_t fas   : 1;         /**< Low means full access security mode. */
       uint16_t pres  : 1;         /**< Low indicating that the system is present (battery inserted). */
     } bits;
   }operationstatus;
-
-  command UnSealKey {"UnSealKey()", 0x60, 0x0000, SET}; /**> This read- or write-block command allows the user to change the Unseal key for the Sealed-to-Unsealed security-state transition.
-  This function is only available when the bq20z90/bq20z95 is in the Full-Access mode*/
+  uint32_t unsealKey();           // command 0x60
+  private:
 };
 
+/*
+  command DeviceType {"DeviceType()", 0x00, 0x0001, DEVICEINFO};
+  command FirmwareVersion {"FirmwareVersion()", 0x00, 0x0002, DEVICEINFO};
+  command HardwareVersion {"HardwareVersion()", 0x00, 0x0003, DEVICEINFO};
+  command ManufacturerStatus {"ManufacturerStatus()", 0x00, 0x0006, DEVICEINFO};
+  command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
+  command Shutdown {"Shutdown()", 0x00, 0x0010, SET}; // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
+  command Sleep {"Sleep()", 0x00, 0x0011, SET}; // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
+  command SealDevice {"SealDevice()", 0x00, 0x0020, SET}; 
+  command PermanentFailClear {"PermanentFailClear(PFKey)", 0x00, 0x0000, SET}; 
+  command UnsealDevice {"UnsealDevice()", 0x00, 0x0000, SET}; Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
+  This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the UnSealKey first followed by the 2nd word of the UnSealKey.
+  If the command fails 4 seconds must pass before the command can be reissued.
+  command FullAccessDevice {"FullAccessDevice()", 0x00, 0x0000, SET}; 
+  command FETControl {"FETControl()", 0x46, 0x0000, SET};
+    command StateOfHealth {"StateOfHealth()", 0x4f, 0x0000, DEVICEINFO};
+  command SafetyAlert {"SafetyAlert()", 0x50, 0x0000, DEVICEINFO};
+    command PFAlert {"PFAlert()", 0x52, 0x0000, DEVICEINFO};  
+  command PFStatus {"PFStatus()", 0x53, 0x0000, DEVICEINFO};
+  command OperationStatus {"OperationStatus()", 0x54, 0x0000, DEVICEINFO};
+  command UnSealKey {"UnSealKey()", 0x60, 0x0000, SET};
+*/
+
 /**
- * @union statecodes
+ * @section statuscodes
  * @brief Holds the description of the various state_codes (see ManufacturerStatus).
  *
  */
@@ -293,7 +289,7 @@ static String statuscodes[16] {
 };
 
 /**
- * @union fetcodes
+ * @section fetcodes
  * @brief Holds the description of the states of the FETs (see Manufacturer Status(0x0006)).
  *
  */
@@ -305,7 +301,7 @@ static String fetcodes[4] {
 };
 
 /**
- * @union permanentfailurecodes
+ * @section permanentfailurecodes
  * @brief Indicates permanent failure cause when permanent failure indicated by STATE3..STATE0 (see Manufacturer Status(0x0006)).
  *
  */

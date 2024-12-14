@@ -12,81 +12,57 @@
 
 #include <Arduino.h>
 #include <string.h>
-#include "CommandsClassifiers.h"
+#include "CommandClassifiers.h"
 #include "SMBus.h"
 
-class smbuscommands : public smbus{
-public:
-  smbuscommands();
+#define MANUFACTURERACCESS     0X00
+#define REMAININGCAPACITYALARM 0x01
+#define REMAININGTIMEALARM     0x02
+#define BATTERYMODE            0x03
+#define ATRATE                 0x04
+#define ATRATETIMETOFULL       0x05
+#define ATRATETIEMTOEMPTY      0x06
+#define ATRATEOK               0x07
+#define TEMPERATURE            0x08
+#define VOLTAGE                0x09
+#define CURRENT                0x0a
+#define AVERAGECURRENT         0x0b
+#define MAXERROR               0x0c
+#define RELATIVESTATEOFCHARGE  0x0d
+#define ABSOLUTESTATEOFCHARGE  0x0e
+#define REMAININGCAPACITY      0x0f
+#define FULLCAPACITY           0x10
+#define RUNTIMETOEMPTY         0x11
+#define AVGTIMETOEMPTY         0x12
+#define AVGTIMETOFULL          0x13
+#define CHARGINGCURRENT        0x14
+#define CHARGINGVOLTAGE        0x15
+#define BATTERYSTATUS          0x16
+#define CYCLECOUNT             0x17
+#define DESIGNCAPACITY         0x18
+#define DESIGNVOLTAGE          0x19
+#define SPECIFICATIONINFO      0x1a
+#define MANUFACTURERDATE       0x1b
+#define SERIALNUMBER           0x1c
+                               // 0x1d - 0x1f are reserved
+#define MANUFACTURERNAME       0x20
+#define DEVICENAME             0x21
+#define DEVICECHEMISTRY        0x22
+#define MANUFACTURERDATA       0x23
+                               // 0x25 - 0x2e are reserved
+#define OPTIONALMFGFUNCTION5   0x2f
+#define OPTIONALMFGFUNCTION4   0x3c
+#define OPTIONALMFGFUNCTION3   0x3d
+#define OPTIONALMFGFUNCTION2   0x3e
+#define OPTIONALMFGFUNCTION1   0x3f
 
+class smbuscommands : public smbus {
+public:
+  smbuscommands(uint8_t address);
+  virtual uint16_t manufacturerAccess();  // command 0x00
   uint16_t remainingCapacityAlarm();      // command 0x01
   uint16_t remainingTimeAlarm();          // command 0x02
   uint16_t batteryMode();                 // command 0x03
-  int16_t atRate();                       // command 0x04
-  uint16_t atRateTimeToFull();            // command 0x05
-  uint16_t atRateTimeToEmpty();           // command 0x06
-  bool atRateOK();                        // command 0x07 
-  float temperature();                    // command 0x08, in Kelvin
-  float temperatureC();
-  float temperatureF();
-  uint16_t voltage();                     // command 0x09
-  int16_t current();                      // command 0x0a
-  int16_t averageCurrent();               // command 0x0b
-  uint16_t maxError();                    // command 0x0c
-  uint16_t relativeStateOfCharge();       // command 0x0d
-  uint16_t absoluteStateOfCharge();       // command 0x0e
-  uint16_t remainingCapacity();           // command 0x0f
-  uint16_t fullCapacity();                // command 0x10
-  uint16_t runTimeToEmpty();              // command 0x11
-  uint16_t avgTimeToEmpty();              // command 0x12
-  uint16_t avgTimeToFull();               // command 0x13
-  uint16_t chargingCurrent();             // command 0x14
-  uint16_t chargingVoltage();             // command 0x15
-  void batteryStatus();                   // command 0x16
-  uint16_t cycleCount();                  // command 0x17
-  uint16_t designCapacity();              // command 0x18
-  uint16_t designVoltage();               // command 0x19
-  String specificationInfo();             // command 0x1a
-  uint16_t manufactureDate();             // command 0x1b
-  uint8_t manufactureDay();
-  uint8_t manufactureMonth();
-  int manufactureYear();
-  uint16_t serialNumber();                // command 0x1c
-  const char* manufacturerName();         // command 0x20
-  const char* deviceName();               // command 0x21
-  const char* deviceChemistry();          // command 0x22
-  void manufacturerData();                // command 0x23
-  uint16_t voltageCellFour();             // command 0x3c
-  uint16_t voltageCellThree();            // command 0x3d
-  uint16_t voltageCellTwo();              // command 0x3e
-  uint16_t voltageCellOne();              // command 0x3f
-  
-  private:
-};
-
-void Display_standard(ArduinoSMBus&);
-void Display_bq2020z9xx(ArduinoSMBus&);
-
-
-
-
-
-struct sbs_command{
-  struct command{
-    String name;
-    uint8_t reg;
-    uint8_t monitor_group;
-  };
-  command ManufacturerAccess {"ManufacturerAccess()", 0x00, DEVICEINFO}; /**> This function is optional and its meaning is implementation specific.  It may be used by a battery
-  manufacturer or silicon supplier to return specific version information, internal calibration information, or some other manufacturer specific function.  There is no implied or 
-  required use for this function and therefore it may be used for multiple purposes.  The only requirement is the data protocol listed below: read word or write word. */
-  command RemainingCapacityAlarm {"RemainingCapacityAlarm()", 0x01, DEVICEINFO}; /**> Sets or gets the Low Capacity alarm threshold value.  Whenever the RemainingCapacity() falls below the
-  Low Capacity value, the Smart Battery sends AlarmWarning() messages to the SMBus Host with the REMAINING_CAPACITY_ALARM bit set.  A Low Capacity value of 0 disables this alarm.
-  (If the ALARM_MODE bit is set in BatteryMode() then the AlarmWarning() message is disabled for a set period of time. */
-  command RemainingTimeAlarm {"RemainingTimeAlarm()", 0x02, DEVICEINFO}; /**> Sets or gets the Remaining Time alarm value.  Whenever the AverageTimeToEmpty() falls below the Remaining Time value, the Smart Battery sends
-  AlarmWarning() messages to the SMBus Host with the REMAINING_TIME_ALARM bit set.  A Remaining Time value of 0 effectively disables this alarm. (If the ALARM_MODE bit is set in 
-  BatteryMode() then the AlarmWarning() message is disabled for a set period of time. */
-  command BatteryMode {"BatteryMode()", 0x03, STATUSBITS}; /**> This function selects the various battery operational modes and reports the battery’s capabilities, modes, and flags minor conditions requiring attention. */
    /**
    * @union batterymode
    * @brief A struct to hold various battery mode flags.
@@ -106,38 +82,27 @@ struct sbs_command{
       uint16_t capacity_mode              : 1; /**< True to report in mA or mAh, false to report in 10mW or 10mWh units. BIT 15 (Read/Write) */
     } bits;
   }batterymode;
-  command AtRate {"AtRate()", 0x04, ATRATES}; /**> The AtRate() function is the first half of a two-function call-set used to set the AtRate value used in calculations made by the AtRateTimeToFull(),
-  AtRateTimeToEmpty(), and AtRateOK() functions.  The AtRate value may be expressed in either current (mA) or power (10mW) depending on the setting of the BatteryMode()'s CAPACITY_MODE bit.*/
-  command AtRateTimeToFull {"AtRateTimeToFull()", 0x05, ATRATES}; /**> Returns the predicted remaining time to fully charge the battery at the previously written AtRate value in mA. */
-  command AtRateTimeToEmpty {"AtRateTimeToEmpty()", 0x06, ATRATES}; /**> Returns the predicted remaining operating time if the battery is discharged at the previously written AtRate 
-  value. (Result will depend on the setting of CAPACITY_MODE bit.)*/
-  command AtRateOK {"AtRateOK()", 0x07, ATRATES}; /**> Returns a Boolean value that indicates whether or not the battery can deliver the previously written AtRate value of additional 
-  energy for 10 seconds (Boolean).  If the AtRate value is zero or positive, the AtRateOK() function will ALWAYS return true. */
-  command Temperature {"Temperature()", 0x08, USAGEINFO}; /**> Returns the cell-pack's internal temperature (°K).  The actual operational temperature range will be defined at a pack level 
-  by a particular manufacturer.  Typically it will be in the range of -20°C to +75°C. */
-  command Voltage {"Voltage()", 0x09, USAGEINFO}; /**> Returns the cell-pack voltage (mV).*/
-  command Current {"Current()", 0x0a, USAGEINFO}; /**> Returns the current being supplied (or accepted) through the battery's terminals (mA).*/
-  command AverageCurrent {"AverageCurrent()", 0x0b, USAGEINFO}; /**> Returns a one-minute rolling average based on the current being supplied (or accepted) through the battery's
-  terminals (mA).  The AverageCurrent() function is expected to return meaningful values during the battery's first minute of operation. */
-  command MaxError {"MaxError()", 0x0c, USAGEINFO}; /**> Returns the expected margin of error (%) in the state of charge calculation. */
-  command RelativeStateOfCharge {"RelativeStateOfCharge()", 0x0d, COMPUTEDINFO}; /**> Returns the predicted remaining battery capacity expressed as a percentage of FullChargeCapacity() (%).*/
-  command AbsoluteStateOfCharge {"AbsoluteStateOfCharge()", 0x0e, COMPUTEDINFO}; /**> Returns the predicted remaining battery capacity expressed as a percentage of DesignCapacity() (%).  Note
-  that AbsoluteStateOfCharge() can return values greater than 100%.*/
-  command RemainingCapacity {"RemainingCapacity()", 0x0f, USAGEINFO}; /**> Returns the predicted remaining battery capacity.  The RemainingCapacity() capacity value is expressed in
-  either current (mAh at a C/5 discharge rate) or power (10mWh at a P/5 discharge rate) depending on the setting of the BatteryMode()'s CAPACITY_MODE bit. */
-  command FullChargeCapacity {"FullChargeCapacity() ", 0x10, USAGEINFO}; /**> Returns the predicted pack capacity when it is fully charged.  The FullChargeCapacity() value is expressed
-  in either current (mAh at a C/5 discharge rate) or power (10mWh at a P/5 discharge rate) depending on the setting of the BatteryMode()'s CAPACITY_MODE bit. */
-  command RunTimeToEmpty {"RunTimeToEmpty()", 0x11, COMPUTEDINFO}; /**> Returns the predicted remaining battery life at the present rate of discharge (minutes).  The RunTimeToEmpty() 
-  value is calculated based on either current or power depending on the setting of the BatteryMode()'s CAPACITY_MODE bit. */
-  command AverageTimeToEmpty {"AverageTimeToEmpty()", 0x12, COMPUTEDINFO}; /**> Returns a one-minute rolling average of the predicted remaining battery life (minutes).  The AverageTimeToEmpty() 
-  value is calculated based on either current or power depending on the setting of the BatteryMode()'s CAPACITY_MODE bit.*/
-  command AverageTimeToFull {"AverageTimeToFull()", 0x13, COMPUTEDINFO}; /**> Returns a one minute rolling average of the predicted remaining time until the Smart Battery reaches full charge (minutes).*/
-  command ChargingCurrent{"ChargingCurrent()", 0x14, USAGEINFO}; /**> Sends the desired charging rate to the Smart Battery Charger (mA). This represents the maximum current which may be
-  provided by the Smart Battery Charger to permit the Smart Battery to reach a Fully Charged state.*/
-  command ChargingVoltage {"ChargingVoltage()", 0x15, USAGEINFO}; /**> Sends the desired charging voltage to the Smart Battery Charger (mV). This represents the maximum voltage which may
-  be provided by the Smart Battery Charger to permit the Smart Battery to reach a Fully Charged state. */
-  command BatteryStatus {"BatteryStatus()", 0x16, STATUSBITS }; /**> Returns the Smart Battery's status word  which contains Alarm and Status bit flags.  Some of the BatteryStatus() 
-  flags (REMAINING_CAPACITY_ALARM and REMAINING_TIME_ALARM) are calculated based on either current or power depending on the setting of the BatteryMode()'s CAPACITY_MODE bit.*/
+  int16_t atRate();                       // command 0x04
+  uint16_t atRateTimeToFull();            // command 0x05
+  uint16_t atRateTimeToEmpty();           // command 0x06
+  bool atRateOK();                        // command 0x07 
+  uint16_t temperature();                 // command 0x08, in Kelvin
+  float temperatureC();
+  float temperatureF();
+  uint16_t voltage();                     // command 0x09
+  int16_t current();                      // command 0x0a
+  int16_t averageCurrent();               // command 0x0b
+  uint16_t maxError();                    // command 0x0c
+  uint16_t relativeStateOfCharge();       // command 0x0d
+  uint16_t absoluteStateOfCharge();       // command 0x0e
+  uint16_t remainingCapacity();           // command 0x0f
+  uint16_t fullCapacity();                // command 0x10
+  uint16_t runTimeToEmpty();              // command 0x11
+  uint16_t avgTimeToEmpty();              // command 0x12
+  uint16_t avgTimeToFull();               // command 0x13
+  uint16_t chargingCurrent();             // command 0x14
+  uint16_t chargingVoltage();             // command 0x15
+  uint16_t batteryStatus();               // command 0x16
   /**
    * @union batterystatus
    * @brief A struct to hold various battery status flags.
@@ -162,26 +127,44 @@ struct sbs_command{
       uint16_t over_charged_alarm         : 1; /**< True if the battery is overcharged, false otherwise. Corresponds to bit 15 of the BatteryStatus register. */
     } bits;
   }batterystatus;
-  command CycleCount {"CycleCount()", 0x17, USAGEINFO}; // Returns the number of cycles the battery has experienced.  A cycle is defined as: An amount of discharge approximately equal to the value of DesignCapacity.
-  command DesignCapacity {"DesignCapacity()", 0x18, DEVICEINFO}; /**> Returns the theoretical capacity of a new pack.  The DesignCapacity() value is expressed in either current (mAh at 
-  a C/5 discharge rate) or power (10mWh at a P/5 discharge rate) depending on the setting of the BatteryMode()'s CAPACITY_MODE bit.*/
-  command DesignVoltage {"DesignVoltage()", 0x19, DEVICEINFO}; /**> Returns the theoretical voltage of a new pack (mV).*/
-  command SpecificationInfo {"SpecificationInfo()", 0x1a, DEVICEINFO}; /**>Returns the version number of the Smart Battery specification the battery pack supports, as well as voltage
-  and current and capacity scaling information in a packed unsigned integer.  Power scaling is the product of the voltage scaling times the current scaling.*/
-  command ManufactureDate {"ManufactureDate()", 0x1b, DEVICEINFO}; /**> This function returns the date the cell pack was manufactured in a packed integer.  The date is packed in the
-  // following fashion: (year-1980) * 512 + month * 32 + day.*/
-  command SerialNumber {"SerialNumber()", 0x1c, DEVICEINFO}; /**> This function is used to return a serial number.  This number when combined with the ManufacturerName(), the DeviceName(), 
-  // and the ManufactureDate() will uniquely identify the battery (unsigned int).*/
-  command ManufacturerName {"ManufacturerName()", 0x20, DEVICEINFO}; /**> This function returns a character array containing the battery's manufacturer's name.  For example,
-  // "MyBattCo" would identify the Smart Battery's manufacturer as MyBattCo.*/
-  command DeviceName {"DeviceName()", 0x21, DEVICEINFO}; /**> This function returns a character string that contains the battery's name.  For example, a DeviceName() of "MBC101" 
-  // would indicate that the battery is a model MBC101.*/
-  command DeviceChemistry {"DeviceChemistry()", 0x22, DEVICEINFO}; /**> This function returns a character string that contains the battery's chemistry.  For example, if the
-  // DeviceChemistry() function returns "NiMH," the battery pack would contain nickel metal hydride cells.*/
-  command OptionalMfgFunction4 {"OptionalMfgFunction4)", 0x3c, DEVICEINFO}; /**> */
-  command OptionalMfgFunction3 {"OptionalMfgFunction3)", 0x3d, DEVICEINFO}; /**> */
-  command OptionalMfgFunction2 {"OptionalMfgFunction2)", 0x3e, DEVICEINFO}; /**> */
-  command OptionalMfgFunction1 {"OptionalMfgFunction1)", 0x3f, DEVICEINFO}; /**> */
+  uint16_t cycleCount();                  // command 0x17
+  uint16_t designCapacity();              // command 0x18
+  uint16_t designVoltage();               // command 0x19
+  char* specificationInfo();              // command 0x1a
+  uint16_t manufactureDate();             // command 0x1b
+  uint16_t manufactureDay();
+  uint16_t manufactureMonth();
+  uint16_t manufactureYear();
+  uint16_t serialNumber();                // command 0x1c
+  char* manufacturerName();               // command 0x20
+  char* deviceName();                     // command 0x21
+  char* deviceChemistry();                // command 0x22
+  virtual char* manufacturerData();       // command 0x23, virtual function may be overidden to be more specific for a certain type IC
+  uint16_t optionalMFGfunction4();        // command 0x3c
+  uint16_t optionalMFGfunction3();        // command 0x3d
+  uint16_t optionalMFGfunction2();        // command 0x3e
+  uint16_t optionalMFGfunction1();        // command 0x3f
+  uint8_t address();
+
+typedef bool (* boolfunction)();
+typedef uint16_t (* uint16function)();
+typedef int16_t (* int16function)();
+typedef float (* floatfunction)();
+typedef char* (* charfunction)();
+  struct {
+    String name;
+    uint16function f16 {0};
+    boolfunction bf {0};
+    floatfunction ff {0};
+    charfunction cf {0};
+    int16function i16 {0};
+    uint8_t monitor_group;
+  }commands_info[0x3f];
+  int16_t readRegister(uint8_t reg);
+  void writeRegister(uint8_t reg, uint16_t data);
+  void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
+  private:
+  uint8_t batteryAddress;
 };
 
 /**

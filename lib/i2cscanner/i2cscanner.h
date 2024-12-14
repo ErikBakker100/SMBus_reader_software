@@ -6,8 +6,6 @@
 uint8_t i2cscan();
 uint8_t i2cscan(uint8_t, uint8_t);
 
-static uint8_t batteryAddress;
-
 static String I2Ccode[6] {
     "ok",
     "data too long",

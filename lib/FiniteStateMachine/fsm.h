@@ -1,8 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include "../SBS/ArduinoSMBus.h"
-#include "../i2cscanner/i2cscanner.h"
-#include "../display/display.hpp"
+#include "../BQ/BQ20Z9xx.h"
 #include "../CmdParser/CmdBuffer.hpp"
 #include "../CmdParser/CmdParser.hpp"
 
@@ -13,8 +11,10 @@ public:
     Command();
     virtual void handleInput(CmdBuffer<64>);
     virtual void update();
+    bq20z9xxcommands* battery {nullptr};
 private:
     CommandState* state_;
+protected:
 };
 
 class CommandState {

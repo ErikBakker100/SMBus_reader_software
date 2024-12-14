@@ -10,7 +10,7 @@
  */
 
 #include "SMBus.h"
-#define CLOCKSPEED 130000  /**< Roughly 100kHz */
+
 
 /**
  * @brief Constructor for a new smbus object.
@@ -28,12 +28,12 @@ smbus::smbus() {
  * @param reg 
  * @return uint16_t 
  */
-int16_t smbus::readRegister(uint8_t reg) {
-  Wire.beginTransmission(_batteryAddress);
+int16_t smbus::readRegister(uint8_t reg, uint8_t address) {
+  Wire.beginTransmission(address);
   Wire.write(reg);
   i2ccode = Wire.endTransmission(false);
   uint8_t datalength = 2;
-  Wire.requestFrom(_batteryAddress, datalength); // Read 2 bytes
+  Wire.requestFrom(address, datalength); // Read 2 bytes
   if(Wire.available()) {
     return (Wire.read() | Wire.read() << 8);
   } else {
@@ -47,8 +47,8 @@ int16_t smbus::readRegister(uint8_t reg) {
  * @param data 
  * @return void 
  */
-void smbus::writeRegister(uint8_t reg, uint16_t data) {
-  Wire.beginTransmission(_batteryAddress);
+void smbus::writeRegister(uint8_t reg, uint16_t data, uint8_t address) {
+  Wire.beginTransmission(address);
   Wire.write(reg);
   Wire.write(lowByte(data));
   Wire.write(highByte(data));
@@ -62,12 +62,12 @@ void smbus::writeRegister(uint8_t reg, uint16_t data) {
  * @param data 
  * @param length 
  */
-void smbus::readBlock(uint8_t reg, uint8_t* data, uint8_t length) {
-  Wire.beginTransmission(_batteryAddress);
+void smbus::readBlock(uint8_t reg, uint8_t* data, uint8_t length, uint8_t address) {
+  Wire.beginTransmission(address);
   Wire.write(reg);
   i2ccode = Wire.endTransmission(false);
   uint8_t datalength = length + 1; // Request one extra byte for the length byte
-  uint8_t count = Wire.requestFrom(_batteryAddress, datalength); // returns the number of bytes returned from the peripheral device
+  uint8_t count = Wire.requestFrom(address, datalength); // returns the number of bytes returned from the peripheral device
   if (Wire.available()) {
     count = Wire.read(); // The first byte is the length of the block, it returns the number of bytes received.
   }
