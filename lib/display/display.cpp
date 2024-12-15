@@ -20,357 +20,487 @@ void displaySmallmenu() {
 
 void displayBatteryAddress(bq20z9xxcommands* battery) {
     uint16_t x, y; // x and y position
-    ansi.print("Batteryaddress set to: ");
     ansi.readCursorPosition(x, y);
+    ansi.print("Batteryaddress set to: ");
     ansi.gotoXY(TAB2, y);
     ansi.print("0x");
     ansi.print(battery->address() < 0x10 ? "0": "");
     ansi.println(battery->address(), HEX);
 }
 
+void displaymanufacturerAccess(bq20z9xxcommands* battery) {
+
+}
+
+void displayremainingCapacityAlarm(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("remainingCapacityAlarm (0x01):");
+  battery->batteryMode(); // We need to get the Battery Mode first to determine output ranges further on
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->remainingCapacityAlarm());
+  ansi.print(battery->batterymode.bits.capacity_mode ? " 10mWh" : "mAh");
+  ansi.gotoXY(TAB3, y);
+  ansi.print(I2Ccode[battery->i2ccode]);
+}
+
+void displayremainingTimeAlarm(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("remainingTimeAlarm (0x02):");
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->remainingTimeAlarm());
+  ansi.print(" minutes");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaybatteryMode(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("BatteryMode (0x03):"); 
+  battery->batteryMode();
+  ansi.gotoXY(TAB2, y);
+  printBits(battery->batterymode.raw);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+  ansi.gotoXY(TAB1, y+1);
+  ansi.print("Internal Charge Controller:");
+  ansi.gotoXY(TAB2, y+1);
+  ansi.println(battery->batterymode.bits.internal_charge_controller ? "Supported" : "Not Supported");
+  ansi.gotoXY(TAB1, y+2);
+  ansi.print("Primary Battery Support:");
+  ansi.gotoXY(TAB2, y+2);
+  ansi.println(battery->batterymode.bits.primary_battery_support ? "Supported" : "Not Supported");
+  ansi.gotoXY(TAB1, y+3);
+  ansi.print("Condition Flag:");
+  ansi.gotoXY(TAB2, y+3);
+  ansi.println(battery->batterymode.bits.condition_flag ? "Cycle Requested" : "Battery OK");
+  ansi.gotoXY(TAB1, y+4);
+  ansi.print("Internal Charge Controller:");
+  ansi.gotoXY(TAB2, y+4);
+  ansi.println(battery->batterymode.bits.charge_controller_enabled ? "Enabled" : "Disabled");
+  ansi.gotoXY(TAB1, y+5);
+  ansi.print("Primary Battery:");
+  ansi.gotoXY(TAB2, y+5);
+  ansi.println(battery->batterymode.bits.primary_battery ? "Operating in primary role" : "Operating in secondary role");
+  ansi.gotoXY(TAB1, y+6);
+  ansi.print("Alarm Mode:");
+  ansi.gotoXY(TAB2, y+6);
+  ansi.println(battery->batterymode.bits.alarm_mode ? "Broadcasts disabled " : "Broadcasts enabled ");
+  ansi.gotoXY(TAB1, y+7);
+  ansi.print("Charger Mode:");
+  ansi.gotoXY(TAB2, y+7);
+  ansi.println(battery->batterymode.bits.charger_mode ? "Broadcasts disabled " : "Broadcasts enabled ");
+  ansi.gotoXY(TAB1, y+8);
+  ansi.print("Capacity Mode:");
+  ansi.gotoXY(TAB2, y+8);
+  ansi.println(battery->batterymode.bits.capacity_mode ? "In 10mW or 10mWh" : "In mA or mAh");
+}
+
+void displayatRate(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("At Rate (0x04):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->atRate());
+  battery->batteryMode();
+  ansi.print(battery->batterymode.bits.capacity_mode ? "x10mW" : "mA");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayatRateTimeToFull(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("At Rate Time To Full (0x05):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->atRateTimeToFull());
+  ansi.print(" minutes");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayatRateTimeToEmpty(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("At Rate Time To Empty (0x06):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->atRateTimeToEmpty());
+  ansi.print(" minutes");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayatRateOK(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("At Rate OK (0x07):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->atRateOK() ? "true" : "false");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaytemperature(bq20z9xxcommands* battery){
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Temperature (0x08):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->temperature(), 1);
+  ansi.print("K, ");
+  ansi.print(battery->temperatureC(), 1);
+  ansi.print("C, ");
+  ansi.print(battery->temperatureF());
+  ansi.println("F.");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayvoltage(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Voltage (0x09):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  float voltage = (float)battery->voltage()/1000;
+  ansi.print(voltage);
+  ansi.print("V");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaycurrent(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Current (0x0a):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->current());
+  ansi.print("mA");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayaverageCurrent(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Average Current (0x0b):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->averageCurrent());
+  ansi.print("mA");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaymaxError(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Max Error (0x0c):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->maxError());
+  ansi.print("%");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayrelativeStateOfCharge(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Relative State Of Charge (0x0d):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->relativeStateOfCharge());
+  ansi.print("% of Full Capacity");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayabsoluteStateOfCharge(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Absolute State Of Charge (0x0e):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->absoluteStateOfCharge());
+  ansi.print("% of Full Capacity");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayremainingCapacity(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Remaining Capacity (0x0f):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->remainingCapacity());
+  battery->batteryMode();
+  ansi.print(battery->batterymode.bits.capacity_mode ? "x10mWh" : " mAh");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayfullCapacity(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Full Capacity (0x10):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->fullCapacity());
+  battery->batteryMode();
+  ansi.print(battery->batterymode.bits.capacity_mode ? "x10mWh" : " mAh");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayrunTimeToEmpty(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Run Time To Empty (0x11):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->runTimeToEmpty());
+  ansi.print(" minutes");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayavgTimeToEmpty(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Average Time To Empty (0x12):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->avgTimeToEmpty());
+  ansi.print(" minutes");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayavgTimeToFull(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Average Time To Full (0x13):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->avgTimeToFull());
+  ansi.print(" minutes");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaychargingCurrent(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Desired Charging Current (0x14):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->chargingCurrent());
+  ansi.print("mA");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaychargingVoltage(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Desired Charging Voltage (0x15):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->chargingVoltage());
+  ansi.print("mV");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaybatteryStatus(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Battery Status (0x16):");
+  ansi.readCursorPosition(x, y);
+  battery->batteryStatus();
+  ansi.gotoXY(TAB2, y);
+  printBits(battery->batterystatus.raw);
+  ansi.gotoXY(TAB3, y);
+  ansi.print(I2Ccode[battery->i2ccode] + " " + errorcodes[battery->batterystatus.bits.error_codes]);
+  ansi.gotoXY(TAB1, y+1);
+  ansi.print("Fully Discharged:");
+  ansi.gotoXY(TAB2, y+1);
+  ansi.print(battery->batterystatus.bits.fully_discharged ? "True" : "False");
+  ansi.gotoXY(TAB1, y+2);
+  ansi.print("Fully Charged:");
+  ansi.gotoXY(TAB2, y+2);
+  ansi.print(battery->batterystatus.bits.fully_charged ? "True" : "False");
+  ansi.gotoXY(TAB1, y+3);
+  ansi.print("Discharging:");
+  ansi.gotoXY(TAB2, y+3);
+  ansi.print(battery->batterystatus.bits.discharging ? "True" : "False");
+  ansi.gotoXY(TAB1, y+4);
+  ansi.print("Initialized:");
+  ansi.gotoXY(TAB2, y+4);
+  ansi.print(battery->batterystatus.bits.initialized ? "Calibrated" : "Calibrating");
+  ansi.gotoXY(TAB1, y+5);
+  ansi.print("Remaining Time Alarm:");
+  ansi.gotoXY(TAB2, y+5);
+  ansi.print(battery->batterystatus.bits.rem_time_alarm ? "Set" : "Not set");
+  ansi.gotoXY(TAB1, y+6);
+  ansi.print("Remaining Capacity Alarm:");
+  ansi.gotoXY(TAB2, y+6);
+  ansi.print(battery->batterystatus.bits.rem_capacity_alarm ? "Set" : "Not set");
+  ansi.gotoXY(TAB1, y+7);
+  ansi.print("Terminate Discharge Alarm:");
+  ansi.gotoXY(TAB2, y+7);
+  ansi.print(battery->batterystatus.bits.term_discharge_alarm ? "Capacity depleted" : "Discharge not detected");
+  ansi.gotoXY(TAB1, y+8);
+  ansi.print("Over Temperature Alarm:");
+  ansi.gotoXY(TAB2, y+8);
+  ansi.print(battery->batterystatus.bits.over_temp_alarm ? "Above limit" : "Within acceptable range");
+  ansi.gotoXY(TAB1, y+9);
+  ansi.print("Terminate Charge Alarm:");
+  ansi.gotoXY(TAB2, y+9);
+  ansi.print(battery->batterystatus.bits.term_charge_alarm ? "Suspend charging" : "No charging, alarm cleared");
+  ansi.gotoXY(TAB1, y+10);    
+  ansi.print("Over Charged Alarm:");
+  ansi.gotoXY(TAB2, y+10);
+  ansi.println(battery->batterystatus.bits.over_charged_alarm ? "Battery fully charged" : "Cleared");
+}
+
+void displaycycleCount(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Cycle Count (0x17):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->cycleCount());
+  ansi.print(" times");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaydesignCapacity(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Design Capacity (0x18):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->designCapacity());
+  ansi.print(battery->batterymode.bits.capacity_mode ? "x10mWh" : " mAh");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaydesignVoltage(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Design Voltage (0x19):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print((float)battery->designVoltage()/1000);
+  ansi.print("V");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayspecificationInfo(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Protocol (0x1a):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->specificationInfo());
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaymanufactureDate(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Manufacture Date (0x1b): ");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->manufactureDay());
+  ansi.print("-");
+  ansi.print(battery->manufactureMonth());
+  ansi.print("-");
+  ansi.print(battery->manufactureYear());
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displayserialNumber(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Serial Number (0x1c):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->serialNumber());
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaymanufacturerName(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Manufacturer Name (0x20):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->manufacturerName());
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaydeviceName(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Device Name (0x21):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->deviceName());
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+void displaydeviceChemistry(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Device Chemistry (0x22):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->deviceChemistry());
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
+// Following functions are not part of the smart battery specification version 1.1
+void displayoptionalMFGfunctions(bq20z9xxcommands* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("Voltage Cell 1 to 4 (0x3f - 0x3c):");
+  ansi.readCursorPosition(x, y);
+  ansi.gotoXY(TAB2, y);
+  ansi.print((float)battery->optionalMFGfunction4()/1000);
+  ansi.print("V, ");
+  ansi.print((float)battery->optionalMFGfunction3()/1000);
+  ansi.print("V, ");
+  ansi.print((float)battery->optionalMFGfunction2()/1000);
+  ansi.print("V, ");
+  ansi.print((float)battery->optionalMFGfunction1()/1000);
+  ansi.println("V.");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[battery->i2ccode]);
+}
+
 void display_sbscommands(bq20z9xxcommands* battery) {
-    uint16_t x, y; // x and y position
-    battery->batteryMode(); // We need to get the Battery Mode first to determine output ranges further on
-    ansi.print("remainingCapacityAlarm (0x01):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->remainingCapacityAlarm());
-    ansi.print(battery->batterymode.bits.capacity_mode ? " 10mWh" : "mAh");
-    ansi.gotoXY(TAB3, y);
-    ansi.print(I2Ccode[battery->i2ccode]);
-
-    ansi.print("remainingTimeAlarm (0x02):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->remainingTimeAlarm());
-    ansi.print(" minutes");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("BatteryMode (0x03):"); 
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    printBits(battery->batterymode.raw);
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-    ansi.gotoXY(TAB1, y+1);
-    ansi.print("Internal Charge Controller:");
-    ansi.gotoXY(TAB2, y+1);
-    ansi.println(battery->batterymode.bits.internal_charge_controller ? "Supported" : "Not Supported");
-    ansi.gotoXY(TAB1, y+2);
-    ansi.print("Primary Battery Support:");
-    ansi.gotoXY(TAB2, y+2);
-    ansi.println(battery->batterymode.bits.primary_battery_support ? "Supported" : "Not Supported");
-    ansi.gotoXY(TAB1, y+3);
-    ansi.print("Condition Flag:");
-    ansi.gotoXY(TAB2, y+3);
-    ansi.println(battery->batterymode.bits.condition_flag ? "Cycle Requested" : "Battery OK");
-    ansi.gotoXY(TAB1, y+4);
-    ansi.print("Internal Charge Controller:");
-    ansi.gotoXY(TAB2, y+4);
-    ansi.println(battery->batterymode.bits.charge_controller_enabled ? "Enabled" : "Disabled");
-    ansi.gotoXY(TAB1, y+5);
-    ansi.print("Primary Battery:");
-    ansi.gotoXY(TAB2, y+5);
-    ansi.println(battery->batterymode.bits.primary_battery ? "Operating in primary role" : "Operating in secondary role");
-    ansi.gotoXY(TAB1, y+6);
-    ansi.print("Alarm Mode:");
-    ansi.gotoXY(TAB2, y+6);
-    ansi.println(battery->batterymode.bits.alarm_mode ? "Broadcasts disabled " : "Broadcasts enabled ");
-    ansi.gotoXY(TAB1, y+7);
-    ansi.print("Charger Mode:");
-    ansi.gotoXY(TAB2, y+7);
-    ansi.println(battery->batterymode.bits.charger_mode ? "Broadcasts disabled " : "Broadcasts enabled ");
-    ansi.gotoXY(TAB1, y+8);
-    ansi.print("Capacity Mode:");
-    ansi.gotoXY(TAB2, y+8);
-    ansi.println(battery->batterymode.bits.capacity_mode ? "In 10mW or 10mWh" : "In mA or mAh");
-
-    ansi.print("At Rate (0x04):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->atRate());
-    ansi.print(battery->batterymode.bits.capacity_mode ? "x10mW" : "mA");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("At Rate Time To Full (0x05):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->atRateTimeToFull());
-    ansi.print(" minutes");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("At Rate Time To Empty (0x06):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->atRateTimeToEmpty());
-    ansi.print(" minutes");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("At Rate OK (0x07):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->atRateOK() ? "true" : "false");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Temperature (0x08):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->temperature(), 1);
-    ansi.print("K, ");
-    ansi.print(battery->temperatureC(), 1);
-    ansi.print("C, ");
-    ansi.print(battery->temperatureF());
-    ansi.println("F.");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Voltage (0x09):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    float voltage = (float)battery->voltage()/1000;
-    ansi.print(voltage);
-    ansi.print("V");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Current (0x0a):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->current());
-    ansi.print("mA");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Average Current (0x0b):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->averageCurrent());
-    ansi.print("mA");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Max Error (0x0c):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->maxError());
-    ansi.print("%");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Relative State Of Charge (0x0d):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->relativeStateOfCharge());
-    ansi.print("% of Full Capacity");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Absolute State Of Charge (0x0e):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->absoluteStateOfCharge());
-    ansi.print("% of Full Capacity");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Remaining Capacity (0x0f):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->remainingCapacity());
-    ansi.print(battery->batterymode.bits.capacity_mode ? "x10mWh" : " mAh");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Full Capacity (0x10):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->fullCapacity());
-    ansi.print(battery->batterymode.bits.capacity_mode ? "x10mWh" : " mAh");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Run Time To Empty (0x11):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->runTimeToEmpty());
-    ansi.print(" minutes");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Average Time To Empty (0x12):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->avgTimeToEmpty());
-    ansi.print(" minutes");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Average Time To Full (0x13):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->avgTimeToFull());
-    ansi.print(" minutes");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Desired Charging Current (0x14):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->chargingCurrent());
-    ansi.print("mA");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Desired Charging Voltage (0x15):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->chargingVoltage());
-    ansi.print("mV");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Battery Status (0x16):");
-    ansi.readCursorPosition(x, y);
-    battery->batteryStatus();
-    ansi.gotoXY(TAB2, y);
-    printBits(battery->batterystatus.raw);
-    ansi.gotoXY(TAB3, y);
-    ansi.print(I2Ccode[battery->i2ccode] + " " + errorcodes[battery->batterystatus.bits.error_codes]);
-    ansi.gotoXY(TAB1, y+1);
-    ansi.print("Fully Discharged:");
-    ansi.gotoXY(TAB2, y+1);
-    ansi.print(battery->batterystatus.bits.fully_discharged ? "True" : "False");
-    ansi.gotoXY(TAB1, y+2);
-    ansi.print("Fully Charged:");
-    ansi.gotoXY(TAB2, y+2);
-    ansi.print(battery->batterystatus.bits.fully_charged ? "True" : "False");
-    ansi.gotoXY(TAB1, y+3);
-    ansi.print("Discharging:");
-    ansi.gotoXY(TAB2, y+3);
-    ansi.print(battery->batterystatus.bits.discharging ? "True" : "False");
-    ansi.gotoXY(TAB1, y+4);
-    ansi.print("Initialized:");
-    ansi.gotoXY(TAB2, y+4);
-    ansi.print(battery->batterystatus.bits.initialized ? "Calibrated" : "Calibrating");
-    ansi.gotoXY(TAB1, y+5);
-    ansi.print("Remaining Time Alarm:");
-    ansi.gotoXY(TAB2, y+5);
-    ansi.print(battery->batterystatus.bits.rem_time_alarm ? "Set" : "Not set");
-    ansi.gotoXY(TAB1, y+6);
-    ansi.print("Remaining Capacity Alarm:");
-    ansi.gotoXY(TAB2, y+6);
-    ansi.print(battery->batterystatus.bits.rem_capacity_alarm ? "Set" : "Not set");
-    ansi.gotoXY(TAB1, y+7);
-    ansi.print("Terminate Discharge Alarm:");
-    ansi.gotoXY(TAB2, y+7);
-    ansi.print(battery->batterystatus.bits.term_discharge_alarm ? "Capacity depleted" : "Discharge not detected");
-    ansi.gotoXY(TAB1, y+8);
-    ansi.print("Over Temperature Alarm:");
-    ansi.gotoXY(TAB2, y+8);
-    ansi.print(battery->batterystatus.bits.over_temp_alarm ? "Above limit" : "Within acceptable range");
-    ansi.gotoXY(TAB1, y+9);
-    ansi.print("Terminate Charge Alarm:");
-    ansi.gotoXY(TAB2, y+9);
-    ansi.print(battery->batterystatus.bits.term_charge_alarm ? "Suspend charging" : "No charging, alarm cleared");
-    ansi.gotoXY(TAB1, y+10);    
-    ansi.print("Over Charged Alarm:");
-    ansi.gotoXY(TAB2, y+10);
-    ansi.println(battery->batterystatus.bits.over_charged_alarm ? "Battery fully charged" : "Cleared");
-
-    ansi.print("Cycle Count (0x17):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->cycleCount());
-    ansi.print(" times");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Design Capacity (0x18):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->designCapacity());
-    ansi.print(battery->batterymode.bits.capacity_mode ? "x10mWh" : " mAh");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-    ansi.print("Design Voltage (0x19):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    voltage = (float)battery->designVoltage()/1000;
-    ansi.print(voltage);
-    ansi.print("V");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Protocol (0x1a):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->specificationInfo());
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Manufacture Date (0x1b): ");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->manufactureDay());
-    ansi.print("-");
-    ansi.print(battery->manufactureMonth());
-    ansi.print("-");
-    ansi.print(battery->manufactureYear());
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Serial Number (0x1c):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->serialNumber());
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Manufacturer Name (0x20):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->manufacturerName());
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-   
-    ansi.print("Device Name (0x21):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->deviceName());
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    ansi.print("Device Chemistry (0x22):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    ansi.print(battery->deviceChemistry());
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-
-    // Following functions are not part of the smart battery specification version 1.1
     
-    ansi.print("Voltage Cell 1 to 4 (0x3f - 0x3c):");
-    ansi.readCursorPosition(x, y);
-    ansi.gotoXY(TAB2, y);
-    voltage = (float)battery->optionalMFGfunction4()/1000;
-    ansi.print(voltage);
-    ansi.print("V, ");
-    voltage = (float)battery->optionalMFGfunction3()/1000;
-    ansi.print(voltage);
-    ansi.print("V, ");
-    voltage = (float)battery->optionalMFGfunction2()/1000;
-    ansi.print(voltage);
-    ansi.print("V, ");
-    voltage = (float)battery->optionalMFGfunction1()/1000;
-    ansi.print(voltage);
-    ansi.println("V.");
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
+
 }
 
 

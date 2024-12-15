@@ -2,53 +2,43 @@
 
 smbuscommands::smbuscommands(uint8_t address) {
     batteryAddress = address;
-    commands_info[0x00].name = "ManufacturerAccess()";
-    commands_info[0x00].monitor_group = DEVICEINFO;
-//    commands_info[0x00].f16 = manufacturerAccess;
-
-    commands_info[0x01].name = "RemainingCapacityAlarm()";
-    commands_info[0x01].monitor_group = DEVICEINFO;
-//    commands_info[0x01].f16 = remainingCapacityAlarm;
-  /*
-  command RemainingCapacityAlarm {"", 0x01, DEVICEINFO}; 
-  command RemainingTimeAlarm {"RemainingTimeAlarm()", 0x02, DEVICEINFO}; 
-  command BatteryMode {"BatteryMode()", 0x03, STATUSBITS}; 
-  command AtRate {"AtRate()", 0x04, ATRATES};
-  command AtRateTimeToFull {"AtRateTimeToFull()", 0x05, ATRATES};
-  command AtRateTimeToEmpty {"AtRateTimeToEmpty()", 0x06, ATRATES};
-  command AtRateOK {"AtRateOK()", 0x07, ATRATES};
-  command Temperature {"Temperature()", 0x08, USAGEINFO};
-  command Voltage {"Voltage()", 0x09, USAGEINFO};
-  command Current {"Current()", 0x0a, USAGEINFO};
-  command AverageCurrent {"AverageCurrent()", 0x0b, USAGEINFO};
-  command MaxError {"MaxError()", 0x0c, USAGEINFO};
-  command RelativeStateOfCharge {"RelativeStateOfCharge()", 0x0d, COMPUTEDINFO};
-  command AbsoluteStateOfCharge {"AbsoluteStateOfCharge()", 0x0e, COMPUTEDINFO};
-  command RemainingCapacity {"RemainingCapacity()", 0x0f, USAGEINFO};
-  command FullChargeCapacity {"FullChargeCapacity() ", 0x10, USAGEINFO};
-  command RunTimeToEmpty {"RunTimeToEmpty()", 0x11, COMPUTEDINFO};
-  command AverageTimeToEmpty {"AverageTimeToEmpty()", 0x12, COMPUTEDINFO};
-  command AverageTimeToFull {"AverageTimeToFull()", 0x13, COMPUTEDINFO};
-  command ChargingCurrent{"ChargingCurrent()", 0x14, USAGEINFO};
-  command ChargingVoltage {"ChargingVoltage()", 0x15, USAGEINFO};
-  command BatteryStatus {"BatteryStatus()", 0x16, STATUSBITS };
-
-  command CycleCount {"CycleCount()", 0x17, USAGEINFO};
-  command DesignCapacity {"DesignCapacity()", 0x18, DEVICEINFO};
-  command DesignVoltage {"DesignVoltage()", 0x19, DEVICEINFO};
-  command SpecificationInfo {"SpecificationInfo()", 0x1a, DEVICEINFO};
-  command ManufactureDate {"ManufactureDate()", 0x1b, DEVICEINFO};
-  command SerialNumber {"SerialNumber()", 0x1c, DEVICEINFO};
-  command ManufacturerName {"ManufacturerName()", 0x20, DEVICEINFO};
-  command DeviceName {"DeviceName()", 0x21, DEVICEINFO};
-  command DeviceChemistry {"DeviceChemistry()", 0x22, DEVICEINFO};
-  command OptionalMfgFunction4 {"OptionalMfgFunction4)", 0x3c, DEVICEINFO};
-  command OptionalMfgFunction3 {"OptionalMfgFunction3)", 0x3d, DEVICEINFO};
-  command OptionalMfgFunction2 {"OptionalMfgFunction2)", 0x3e, DEVICEINFO};
-  command OptionalMfgFunction1 {"OptionalMfgFunction1)", 0x3f, DEVICEINFO};
-};
-
-*/
+// list of the different SMB commands, including function pointers to these funtions. This to be able to call them via user input
+    info.push_back({0x00, &smbuscommands::manufacturerAccess, DEVICEINFO, "ManufacturerAccess()"});
+    info.push_back({0x01, &smbuscommands::remainingCapacityAlarm, DEVICEINFO, "remainingCapacityAlarm()"});
+    info.push_back({0x02, &smbuscommands::remainingTimeAlarm, DEVICEINFO, "remainingTimeAlarm()"});
+    info.push_back({0x03, &smbuscommands::batteryMode, STATUSBITS, "BatteryMode()"});
+    info.push_back({0x04, &smbuscommands::atRate, ATRATES, "atRate()"});
+    info.push_back({0x05, &smbuscommands::atRateTimeToFull, ATRATES, "atRateTimeToFull()"});
+    info.push_back({0x06, &smbuscommands::atRateTimeToEmpty, ATRATES, "atRateTimeToEmpty()"});
+    info.push_back({0x07, &smbuscommands::atRateOK, ATRATES, "atRateOK()"});
+    info.push_back({0x08, &smbuscommands::temperature, USAGEINFO, "temperature()"});
+    info.push_back({0x09, &smbuscommands::voltage, USAGEINFO, "voltage()"});
+    info.push_back({0x0a, &smbuscommands::current, USAGEINFO, "current()"});
+    info.push_back({0x0b, &smbuscommands::averageCurrent, USAGEINFO, "averageCurrent()"});
+    info.push_back({0x0c, &smbuscommands::maxError, USAGEINFO, "maxError()"});
+    info.push_back({0x0d, &smbuscommands::relativeStateOfCharge, COMPUTEDINFO, "relativeStateOfCharge()"});
+    info.push_back({0x0e, &smbuscommands::absoluteStateOfCharge, COMPUTEDINFO, "absoluteStateOfCharge()"});
+    info.push_back({0x0f, &smbuscommands::remainingCapacity, USAGEINFO, "remainingCapacity()"});
+    info.push_back({0x10, &smbuscommands::fullCapacity, USAGEINFO, "fullCapacity()"});
+    info.push_back({0x11, &smbuscommands::runTimeToEmpty, COMPUTEDINFO, "runTimeToEmpty()"});
+    info.push_back({0x12, &smbuscommands::avgTimeToEmpty, COMPUTEDINFO, "avgTimeToEmpty()"});
+    info.push_back({0x13, &smbuscommands::avgTimeToFull, COMPUTEDINFO, "avgTimeToFull()"});
+    info.push_back({0x14, &smbuscommands::chargingCurrent, USAGEINFO, "chargingCurrent()"});
+    info.push_back({0x15, &smbuscommands::chargingVoltage, USAGEINFO, "chargingVoltage()"});
+    info.push_back({0x16, &smbuscommands::batteryStatus, STATUSBITS, "batteryStatus()"});
+    info.push_back({0x17, &smbuscommands::cycleCount,  USAGEINFO, "cycleCount()"});
+    info.push_back({0x18, &smbuscommands::designCapacity, DEVICEINFO, "designCapacity()"});
+    info.push_back({0x19, &smbuscommands::designVoltage, DEVICEINFO, "designVoltage()"});
+    info.push_back({0x1a, &smbuscommands::specificationInfo, DEVICEINFO, "specificationInfo()"});
+    info.push_back({0x1b, &smbuscommands::manufactureDate, DEVICEINFO, "manufactureDate()"});
+    info.push_back({0x1c, &smbuscommands::serialNumber, DEVICEINFO, "serialNumber()"});
+    info.push_back({0x20, &smbuscommands::manufacturerName, DEVICEINFO, "manufacturerName()"});
+    info.push_back({0x21, &smbuscommands::deviceName, DEVICEINFO, "deviceName()"});
+    info.push_back({0x22, &smbuscommands::deviceChemistry, DEVICEINFO, "deviceChemistry()"});
+    info.push_back({0x3c, &smbuscommands::optionalMFGfunction4, DEVICEINFO, "optionalMFGfunction4()"});
+    info.push_back({0x3d, &smbuscommands::optionalMFGfunction3, DEVICEINFO, "optionalMFGfunction3()"});
+    info.push_back({0x3e, &smbuscommands::optionalMFGfunction2, DEVICEINFO, "optionalMFGfunction2()"});
+    info.push_back({0x3f, &smbuscommands::optionalMFGfunction1, DEVICEINFO, "optionalMFGfunction1()"});
 }
 
 int16_t smbuscommands::readRegister(uint8_t reg) {
