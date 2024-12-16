@@ -14,6 +14,8 @@
 #include <string.h>
 #include "../SMB/SMBCommands.h"
 
+#define BQICTYPE bq20z9xx
+
 #define UNSEALA                     0x0414 /**< Unseal Key a */
 #define UNSEALB                     0x3672 /**< Unseal Key b */
 #define FULLACCESSA                 0xffff
@@ -42,9 +44,9 @@
  * @class command
  * @brief Extended commands pecific for the BQ20Z9xx
  */
-class bq20z9xxcommands : public smbuscommands{
+class bq20z9xx : public smbuscommands{
   public:
-  bq20z9xxcommands(uint8_t address);
+  bq20z9xx(uint8_t address);
   uint16_t manufacturerAccessType(); // command 0x00 0x01
   uint16_t manufacturerAccessFirmware(); // command 0x00
   uint16_t manufacturerAccessHardware(); // command 0x00
@@ -88,7 +90,7 @@ class bq20z9xxcommands : public smbuscommands{
     } bytes;
   }manufacturerdata;
   // following are extended SBS commands which are only available when the bq20z90/bq20z95 device is in unsealed mode.
-  uint16_t FETControl(); // command 0x46
+  uint16_t fetControl(); // command 0x46
   /**
   * @union fetcontrol
   * @brief This read- or write-word function allows direct control of the FETs for test purposes.
@@ -105,7 +107,7 @@ class bq20z9xxcommands : public smbuscommands{
     } bits;
   }fetcontrol;
   uint16_t stateOfHealth(); // command 0x4f
-  uint16_t Safetyalert(); // command 0x50
+  uint16_t safetyAlert(); // command 0x50
   /**
  * @union safetyalert
  * @brief A struct to hold the flags of the pending safety issues register.
@@ -131,7 +133,7 @@ class bq20z9xxcommands : public smbuscommands{
       uint16_t otd  : 1;          /**< Discharge overtemperature alert. */
     } bits;
   }safetyalert;
-  uint16_t Safetystatus();        // command 0x51
+  uint16_t safetyStatus();        // command 0x51
   /**
   * @union safetystatus
   * @brief A struct to hold the flags of the 1st level safety features register.
@@ -157,7 +159,7 @@ class bq20z9xxcommands : public smbuscommands{
       uint16_t otd  : 1;          /**< Discharge overtemperature condition. */
     } bits;
   }safetystatus;
-  uint16_t PFalert(); // command 0x52
+  uint16_t pfAlert(); // command 0x52
   /**
    * @union pfalert
    * @brief A struct to hold the flags of the pending safety issues register.
@@ -183,7 +185,7 @@ class bq20z9xxcommands : public smbuscommands{
       uint16_t fbf   : 1;         /**< Fuse Blow Failure alert. */
     } bits;
   }pfalert;
-  uint16_t PFstatus(); // command 0x53
+  uint16_t pfStatus(); // command 0x53
   /**
    * @union pfstatus
    * @brief A struct to hold the permanent failure status register flags.
@@ -210,7 +212,7 @@ class bq20z9xxcommands : public smbuscommands{
       uint16_t fbf   : 1;         /**< Fuse Blow Failure. */
     } bits;
   }pfstatus;
-  uint16_t Operationstatus();     // command 0x54
+  uint16_t operationStatus();     // command 0x54
   /**
    * @union operationstatus
    * @brief A struct to hold the operation status flags.
@@ -238,31 +240,11 @@ class bq20z9xxcommands : public smbuscommands{
     } bits;
   }operationstatus;
   uint32_t unsealKey();           // command 0x60
+
+  std::vector<Info>bq20z9xx_info;
+
   private:
 };
-
-/*
-  command DeviceType {"DeviceType()", 0x00, 0x0001, DEVICEINFO};
-  command FirmwareVersion {"FirmwareVersion()", 0x00, 0x0002, DEVICEINFO};
-  command HardwareVersion {"HardwareVersion()", 0x00, 0x0003, DEVICEINFO};
-  command ManufacturerStatus {"ManufacturerStatus()", 0x00, 0x0006, DEVICEINFO};
-  command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
-  command Shutdown {"Shutdown()", 0x00, 0x0010, SET}; // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
-  command Sleep {"Sleep()", 0x00, 0x0011, SET}; // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
-  command SealDevice {"SealDevice()", 0x00, 0x0020, SET}; 
-  command PermanentFailClear {"PermanentFailClear(PFKey)", 0x00, 0x0000, SET}; 
-  command UnsealDevice {"UnsealDevice()", 0x00, 0x0000, SET}; Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
-  This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the UnSealKey first followed by the 2nd word of the UnSealKey.
-  If the command fails 4 seconds must pass before the command can be reissued.
-  command FullAccessDevice {"FullAccessDevice()", 0x00, 0x0000, SET}; 
-  command FETControl {"FETControl()", 0x46, 0x0000, SET};
-    command StateOfHealth {"StateOfHealth()", 0x4f, 0x0000, DEVICEINFO};
-  command SafetyAlert {"SafetyAlert()", 0x50, 0x0000, DEVICEINFO};
-    command PFAlert {"PFAlert()", 0x52, 0x0000, DEVICEINFO};  
-  command PFStatus {"PFStatus()", 0x53, 0x0000, DEVICEINFO};
-  command OperationStatus {"OperationStatus()", 0x54, 0x0000, DEVICEINFO};
-  command UnSealKey {"UnSealKey()", 0x60, 0x0000, SET};
-*/
 
 /**
  * @section statuscodes

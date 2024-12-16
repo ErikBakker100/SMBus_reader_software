@@ -1,38 +1,18 @@
 #include "display.hpp"
 #include <bitset>
 
-void displayMainmenu() {
-    ansi.clearScreen();
-    ansi.println("1 = Menu,                   This menu");
-    ansi.println("2 = Search address,         Find address, use 2 x x for start and end address.");
-    ansi.println("3 = Standard SBS commands,  Reads Registers as defined in rev 1.1 of the smart battery data specification.");
-    ansi.println("4 = IC specific commands,   ");
-    ansi.println("5 = Unseal Battery,         ");
-    ansi.println("6 = Seal Battery,           ");
-    ansi.println("7 = Clear Permanent Failure ");
-    ansi.println("8 = Specify Command         Use 8 x for command, x can be name or reg, use 8 x x for range in hex.");
+
+void displaymanufacturerAccess(bq20z9xx* battery) {
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("manufacturerAccess (0x00):");
+  ansi.gotoXY(TAB2, y);
+  ansi.print(battery->manufacturerAccess(), HEX);
+  ansi.gotoXY(TAB3, y);
+  ansi.print(I2Ccode[battery->i2ccode]);
 }
 
-void displaySmallmenu() {
-    ansi.clearScreen();
-    ansi.println("1=Menu, 2=Search, 3=Standard, 4=Extended, 5=Unseal, 6=Seal, 7=Clear PF, 8=Specify Command");
-}
-
-void displayBatteryAddress(bq20z9xxcommands* battery) {
-    uint16_t x, y; // x and y position
-    ansi.readCursorPosition(x, y);
-    ansi.print("Batteryaddress set to: ");
-    ansi.gotoXY(TAB2, y);
-    ansi.print("0x");
-    ansi.print(battery->address() < 0x10 ? "0": "");
-    ansi.println(battery->address(), HEX);
-}
-
-void displaymanufacturerAccess(bq20z9xxcommands* battery) {
-
-}
-
-void displayremainingCapacityAlarm(bq20z9xxcommands* battery) {
+void displayremainingCapacityAlarm(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("remainingCapacityAlarm (0x01):");
@@ -44,7 +24,7 @@ void displayremainingCapacityAlarm(bq20z9xxcommands* battery) {
   ansi.print(I2Ccode[battery->i2ccode]);
 }
 
-void displayremainingTimeAlarm(bq20z9xxcommands* battery) {
+void displayremainingTimeAlarm(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("remainingTimeAlarm (0x02):");
@@ -55,7 +35,7 @@ void displayremainingTimeAlarm(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaybatteryMode(bq20z9xxcommands* battery) {
+void displaybatteryMode(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("BatteryMode (0x03):"); 
@@ -98,7 +78,7 @@ void displaybatteryMode(bq20z9xxcommands* battery) {
   ansi.println(battery->batterymode.bits.capacity_mode ? "In 10mW or 10mWh" : "In mA or mAh");
 }
 
-void displayatRate(bq20z9xxcommands* battery) {
+void displayatRate(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("At Rate (0x04):");
@@ -111,7 +91,7 @@ void displayatRate(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayatRateTimeToFull(bq20z9xxcommands* battery) {
+void displayatRateTimeToFull(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("At Rate Time To Full (0x05):");
@@ -123,7 +103,7 @@ void displayatRateTimeToFull(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayatRateTimeToEmpty(bq20z9xxcommands* battery) {
+void displayatRateTimeToEmpty(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("At Rate Time To Empty (0x06):");
@@ -135,7 +115,7 @@ void displayatRateTimeToEmpty(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayatRateOK(bq20z9xxcommands* battery) {
+void displayatRateOK(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("At Rate OK (0x07):");
@@ -146,7 +126,7 @@ void displayatRateOK(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaytemperature(bq20z9xxcommands* battery){
+void displaytemperature(bq20z9xx* battery){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Temperature (0x08):");
@@ -162,7 +142,7 @@ void displaytemperature(bq20z9xxcommands* battery){
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayvoltage(bq20z9xxcommands* battery) {
+void displayvoltage(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Voltage (0x09):");
@@ -175,7 +155,7 @@ void displayvoltage(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaycurrent(bq20z9xxcommands* battery) {
+void displaycurrent(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Current (0x0a):");
@@ -187,7 +167,7 @@ void displaycurrent(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayaverageCurrent(bq20z9xxcommands* battery) {
+void displayaverageCurrent(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Average Current (0x0b):");
@@ -199,7 +179,7 @@ void displayaverageCurrent(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaymaxError(bq20z9xxcommands* battery) {
+void displaymaxError(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Max Error (0x0c):");
@@ -211,7 +191,7 @@ void displaymaxError(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayrelativeStateOfCharge(bq20z9xxcommands* battery) {
+void displayrelativeStateOfCharge(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Relative State Of Charge (0x0d):");
@@ -223,7 +203,7 @@ void displayrelativeStateOfCharge(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayabsoluteStateOfCharge(bq20z9xxcommands* battery) {
+void displayabsoluteStateOfCharge(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Absolute State Of Charge (0x0e):");
@@ -235,7 +215,7 @@ void displayabsoluteStateOfCharge(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayremainingCapacity(bq20z9xxcommands* battery) {
+void displayremainingCapacity(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Remaining Capacity (0x0f):");
@@ -248,7 +228,7 @@ void displayremainingCapacity(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayfullCapacity(bq20z9xxcommands* battery) {
+void displayfullCapacity(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Full Capacity (0x10):");
@@ -261,7 +241,7 @@ void displayfullCapacity(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayrunTimeToEmpty(bq20z9xxcommands* battery) {
+void displayrunTimeToEmpty(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Run Time To Empty (0x11):");
@@ -273,7 +253,7 @@ void displayrunTimeToEmpty(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayavgTimeToEmpty(bq20z9xxcommands* battery) {
+void displayavgTimeToEmpty(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Average Time To Empty (0x12):");
@@ -285,7 +265,7 @@ void displayavgTimeToEmpty(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayavgTimeToFull(bq20z9xxcommands* battery) {
+void displayavgTimeToFull(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Average Time To Full (0x13):");
@@ -297,7 +277,7 @@ void displayavgTimeToFull(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaychargingCurrent(bq20z9xxcommands* battery) {
+void displaychargingCurrent(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Desired Charging Current (0x14):");
@@ -309,7 +289,7 @@ void displaychargingCurrent(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaychargingVoltage(bq20z9xxcommands* battery) {
+void displaychargingVoltage(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Desired Charging Voltage (0x15):");
@@ -321,7 +301,7 @@ void displaychargingVoltage(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaybatteryStatus(bq20z9xxcommands* battery) {
+void displaybatteryStatus(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Battery Status (0x16):");
@@ -373,7 +353,7 @@ void displaybatteryStatus(bq20z9xxcommands* battery) {
   ansi.println(battery->batterystatus.bits.over_charged_alarm ? "Battery fully charged" : "Cleared");
 }
 
-void displaycycleCount(bq20z9xxcommands* battery) {
+void displaycycleCount(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Cycle Count (0x17):");
@@ -385,7 +365,7 @@ void displaycycleCount(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaydesignCapacity(bq20z9xxcommands* battery) {
+void displaydesignCapacity(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Design Capacity (0x18):");
@@ -397,7 +377,7 @@ void displaydesignCapacity(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaydesignVoltage(bq20z9xxcommands* battery) {
+void displaydesignVoltage(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Design Voltage (0x19):");
@@ -409,7 +389,7 @@ void displaydesignVoltage(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayspecificationInfo(bq20z9xxcommands* battery) {
+void displayspecificationInfo(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Protocol (0x1a):");
@@ -420,7 +400,7 @@ void displayspecificationInfo(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaymanufactureDate(bq20z9xxcommands* battery) {
+void displaymanufactureDate(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Manufacture Date (0x1b): ");
@@ -435,7 +415,7 @@ void displaymanufactureDate(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displayserialNumber(bq20z9xxcommands* battery) {
+void displayserialNumber(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Serial Number (0x1c):");
@@ -446,7 +426,7 @@ void displayserialNumber(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaymanufacturerName(bq20z9xxcommands* battery) {
+void displaymanufacturerName(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Manufacturer Name (0x20):");
@@ -457,7 +437,7 @@ void displaymanufacturerName(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaydeviceName(bq20z9xxcommands* battery) {
+void displaydeviceName(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Device Name (0x21):");
@@ -468,7 +448,7 @@ void displaydeviceName(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void displaydeviceChemistry(bq20z9xxcommands* battery) {
+void displaydeviceChemistry(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Device Chemistry (0x22):");
@@ -480,7 +460,7 @@ void displaydeviceChemistry(bq20z9xxcommands* battery) {
 }
 
 // Following functions are not part of the smart battery specification version 1.1
-void displayoptionalMFGfunctions(bq20z9xxcommands* battery) {
+void displayoptionalMFGfunctions(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Voltage Cell 1 to 4 (0x3f - 0x3c):");
@@ -498,13 +478,10 @@ void displayoptionalMFGfunctions(bq20z9xxcommands* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 }
 
-void display_sbscommands(bq20z9xxcommands* battery) {
-    
-
-}
 
 
-void display_bq20z9xx(bq20z9xxcommands* battery) {
+
+void display_bq20z9xx(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessType (0x00 -> 0x0001):");
@@ -603,7 +580,7 @@ void display_bq20z9xx(bq20z9xxcommands* battery) {
   ansi.print("FETControl (0x46):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
-  battery->FETControl();
+  battery->fetControl();
   if (battery->i2ccode) {
     ansi.print(I2Ccode[battery->i2ccode]);
     ansi.println(", is device unsealed ?");
@@ -637,7 +614,7 @@ void display_bq20z9xx(bq20z9xxcommands* battery) {
   ansi.print("Safety Alert (0x50):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
-  battery->Safetyalert();
+  battery->safetyAlert();
   if (battery->i2ccode) {
     ansi.print(I2Ccode[battery->i2ccode]);
     ansi.println(", is device unsealed ?");
@@ -650,7 +627,7 @@ void display_bq20z9xx(bq20z9xxcommands* battery) {
   ansi.print("Safety Status (0x51):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
-  battery->Safetystatus();
+  battery->safetyStatus();
   if (battery->i2ccode) {
     ansi.print(I2Ccode[battery->i2ccode]);
     ansi.println(", is device unsealed ?");
@@ -663,7 +640,7 @@ void display_bq20z9xx(bq20z9xxcommands* battery) {
   ansi.print("PF Alert (0x52):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
-  battery->PFalert();
+  battery->pfAlert();
   if (battery->i2ccode) {
     ansi.print(I2Ccode[battery->i2ccode]);
     ansi.println(", is device unsealed ?");
@@ -676,7 +653,7 @@ void display_bq20z9xx(bq20z9xxcommands* battery) {
   ansi.print("PF Status (0x53):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
-  battery->PFstatus();
+  battery->pfStatus();
   if (battery->i2ccode) {
     ansi.print(I2Ccode[battery->i2ccode]);
     ansi.println(", is device unsealed ?");
@@ -689,7 +666,7 @@ void display_bq20z9xx(bq20z9xxcommands* battery) {
   ansi.print("Operation Status (0x54):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
-  battery->Operationstatus();
+  battery->operationStatus();
   if (battery->i2ccode) {
     ansi.print(I2Ccode[battery->i2ccode]);
     ansi.println(", is device unsealed ?");
@@ -700,7 +677,7 @@ void display_bq20z9xx(bq20z9xxcommands* battery) {
   }
 }
 
-void displaySealstatus(bq20z9xxcommands* battery) {
+void displaySealstatus(bq20z9xx* battery) {
   battery->batteryStatus();
   ansi.print(I2Ccode[battery->i2ccode]);
   ansi.println(" " + errorcodes[battery->batterystatus.bits.error_codes]);
@@ -708,7 +685,7 @@ void displaySealstatus(bq20z9xxcommands* battery) {
   ansi.println(battery->operationstatus.bits.fas?"full access mode enabled":"full access mode disabled");
 }
 
-void displayBatteryStatus(bq20z9xxcommands* battery) {
+void displayBatteryStatus(bq20z9xx* battery) {
     ansi.print("Battery Status (0x16):");
     uint16_t x, y;
     ansi.readCursorPosition(x, y);
@@ -719,6 +696,39 @@ void displayBatteryStatus(bq20z9xxcommands* battery) {
     ansi.println(I2Ccode[battery->i2ccode]);
     ansi.println(" " + errorcodes[battery->batterystatus.bits.error_codes]);
 }
+
+void displayMainmenu() {
+    ansi.clearScreen();
+    ansi.println("1 = Menu,                   This menu");
+    ansi.println("2 = Search address,         Find address, use 2 x x for start and end address.");
+    ansi.println("3 = Standard SBS commands,  Reads Registers as defined in rev 1.1 of the smart battery data specification.");
+    ansi.println("4 = IC specific commands,   ");
+    ansi.println("5 = Unseal Battery,         ");
+    ansi.println("6 = Seal Battery,           ");
+    ansi.println("7 = Clear Permanent Failure ");
+    ansi.println("8 = Specify Command         Use 8 x for command, x can be name or reg, use 8 x x for range in hex.");
+}
+
+void displaySmallmenu() {
+    ansi.clearScreen();
+    ansi.println("1=Menu, 2=Search, 3=Standard, 4=Extended, 5=Unseal, 6=Seal, 7=Clear PF, 8=Specify Command");
+}
+
+void displayBatteryAddress(bq20z9xx* battery) {
+    uint16_t x, y; // x and y position
+    ansi.readCursorPosition(x, y);
+    ansi.print("Batteryaddress set to: ");
+    ansi.gotoXY(TAB2, y);
+    ansi.print("0x");
+    ansi.print(battery->address() < 0x10 ? "0": "");
+    ansi.println(battery->address(), HEX);
+}
+
+void display_sbscommands(bq20z9xx* battery) {
+    
+
+}
+
 
 // prints 8-bit integer in this form: 0000 0000
 void printBits(uint8_t n) {

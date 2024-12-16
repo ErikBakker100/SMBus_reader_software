@@ -77,7 +77,7 @@ void scanState::enter(Command& command) {
         second = param.toInt();
         if (first <= second) address =i2cscan(first, second);
     } else address = i2cscan();
-    if (address > 0) command.battery = new bq20z9xxcommands(address);
+    if (address > 0) command.battery = new BQICTYPE(address);
     displayBatteryAddress(command.battery);
 }
 
@@ -98,7 +98,6 @@ void standardState::enter(Command& command) {
 
 void extendedState::enter(Command& command) {
     displaySmallmenu();
-//    display_bq20z9xx(battery);
 }
 
 // class unseal = 5

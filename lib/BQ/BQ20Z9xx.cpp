@@ -1,6 +1,30 @@
 #include "BQ20Z9xx.h"
 
-bq20z9xxcommands::bq20z9xxcommands(uint8_t address) : smbuscommands(address) {
+bq20z9xx::bq20z9xx(uint8_t address) : smbuscommands(address) {
+//  bq20z9xx_info.push_back({0x00, &smbuscommands::manufacturerAccessType, DEVICEINFO, "manufacturerAccessType()"});
+
+/*
+  command DeviceType {"DeviceType()", 0x00, 0x0001, DEVICEINFO};
+  command FirmwareVersion {"FirmwareVersion()", 0x00, 0x0002, DEVICEINFO};
+  command HardwareVersion {"HardwareVersion()", 0x00, 0x0003, DEVICEINFO};
+  command ManufacturerStatus {"ManufacturerStatus()", 0x00, 0x0006, DEVICEINFO};
+  command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
+  command Shutdown {"Shutdown()", 0x00, 0x0010, SET}; // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
+  command Sleep {"Sleep()", 0x00, 0x0011, SET}; // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
+  command SealDevice {"SealDevice()", 0x00, 0x0020, SET}; 
+  command PermanentFailClear {"PermanentFailClear(PFKey)", 0x00, 0x0000, SET}; 
+  command UnsealDevice {"UnsealDevice()", 0x00, 0x0000, SET}; Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
+  This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the UnSealKey first followed by the 2nd word of the UnSealKey.
+  If the command fails 4 seconds must pass before the command can be reissued.
+  command FullAccessDevice {"FullAccessDevice()", 0x00, 0x0000, SET}; 
+  command FETControl {"FETControl()", 0x46, 0x0000, SET};
+    command StateOfHealth {"StateOfHealth()", 0x4f, 0x0000, DEVICEINFO};
+  command SafetyAlert {"SafetyAlert()", 0x50, 0x0000, DEVICEINFO};
+    command PFAlert {"PFAlert()", 0x52, 0x0000, DEVICEINFO};  
+  command PFStatus {"PFStatus()", 0x53, 0x0000, DEVICEINFO};
+  command OperationStatus {"OperationStatus()", 0x54, 0x0000, DEVICEINFO};
+  command UnSealKey {"UnSealKey()", 0x60, 0x0000, SET};
+*/
 }
 
 /**
@@ -9,7 +33,7 @@ bq20z9xxcommands::bq20z9xxcommands(uint8_t address) : smbuscommands(address) {
  * • SBS:ManufacturerAccess(0x00)
  * @return uint16_t
  */
-uint16_t bq20z9xxcommands::manufacturerAccessType() {
+uint16_t bq20z9xx::manufacturerAccessType() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSTYPE);
   return readRegister(MANUFACTURERACCESS);
 }
@@ -21,7 +45,7 @@ uint16_t bq20z9xxcommands::manufacturerAccessType() {
  * • SBS:ManufacturerAccess(0x00)
  * @return uint16_t
  */
-uint16_t bq20z9xxcommands::manufacturerAccessFirmware() {
+uint16_t bq20z9xx::manufacturerAccessFirmware() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSFIRMWARE);
   return readRegister(MANUFACTURERACCESS);
 }
@@ -32,7 +56,7 @@ uint16_t bq20z9xxcommands::manufacturerAccessFirmware() {
  * • SBS:ManufacturerAccess(0x00)
  * @return uint16_t
  */
-uint16_t bq20z9xxcommands::manufacturerAccessHardware() {
+uint16_t bq20z9xx::manufacturerAccessHardware() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSHARDWARE);
   return readRegister(MANUFACTURERACCESS);
 }
@@ -44,7 +68,7 @@ uint16_t bq20z9xxcommands::manufacturerAccessHardware() {
  * • SBS:ManufacturerAccess(0x00)
  * @return uint16_t
  */
-uint16_t bq20z9xxcommands::manufacturerStatus() {
+uint16_t bq20z9xx::manufacturerStatus() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSTATUS);
   manufacturerstatus.raw = readRegister(MANUFACTURERACCESS);
   return manufacturerstatus.raw;
@@ -57,7 +81,7 @@ uint16_t bq20z9xxcommands::manufacturerStatus() {
  * • SBS:ManufacturerAccess(0x00)
  * @return 0
  */
-uint16_t bq20z9xxcommands::manufacturerAccessSeal() {
+uint16_t bq20z9xx::manufacturerAccessSeal() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSSEAL);
   return 0;
 }
@@ -77,7 +101,7 @@ uint16_t bq20z9xxcommands::manufacturerAccessSeal() {
  * @param void
  * @return 0
  */
-uint16_t bq20z9xxcommands::manufacturerAccessPermanentFailClear(uint16_t a, uint16_t b) {
+uint16_t bq20z9xx::manufacturerAccessPermanentFailClear(uint16_t a, uint16_t b) {
   writeRegister(MANUFACTURERACCESS, a);
   writeRegister(MANUFACTURERACCESS, b);
   return 0;
@@ -92,7 +116,7 @@ uint16_t bq20z9xxcommands::manufacturerAccessPermanentFailClear(uint16_t a, uint
  * • SBS:ManufacturerAccess(0x00)
  * @return 0
  */
-uint16_t bq20z9xxcommands::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b) {
+uint16_t bq20z9xx::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16_t UnSealKey_b) {
   writeRegister(MANUFACTURERACCESS, UnSealKey_a);
   writeRegister(MANUFACTURERACCESS, UnSealKey_b);
   return 0;
@@ -105,18 +129,18 @@ uint16_t bq20z9xxcommands::manufacturerAccessUnseal(uint16_t UnSealKey_a, uint16
  * • SBS:ManufacturerAccess(0x00)
  * @return 0
  */
-uint16_t bq20z9xxcommands::manufacturerAccessFullAccess(uint16_t Key_a, uint16_t Key_b) {
+uint16_t bq20z9xx::manufacturerAccessFullAccess(uint16_t Key_a, uint16_t Key_b) {
   writeRegister(MANUFACTURERACCESS, Key_a);
   writeRegister(MANUFACTURERACCESS, Key_b);
   return 0;
 }
 
 /**
- * @brief Get the data from the BQ20Z90xxx and fill a manufacturerdata union.
+ * @brief Get the data from the bq20z9xxx and fill a manufacturerdata union.
  * • SBS:manufacturerData(0x23)
  * @return char* 
  */
-char* bq20z9xxcommands::manufacturerData() {
+char* bq20z9xx::manufacturerData() {
   readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(manufacturerdata.raw), 15);
   manufacturerdata.raw[15] = '\0'; // Null-terminate the C-string
   return manufacturerdata.raw;
@@ -129,7 +153,7 @@ char* bq20z9xxcommands::manufacturerData() {
  * • SBS:FETControl(0x46)
  * @return void 
  */
-uint16_t bq20z9xxcommands::FETControl() {
+uint16_t bq20z9xx::fetControl() {
   fetcontrol.raw = readRegister(FETCONTROL);
   return fetcontrol.raw; 
 }
@@ -141,7 +165,7 @@ uint16_t bq20z9xxcommands::FETControl() {
  * • SBS:stateOfHealth(0x4f)
  * @return uint16_t 
  */
-uint16_t bq20z9xxcommands::stateOfHealth() {
+uint16_t bq20z9xx::stateOfHealth() {
   return readRegister(STATEOFHEALTH);
 }
 
@@ -153,7 +177,7 @@ uint16_t bq20z9xxcommands::stateOfHealth() {
  * • SBS:Safetyalert(0x50)
  * @return uint16_t 
  */
-uint16_t bq20z9xxcommands::Safetyalert() {
+uint16_t bq20z9xx::safetyAlert() {
   safetyalert.raw = readRegister(SAFETYALERT);
   return safetyalert.raw;
 }
@@ -164,7 +188,7 @@ uint16_t bq20z9xxcommands::Safetyalert() {
  * • SBS:Safetystatus(0x51)
  * @return uint16_t
  */
-uint16_t bq20z9xxcommands::Safetystatus() {
+uint16_t bq20z9xx::safetyStatus() {
   safetystatus.raw = readRegister(SAFETYSTATUS);
   return safetystatus.raw;
 }
@@ -176,7 +200,7 @@ uint16_t bq20z9xxcommands::Safetystatus() {
  * • SBS:PFalert(0x52)
  * @return uint16_t 
  */
-uint16_t bq20z9xxcommands::PFalert() {
+uint16_t bq20z9xx::pfAlert() {
   pfalert.raw = readRegister(PFALERT);
   return pfalert.raw;
 }
@@ -188,7 +212,7 @@ uint16_t bq20z9xxcommands::PFalert() {
  * • SBS:PFstatus(0x53)
  * @return uint16_t
  */
-uint16_t bq20z9xxcommands::PFstatus() {
+uint16_t bq20z9xx::pfStatus() {
   pfstatus.raw = readRegister(PFSTATUS);
   return pfstatus.raw;
 }
@@ -200,7 +224,7 @@ uint16_t bq20z9xxcommands::PFstatus() {
  * • SBS:Operationstatus(0x54)
  * @return uint16_t 
  */
-uint16_t bq20z9xxcommands::Operationstatus() {
+uint16_t bq20z9xx::operationStatus() {
   operationstatus.raw = readRegister(OPERATIONSTATUS);
   return operationstatus.raw;
 }
@@ -220,7 +244,7 @@ uint16_t bq20z9xxcommands::Operationstatus() {
  * @param void
  * @return uint32_t 
  */
-uint32_t bq20z9xxcommands::unsealKey() {
+uint32_t bq20z9xx::unsealKey() {
   uint8_t data[4]{0};
   readBlock(UNSEALKEY, data, 4);
   uint32_t key{0};

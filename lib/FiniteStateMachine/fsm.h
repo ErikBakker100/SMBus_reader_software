@@ -11,7 +11,7 @@ public:
     Command();
     virtual void handleInput(CmdBuffer<64>);
     virtual void update();
-    bq20z9xxcommands* battery {nullptr};
+    BQICTYPE* battery {nullptr};
 private:
     CommandState* state_;
 protected:

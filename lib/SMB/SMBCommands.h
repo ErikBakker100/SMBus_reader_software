@@ -59,12 +59,14 @@
 #define OPTIONALMFGFUNCTION1   0x3f
 
 class smbuscommands;
+template <class T>
+using myfunc = void(T::*)();
+
 using boolfunction = bool(smbuscommands::*)();
 using uint16function = uint16_t (smbuscommands::*)();
 using int16function = int16_t (smbuscommands::*)();
 using floatfunction = float (smbuscommands::*)();
 using charfunction = char* (smbuscommands::*)();
-using FunctionVariant = std::variant<boolfunction, uint16function, int16function, floatfunction, charfunction>;
 
 class smbuscommands : public smbus {
 public:
@@ -175,12 +177,6 @@ struct Info{
   Info(uint8_t r, uint8_t g, String n) : reg(r), monitor_group(g), name(n) {}  
 };
   std::vector<Info> info;
-
-//  uint16_t func1() { return 0;};
-
-//  using u16function = uint16_t (smbuscommands::*)();
-
-//  std::vector<u16function> fv = {&smbuscommands::func1};
 
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
