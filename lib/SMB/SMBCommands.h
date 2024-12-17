@@ -16,6 +16,7 @@
 #include "SMBus.h"
 #include <variant>
 #include <vector>
+#include <functional>
 
 #define MANUFACTURERACCESS     0X00
 #define REMAININGCAPACITYALARM 0x01
@@ -58,15 +59,25 @@
 #define OPTIONALMFGFUNCTION2   0x3e
 #define OPTIONALMFGFUNCTION1   0x3f
 
-class smbuscommands;
-template <class T>
-using myfunc = void(T::*)();
+// A variant to store different types of member function pointers
+template <typename T>
+using psmbcommand = std::variant<
+    bool(T::*)(),
+    uint16_t (T::*)(),
+    int16_t (T::*)(),
+    float (T::*)(),
+    char* (T::*)()
+>;
 
-using boolfunction = bool(smbuscommands::*)();
-using uint16function = uint16_t (smbuscommands::*)();
-using int16function = int16_t (smbuscommands::*)();
-using floatfunction = float (smbuscommands::*)();
-using charfunction = char* (smbuscommands::*)();
+template <typename T>
+struct Info {
+  uint8_t reg;
+  psmbcommand<T> commands; // Variant for different member function types
+  uint8_t monitor_group;
+  String name;
+
+//  Info(uint8_t r, psmbcommand pbf, uint8_t g, String n) : reg(r), p_boolfunction(pbf), monitor_group(g), name(n) {}
+};
 
 class smbuscommands : public smbus {
 public:
@@ -158,30 +169,13 @@ public:
   uint16_t optionalMFGfunction1();        // command 0x3f
   uint8_t address();
 
-struct Info{
-  uint8_t reg;
-  union {
-    boolfunction p_boolfunction;
-    uint16function p_uint16function;
-    int16function p_int16function;
-    floatfunction p_floatfunction;
-    charfunction p_charfunction;
-  };
-  uint8_t monitor_group;
-  String name;
-  Info(uint8_t r, boolfunction pbf, uint8_t g, String n) : reg(r), p_boolfunction(pbf), monitor_group(g), name(n) {}
-  Info(uint8_t r, uint16function pu16, uint8_t g, String n) : reg(r), p_uint16function(pu16), monitor_group(g), name(n) {}
-  Info(uint8_t r, int16function pi16, uint8_t g, String n) : reg(r), p_int16function(pi16), monitor_group(g), name(n) {}
-  Info(uint8_t r, floatfunction pf, uint8_t g, String n) : reg(r), p_floatfunction(pf), monitor_group(g), name(n) {}
-  Info(uint8_t r, charfunction pc, uint8_t g, String n) : reg(r), p_charfunction(pc), monitor_group(g), name(n) {}
-  Info(uint8_t r, uint8_t g, String n) : reg(r), monitor_group(g), name(n) {}  
-};
-  std::vector<Info> info;
-
+  std::vector<Info<smbuscommands>> info; // Vector of function structs
+  
+  protected:
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
   void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
-  private:
+
   uint8_t batteryAddress;
 };
 

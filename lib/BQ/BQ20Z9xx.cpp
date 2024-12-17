@@ -1,6 +1,7 @@
 #include "BQ20Z9xx.h"
 
 bq20z9xx::bq20z9xx(uint8_t address) : smbuscommands(address) {
+  info.push_back({static_cast<psmbcommand<smbuscommands>>(0x00, &bq20z9xx::manufacturerAccessType, DEVICEINFO, "manufacturerAccessType()")});
 //  bq20z9xx_info.push_back({0x00, &smbuscommands::manufacturerAccessType, DEVICEINFO, "manufacturerAccessType()"});
 
 /*

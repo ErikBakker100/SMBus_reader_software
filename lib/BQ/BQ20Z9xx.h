@@ -240,9 +240,6 @@ class bq20z9xx : public smbuscommands{
     } bits;
   }operationstatus;
   uint32_t unsealKey();           // command 0x60
-
-  std::vector<Info>bq20z9xx_info;
-
   private:
 };
 
