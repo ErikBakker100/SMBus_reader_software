@@ -47,10 +47,14 @@
 class bq20z9xx : public smbuscommands{
   public:
   bq20z9xx(uint8_t address);
-  uint16_t manufacturerAccessType(); // command 0x00 0x01
+  uint16_t manufacturerAccessType(); // command 0x00 0x0001
   uint16_t manufacturerAccessFirmware(); // command 0x00
   uint16_t manufacturerAccessHardware(); // command 0x00
-  uint16_t manufacturerStatus(); // command 0x00
+  uint16_t manufacturerAccessStatus(); // command 0x00
+  uint16_t manufacturerAccessChemistryID(); // command 0x00 0x0008
+  uint16_t manufacturerAccessShutdown(); // command 0x0010
+  uint16_t manufacturerAccessSleep(); // command 0x0011
+
   /**
   * @union manufacturerstatus
   * @brief 

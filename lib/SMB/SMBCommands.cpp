@@ -2,43 +2,43 @@
 
 smbuscommands::smbuscommands(uint8_t address) {
     batteryAddress = address;
-// list of the different SMB commands, including function pointers to these funtions. This to be able to call them via user input
-    info.push_back({0x00, &smbuscommands::manufacturerAccess, DEVICEINFO, "ManufacturerAccess()"});
-    info.push_back({0x01, &smbuscommands::remainingCapacityAlarm, DEVICEINFO, "remainingCapacityAlarm()"});
-    info.push_back({0x02, &smbuscommands::remainingTimeAlarm, DEVICEINFO, "remainingTimeAlarm()"});
-    info.push_back({0x03, &smbuscommands::batteryMode, STATUSBITS, "BatteryMode()"});
-    info.push_back({0x04, &smbuscommands::atRate, ATRATES, "atRate()"});
-    info.push_back({0x05, &smbuscommands::atRateTimeToFull, ATRATES, "atRateTimeToFull()"});
-    info.push_back({0x06, &smbuscommands::atRateTimeToEmpty, ATRATES, "atRateTimeToEmpty()"});
-    info.push_back({0x07, &smbuscommands::atRateOK, ATRATES, "atRateOK()"});
-    info.push_back({0x08, &smbuscommands::temperature, USAGEINFO, "temperature()"});
-    info.push_back({0x09, &smbuscommands::voltage, USAGEINFO, "voltage()"});
-    info.push_back({0x0a, &smbuscommands::current, USAGEINFO, "current()"});
-    info.push_back({0x0b, &smbuscommands::averageCurrent, USAGEINFO, "averageCurrent()"});
-    info.push_back({0x0c, &smbuscommands::maxError, USAGEINFO, "maxError()"});
-    info.push_back({0x0d, &smbuscommands::relativeStateOfCharge, COMPUTEDINFO, "relativeStateOfCharge()"});
-    info.push_back({0x0e, &smbuscommands::absoluteStateOfCharge, COMPUTEDINFO, "absoluteStateOfCharge()"});
-    info.push_back({0x0f, &smbuscommands::remainingCapacity, USAGEINFO, "remainingCapacity()"});
-    info.push_back({0x10, &smbuscommands::fullCapacity, USAGEINFO, "fullCapacity()"});
-    info.push_back({0x11, &smbuscommands::runTimeToEmpty, COMPUTEDINFO, "runTimeToEmpty()"});
-    info.push_back({0x12, &smbuscommands::avgTimeToEmpty, COMPUTEDINFO, "avgTimeToEmpty()"});
-    info.push_back({0x13, &smbuscommands::avgTimeToFull, COMPUTEDINFO, "avgTimeToFull()"});
-    info.push_back({0x14, &smbuscommands::chargingCurrent, USAGEINFO, "chargingCurrent()"});
-    info.push_back({0x15, &smbuscommands::chargingVoltage, USAGEINFO, "chargingVoltage()"});
-    info.push_back({0x16, &smbuscommands::batteryStatus, STATUSBITS, "batteryStatus()"});
-    info.push_back({0x17, &smbuscommands::cycleCount,  USAGEINFO, "cycleCount()"});
-    info.push_back({0x18, &smbuscommands::designCapacity, DEVICEINFO, "designCapacity()"});
-    info.push_back({0x19, &smbuscommands::designVoltage, DEVICEINFO, "designVoltage()"});
-    info.push_back({0x1a, &smbuscommands::specificationInfo, DEVICEINFO, "specificationInfo()"});
-    info.push_back({0x1b, &smbuscommands::manufactureDate, DEVICEINFO, "manufactureDate()"});
-    info.push_back({0x1c, &smbuscommands::serialNumber, DEVICEINFO, "serialNumber()"});
-    info.push_back({0x20, &smbuscommands::manufacturerName, DEVICEINFO, "manufacturerName()"});
-    info.push_back({0x21, &smbuscommands::deviceName, DEVICEINFO, "deviceName()"});
-    info.push_back({0x22, &smbuscommands::deviceChemistry, DEVICEINFO, "deviceChemistry()"});
-    info.push_back({0x3c, &smbuscommands::optionalMFGfunction4, DEVICEINFO, "optionalMFGfunction4()"});
-    info.push_back({0x3d, &smbuscommands::optionalMFGfunction3, DEVICEINFO, "optionalMFGfunction3()"});
-    info.push_back({0x3e, &smbuscommands::optionalMFGfunction2, DEVICEINFO, "optionalMFGfunction2()"});
-    info.push_back({0x3f, &smbuscommands::optionalMFGfunction1, DEVICEINFO, "optionalMFGfunction1()"});
+  // list of the different SMB commands, including function pointers to these funtions. This to be able to call them via user input
+    info.emplace_back([this]() {manufacturerAccess();}, 0x00, DEVICEINFO, "ManufacturerAccess()");
+    info.emplace_back([this]() {remainingCapacityAlarm();},0x01, DEVICEINFO, "remainingCapacityAlarm()");
+    info.emplace_back([this]() {remainingTimeAlarm();}, 0x02, DEVICEINFO, "remainingTimeAlarm()");
+    info.emplace_back([this]() {batteryMode();}, 0x03, STATUSBITS, "batteryMode()");
+    info.emplace_back([this]() {atRate();}, 0x04, ATRATES, "atRate()");
+    info.emplace_back([this]() {atRateTimeToFull();}, 0x05, ATRATES, "atRateTimeToFull()");
+    info.emplace_back([this]() {atRateTimeToEmpty();}, 0x06, ATRATES, "atRateTimeToEmpty()");
+    info.emplace_back([this]() {atRateOK();}, 0x07, ATRATES, "atRateOK()");
+    info.emplace_back([this]() {temperature();}, 0x08, USAGEINFO, "temperature()");
+    info.emplace_back([this]() {voltage();}, 0x09, USAGEINFO, "voltage()");
+    info.emplace_back([this]() {current();}, 0x0a, USAGEINFO, "current()");
+    info.emplace_back([this]() {averageCurrent();}, 0x0b, USAGEINFO, "averageCurrent()");
+    info.emplace_back([this]() {maxError();}, 0x0c, USAGEINFO, "maxError()");
+    info.emplace_back([this]() {relativeStateOfCharge();}, 0x0d, COMPUTEDINFO, "relativeStateOfCharge()");
+    info.emplace_back([this]() {absoluteStateOfCharge();}, 0x0e, COMPUTEDINFO, "absoluteStateOfCharge()");
+    info.emplace_back([this]() {remainingCapacity();}, 0x0f, USAGEINFO, "remainingCapacity()");
+    info.emplace_back([this]() {fullCapacity();}, 0x10, USAGEINFO, "fullCapacity()");
+    info.emplace_back([this]() {runTimeToEmpty();}, 0x11, COMPUTEDINFO, "runTimeToEmpty()");
+    info.emplace_back([this]() {avgTimeToEmpty();}, 0x12, COMPUTEDINFO, "avgTimeToEmpty()");
+    info.emplace_back([this]() {avgTimeToFull();}, 0x13, COMPUTEDINFO, "avgTimeToFull()");
+    info.emplace_back([this]() {chargingCurrent();}, 0x14, USAGEINFO, "chargingCurrent()");
+    info.emplace_back([this]() {chargingVoltage();}, 0x15, USAGEINFO, "chargingVoltage()");
+    info.emplace_back([this]() {batteryStatus();}, 0x16, STATUSBITS, "batteryStatus()");
+    info.emplace_back([this]() {cycleCount();}, 0x17, USAGEINFO, "cycleCount()");
+    info.emplace_back([this]() {designCapacity();}, 0x18, DEVICEINFO, "designCapacity()");
+    info.emplace_back([this]() {designVoltage();}, 0x19, DEVICEINFO, "designVoltage()");
+    info.emplace_back([this]() {specificationInfo();}, 0x1a, DEVICEINFO, "specificationInfo()");
+    info.emplace_back([this]() {manufactureDate();}, 0x1b, DEVICEINFO, "manufactureDate()");
+    info.emplace_back([this]() {serialNumber();}, 0x1c, DEVICEINFO, "serialNumber()");
+    info.emplace_back([this]() {manufacturerName();}, 0x20, DEVICEINFO, "manufacturerName()");
+    info.emplace_back([this]() {deviceName();}, 0x21, DEVICEINFO, "deviceName()");
+    info.emplace_back([this]() {deviceChemistry();}, 0x22, DEVICEINFO, "deviceChemistry()");
+    info.emplace_back([this]() {optionalMFGfunction4();}, 0x3c, DEVICEINFO, "optionalMFGfunction4()");
+    info.emplace_back([this]() {optionalMFGfunction3();}, 0x3d, DEVICEINFO, "optionalMFGfunction3()");
+    info.emplace_back([this]() {optionalMFGfunction2();}, 0x3e, DEVICEINFO, "optionalMFGfunction2()");
+    info.emplace_back([this]() {optionalMFGfunction1();}, 0x3f, DEVICEINFO, "optionalMFGfunction1()");
 }
 
 int16_t smbuscommands::readRegister(uint8_t reg) {

@@ -1,19 +1,21 @@
 #include "BQ20Z9xx.h"
 
 bq20z9xx::bq20z9xx(uint8_t address) : smbuscommands(address) {
-  info.push_back({static_cast<psmbcommand<smbuscommands>>(0x00, &bq20z9xx::manufacturerAccessType, DEVICEINFO, "manufacturerAccessType()")});
-//  bq20z9xx_info.push_back({0x00, &smbuscommands::manufacturerAccessType, DEVICEINFO, "manufacturerAccessType()"});
-
-/*
-  command DeviceType {"DeviceType()", 0x00, 0x0001, DEVICEINFO};
-  command FirmwareVersion {"FirmwareVersion()", 0x00, 0x0002, DEVICEINFO};
-  command HardwareVersion {"HardwareVersion()", 0x00, 0x0003, DEVICEINFO};
-  command ManufacturerStatus {"ManufacturerStatus()", 0x00, 0x0006, DEVICEINFO};
-  command ChemistryID {"ChemistryID()", 0x00, 0x0008, DEVICEINFO};
-  command Shutdown {"Shutdown()", 0x00, 0x0010, SET}; // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
-  command Sleep {"Sleep()", 0x00, 0x0011, SET}; // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
-  command SealDevice {"SealDevice()", 0x00, 0x0020, SET}; 
-  command PermanentFailClear {"PermanentFailClear(PFKey)", 0x00, 0x0000, SET}; 
+  info.emplace_back([this]() {manufacturerAccessType();}, 0x00, DEVICEINFO, "manufacturerAccessType()");
+  info.emplace_back([this]() {manufacturerAccessFirmware();}, 0x00, DEVICEINFO, "manufacturerAccessFirmware()");
+  info.emplace_back([this]() {manufacturerAccessHardware();}, 0x00, DEVICEINFO, "manufacturerAccessHardware()");
+  info.emplace_back([this]() {manufacturerAccessStatus();}, 0x00, DEVICEINFO, "manufacturerAccessStatus()");
+  info.emplace_back([this]() {manufacturerAccessChemistryID();}, 0x00, DEVICEINFO, "manufacturerAccessChemistryID()");
+  info.emplace_back([this]() {manufacturerAccessShutdown();}, 0x00, SET, "manufacturerAccessShutdown()"); // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
+  info.emplace_back([this]() {manufacturerAccessSleep();}, 0x00, SET, "manufacturerAccessSleep()"); // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
+  info.emplace_back([this]() {manufacturerAccessSeal();}, 0x00, SET, "manufacturerAccessSeal()");
+  info.emplace_back([this]() {manufacturerAccessPermanentFailClear(uint16_t, uint16_t);}, 0x00, SET, "manufacturerAccessPermanentFailClear()");
+  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
+  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
+  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
+  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
+  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
+  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
   command UnsealDevice {"UnsealDevice()", 0x00, 0x0000, SET}; Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
   This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the UnSealKey first followed by the 2nd word of the UnSealKey.
   If the command fails 4 seconds must pass before the command can be reissued.
@@ -69,7 +71,7 @@ uint16_t bq20z9xx::manufacturerAccessHardware() {
  * • SBS:ManufacturerAccess(0x00)
  * @return uint16_t
  */
-uint16_t bq20z9xx::manufacturerStatus() {
+uint16_t bq20z9xx::manufacturerAccessStatus() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSTATUS);
   manufacturerstatus.raw = readRegister(MANUFACTURERACCESS);
   return manufacturerstatus.raw;

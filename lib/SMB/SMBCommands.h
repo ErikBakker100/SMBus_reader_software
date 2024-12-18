@@ -60,23 +60,22 @@
 #define OPTIONALMFGFUNCTION1   0x3f
 
 // A variant to store different types of member function pointers
-template <typename T>
 using psmbcommand = std::variant<
-    bool(T::*)(),
-    uint16_t (T::*)(),
-    int16_t (T::*)(),
-    float (T::*)(),
-    char* (T::*)()
+    std::function<bool()>,
+    std::function<uint16_t()>,
+    std::function<int16_t()>,
+    std::function<float()>,
+    std::function<char*()>,
+    std::function<uint16_t(uint16_t, uint16_t)> 
 >;
 
-template <typename T>
 struct Info {
   uint8_t reg;
-  psmbcommand<T> commands; // Variant for different member function types
+  psmbcommand commands;
   uint8_t monitor_group;
   String name;
-
-//  Info(uint8_t r, psmbcommand pbf, uint8_t g, String n) : reg(r), p_boolfunction(pbf), monitor_group(g), name(n) {}
+  // Constructor to initialize the struct
+  Info(psmbcommand pbf, uint8_t r, uint8_t g, String n) : commands(std::move(pbf)), reg(r) , monitor_group(g), name(n) {};
 };
 
 class smbuscommands : public smbus {
@@ -168,9 +167,23 @@ public:
   uint16_t optionalMFGfunction2();        // command 0x3e
   uint16_t optionalMFGfunction1();        // command 0x3f
   uint8_t address();
-
-  std::vector<Info<smbuscommands>> info; // Vector of function structs
   
+  std::vector<Info> info; // Store structs
+/*  
+// Call a specific function by name
+  void callFunctionByName(const std::string& functionName) {
+      auto it = std::find_if(info.begin(), info.end(),
+                              [&functionName](const Info& entry) {
+                                  return entry.name == functionName;
+                              });
+      if (it != info.end()) {
+          Serial.print("Calling function: " + it->name); 
+          std::visit([](auto& f) { f(); }, it->func);
+      } else {
+          Serial.print("Function \"" + functionName + "\" not found.\n");
+      }
+  }
+*/
   protected:
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
