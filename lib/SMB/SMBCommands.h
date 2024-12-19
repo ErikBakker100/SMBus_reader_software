@@ -60,22 +60,35 @@
 #define OPTIONALMFGFUNCTION1   0x3f
 
 // A variant to store different types of member function pointers
-using psmbcommand = std::variant<
+/* using psmbcommand = std::variant<
     std::function<bool()>,
     std::function<uint16_t()>,
     std::function<int16_t()>,
     std::function<float()>,
     std::function<char*()>,
     std::function<uint16_t(uint16_t, uint16_t)> 
+>; */
+
+template <typename T>
+using psmbcommand = std::variant<
+    void (T::*)(),                    // Member function with signature `void()`
+    void (T::*)(uint16_t, uint16_t),  // Member function with signature `void(uint16_t, uint16_t)
+    bool (T::*)(),                    // Member function with signature `bool()`
+    uint16_t (T::*)(),                // Member function with signature `uint16_t()`
+    int16_t (T::*)(),                 // Member function with signature `int16_t()`
+    float (T::*)(),                   // Member function with signature `float()`
+    char* (T::*)()                    // Member function with signature `char*()`
 >;
 
+template <typename T>
 struct Info {
+  psmbcommand<T> commands;
   uint8_t reg;
-  psmbcommand commands;
   uint8_t monitor_group;
   String name;
   // Constructor to initialize the struct
-  Info(psmbcommand pbf, uint8_t r, uint8_t g, String n) : commands(std::move(pbf)), reg(r) , monitor_group(g), name(n) {};
+//  Info(psmbcommand<T> pbf, uint8_t r, uint8_t g, String n) : commands(std::move(pbf)), reg(r) , monitor_group(g), name(n) {};
+  Info(psmbcommand<T> pbf, uint8_t r, uint8_t g, String n) : commands(pbf), reg(r) , monitor_group(g), name(n) {};
 };
 
 class smbuscommands : public smbus {
@@ -168,7 +181,7 @@ public:
   uint16_t optionalMFGfunction1();        // command 0x3f
   uint8_t address();
   
-  std::vector<Info> info; // Store structs
+  std::vector<Info<smbuscommands>> info; // Store structs
 /*  
 // Call a specific function by name
   void callFunctionByName(const std::string& functionName) {
@@ -183,6 +196,23 @@ public:
           Serial.print("Function \"" + functionName + "\" not found.\n");
       }
   }
+
+  // Call functions dynamically
+  void callFunctions() {
+      for (const auto& entry : functions) {
+          std::cout << "Calling function: " << entry.name 
+                    << " with priority " << entry.priority << "\n";
+          std::visit([this](auto f) {
+              using FuncType = decltype(f);
+              if constexpr (std::is_same_v<FuncType, void (Base::*)()>) {
+                  (this->*f)(); // Call void()
+              } else if constexpr (std::is_same_v<FuncType, void (Base::*)(int)>) {
+                  (this->*f)(42); // Call void(int)
+              } else if constexpr (std::is_same_v<FuncType, int (Base::*)()>) {
+                  std::cout << "Result: " << (this->*f)() << '\n'; // Call int()
+              }
+          }, entry.func);
+      }
 */
   protected:
   int16_t readRegister(uint8_t reg);
@@ -202,8 +232,8 @@ static String errorcodes[8] {
   "busy",               /**< The Smart Battery is unable to process the function code at this time. */
   "reserved",           /**< The Smart Battery detected an attempt to read orwrite to a function code reserved by this version of the specification.
 The Smart Battery detected an attempt to access an unsupported optional manufacturer function code. */
-  "unsupported",         /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
-  "access denied",       /**< The Smart Battery detected an attempt to write to a read only function code. */
+  "unsupported",        /**< The Smart Battery does not support this function code which is defined in version 1.1 of the specification. */
+  "access denied",      /**< The Smart Battery detected an attempt to write to a read only function code. */
   "over-, under-flow",  /**< The Smart Battery detected a data overflow or under flow. */
   "badSize",            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
   "unknown"             /**< The Smart Battery detected an unidentifiable error. */

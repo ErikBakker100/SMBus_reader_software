@@ -52,8 +52,8 @@ class bq20z9xx : public smbuscommands{
   uint16_t manufacturerAccessHardware(); // command 0x00
   uint16_t manufacturerAccessStatus(); // command 0x00
   uint16_t manufacturerAccessChemistryID(); // command 0x00 0x0008
-  uint16_t manufacturerAccessShutdown(); // command 0x0010
-  uint16_t manufacturerAccessSleep(); // command 0x0011
+  void manufacturerAccessShutdown(); // command 0x0010
+  void manufacturerAccessSleep(); // command 0x0011
 
   /**
   * @union manufacturerstatus
@@ -244,7 +244,7 @@ class bq20z9xx : public smbuscommands{
     } bits;
   }operationstatus;
   uint32_t unsealKey();           // command 0x60
-  private:
+//  private:
 };
 
 /**

@@ -3,9 +3,10 @@
 smbuscommands::smbuscommands(uint8_t address) {
     batteryAddress = address;
   // list of the different SMB commands, including function pointers to these funtions. This to be able to call them via user input
-    info.emplace_back([this]() {manufacturerAccess();}, 0x00, DEVICEINFO, "ManufacturerAccess()");
-    info.emplace_back([this]() {remainingCapacityAlarm();},0x01, DEVICEINFO, "remainingCapacityAlarm()");
-    info.emplace_back([this]() {remainingTimeAlarm();}, 0x02, DEVICEINFO, "remainingTimeAlarm()");
+//    info.emplace_back([this]() {manufacturerAccess();}, 0x00, DEVICEINFO, "ManufacturerAccess()");
+//    info.emplace_back([this]() {remainingCapacityAlarm();},0x01, DEVICEINFO, "remainingCapacityAlarm()");
+    info.emplace_back(&smbuscommands::remainingCapacityAlarm, 0x00, DEVICEINFO, "remainingCapacityAlarm()");
+/*    info.emplace_back([this]() {remainingTimeAlarm();}, 0x02, DEVICEINFO, "remainingTimeAlarm()");
     info.emplace_back([this]() {batteryMode();}, 0x03, STATUSBITS, "batteryMode()");
     info.emplace_back([this]() {atRate();}, 0x04, ATRATES, "atRate()");
     info.emplace_back([this]() {atRateTimeToFull();}, 0x05, ATRATES, "atRateTimeToFull()");
@@ -38,7 +39,7 @@ smbuscommands::smbuscommands(uint8_t address) {
     info.emplace_back([this]() {optionalMFGfunction4();}, 0x3c, DEVICEINFO, "optionalMFGfunction4()");
     info.emplace_back([this]() {optionalMFGfunction3();}, 0x3d, DEVICEINFO, "optionalMFGfunction3()");
     info.emplace_back([this]() {optionalMFGfunction2();}, 0x3e, DEVICEINFO, "optionalMFGfunction2()");
-    info.emplace_back([this]() {optionalMFGfunction1();}, 0x3f, DEVICEINFO, "optionalMFGfunction1()");
+    info.emplace_back([this]() {optionalMFGfunction1();}, 0x3f, DEVICEINFO, "optionalMFGfunction1()"); */
 }
 
 int16_t smbuscommands::readRegister(uint8_t reg) {

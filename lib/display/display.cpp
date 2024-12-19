@@ -511,7 +511,7 @@ void display_bq20z9xx(bq20z9xx* battery) {
   ansi.println(I2Ccode[battery->i2ccode]);
 
   ansi.print("ManufacturerStatus.name (0x00 -> 0x0006):");
-  battery->manufacturerStatus();
+  battery->manufacturerAccessStatus();
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
   printBits(battery->manufacturerstatus.raw);

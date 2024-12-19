@@ -1,7 +1,7 @@
 #include "BQ20Z9xx.h"
 
 bq20z9xx::bq20z9xx(uint8_t address) : smbuscommands(address) {
-  info.emplace_back([this]() {manufacturerAccessType();}, 0x00, DEVICEINFO, "manufacturerAccessType()");
+/*  info.emplace_back([this]() {manufacturerAccessType();}, 0x00, DEVICEINFO, "manufacturerAccessType()");
   info.emplace_back([this]() {manufacturerAccessFirmware();}, 0x00, DEVICEINFO, "manufacturerAccessFirmware()");
   info.emplace_back([this]() {manufacturerAccessHardware();}, 0x00, DEVICEINFO, "manufacturerAccessHardware()");
   info.emplace_back([this]() {manufacturerAccessStatus();}, 0x00, DEVICEINFO, "manufacturerAccessStatus()");
@@ -9,25 +9,18 @@ bq20z9xx::bq20z9xx(uint8_t address) : smbuscommands(address) {
   info.emplace_back([this]() {manufacturerAccessShutdown();}, 0x00, SET, "manufacturerAccessShutdown()"); // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
   info.emplace_back([this]() {manufacturerAccessSleep();}, 0x00, SET, "manufacturerAccessSleep()"); // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
   info.emplace_back([this]() {manufacturerAccessSeal();}, 0x00, SET, "manufacturerAccessSeal()");
-  info.emplace_back([this]() {manufacturerAccessPermanentFailClear(uint16_t, uint16_t);}, 0x00, SET, "manufacturerAccessPermanentFailClear()");
-  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
-  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
-  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
-  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
-  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
-  info.emplace_back([this]() {();}, 0x00, DEVICEINFO, "()");
-  command UnsealDevice {"UnsealDevice()", 0x00, 0x0000, SET}; Instructs the bq20z90/bq20z95 to enable access to the SBS functions and data flash space and clear the [SS] flag.
-  This 2 step command needs to be written to ManufacturerAccess in the following order: 1st word of the UnSealKey first followed by the 2nd word of the UnSealKey.
-  If the command fails 4 seconds must pass before the command can be reissued.
-  command FullAccessDevice {"FullAccessDevice()", 0x00, 0x0000, SET}; 
-  command FETControl {"FETControl()", 0x46, 0x0000, SET};
-    command StateOfHealth {"StateOfHealth()", 0x4f, 0x0000, DEVICEINFO};
-  command SafetyAlert {"SafetyAlert()", 0x50, 0x0000, DEVICEINFO};
-    command PFAlert {"PFAlert()", 0x52, 0x0000, DEVICEINFO};  
-  command PFStatus {"PFStatus()", 0x53, 0x0000, DEVICEINFO};
-  command OperationStatus {"OperationStatus()", 0x54, 0x0000, DEVICEINFO};
-  command UnSealKey {"UnSealKey()", 0x60, 0x0000, SET};
-*/
+  info.emplace_back([this]() {manufacturerAccessPermanentFailClear(0, 0);}, 0x00, SET, "manufacturerAccessPermanentFailClear()");
+  info.emplace_back([this]() {manufacturerAccessUnseal(0, 0);}, 0x00, SET, "manufacturerAccessUnseal()");
+  info.emplace_back([this]() {manufacturerAccessFullAccess(0, 0);}, 0x00, SET, "manufacturerAccessFullAccess()");
+  info.emplace_back([this]() {manufacturerData();}, 0x23, DEVICEINFO, "manufacturerData()");
+  info.emplace_back([this]() {fetControl();}, 0x46, SET, "fetControl()");
+  info.emplace_back([this]() {stateOfHealth();}, 0x4f, DEVICEINFO, "stateOfHealth()");
+  info.emplace_back([this]() {safetyAlert();}, 0x50, DEVICEINFO, "safetyAlert()");
+  info.emplace_back([this]() {safetyStatus();}, 0x51, DEVICEINFO, "safetyStatus()");
+  info.emplace_back([this]() {pfAlert();}, 0x52, DEVICEINFO, "pfAlert()");
+  info.emplace_back([this]() {pfStatus();}, 0x53, DEVICEINFO, "pfStatus()");
+  info.emplace_back([this]() {operationStatus();}, 0x54, DEVICEINFO, "operationStatus()");
+  info.emplace_back([this]() {unsealKey();}, 0x60, DEVICEINFO, "unsealKey()"); */
 }
 
 /**
@@ -75,6 +68,28 @@ uint16_t bq20z9xx::manufacturerAccessStatus() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSTATUS);
   manufacturerstatus.raw = readRegister(MANUFACTURERACCESS);
   return manufacturerstatus.raw;
+}
+
+/**
+ * @brief implementation specific. For TI bq20z90/bq20z95 Returns the Battery Status.
+ * @return uint16_t
+ */
+uint16_t bq20z9xx::manufacturerAccessChemistryID() { // command 0x00 0x0008
+  writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSCHEMISTRY);
+  return readRegister(MANUFACTURERACCESS);
+}
+
+/**
+ * @brief implementation specific. For TI bq20z90/bq20z95 Returns the Battery Status.
+ * @return uint16_t
+ */
+
+void bq20z9xx::manufacturerAccessShutdown(){ // command 0x0010
+  writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSSHUTDOWN);
+}
+
+void bq20z9xx::manufacturerAccessSleep(){ // command 0x0011
+  writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSSLEEP);
 }
 
 /**
