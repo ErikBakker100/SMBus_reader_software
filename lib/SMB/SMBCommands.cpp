@@ -495,19 +495,40 @@ uint8_t smbuscommands::address() {
   return batteryAddress;
 };
 
-
 // Call a specific function by name
 void smbuscommands::callFunctionByName(const String& functionName) {
   auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info<smbuscommands>& entry) {return entry.name == functionName;});
-//  auto it = std::find_if(info.begin(), info.end(), [&functionName](const auto& entry) {return entry.name == functionName;});
-
   if (it != info.end()) {
-    Serial.print("Calling function: " + it->name); 
-    Serial.print("Calling function: "); 
-    std::visit([](auto& f) { f(); }, it->commands);
+    std::visit([this](auto& f) {
+      using FunctionType = decltype(f);
+      // Handle different member function signatures
+      if constexpr (std::is_same_v<FunctionType, void (smbuscommands::*)()>) { 
+          (this->*f)();
+      } else if constexpr (std::is_same_v<FunctionType, void (smbuscommands::*)(uint16_t, uint16_t)>) {
+          (this->*f)(0, 0); // Provide default arguments
+      } else if constexpr (std::is_same_v<FunctionType, bool (smbuscommands::*)()>) {
+          bool result = (this->*f)();
+          Serial.print("Result: "); Serial.println(result);
+      } else if constexpr (std::is_same_v<FunctionType, uint16_t (smbuscommands::*)()>) {
+          uint16_t result = (this->*f)();
+          Serial.print("Result: "); Serial.println(result);
+      } else if constexpr (std::is_same_v<FunctionType, uint32_t (smbuscommands::*)()>) {
+          uint32_t result = (this->*f)();
+          Serial.print("Result: "); Serial.println(result);
+      } else if constexpr (std::is_same_v<FunctionType, int16_t (smbuscommands::*)()>) {
+          int16_t result = (this->*f)();
+          Serial.print("Result: "); Serial.println(result);
+      } else if constexpr (std::is_same_v<FunctionType, float (smbuscommands::*)()>) {
+          float result = (this->*f)();
+          Serial.print("Result: "); Serial.println(result);
+      } else if constexpr (std::is_same_v<FunctionType, char* (smbuscommands::*)()>) {
+          char* result = (this->*f)();
+          Serial.print("Result: "); Serial.println(result);
+      } else { Serial.println("Unsupported function type."); }
+    }, it->commands);
   } else {
     Serial.print("Function \"" + functionName + "\" not found.\n");
-  } 
+  }
 }
 
 // Call a specific function by register number
@@ -516,17 +537,4 @@ void smbuscommands::callFunctionByReg(const uint16_t reg) {
 
 // Call all functions with the same classifier
 void smbuscommands::callFunctionsByClassifier(uint8_t) {
-  /*
-  for (const auto& entry : functions) {
-    std::cout << "Calling function: " << entry.name << " with priority " << entry.priority << "\n";
-    std::visit([this](auto f) {
-      using FuncType = decltype(f);
-      if constexpr (std::is_same_v<FuncType, void (Base::*)()>) {
-        (this->*f)(); // Call void()
-      } else if constexpr (std::is_same_v<FuncType, void (Base::*)(int)>) {
-        (this->*f)(42); // Call void(int)
-      } else if constexpr (std::is_same_v<FuncType, int (Base::*)()>) {
-        std::cout << "Result: " << (this->*f)() << '\n'; // Call int()
-      }
-    }, entry.func); */
 }

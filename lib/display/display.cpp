@@ -1,6 +1,5 @@
-#include "display.hpp"
+#include "display.h"
 #include <bitset>
-
 
 void displaymanufacturerAccess(bq20z9xx* battery) {
   uint16_t x, y; // x and y position
@@ -683,18 +682,6 @@ void displaySealstatus(bq20z9xx* battery) {
   ansi.println(" " + errorcodes[battery->batterystatus.bits.error_codes]);
   ansi.println(battery->operationstatus.bits.ss?"sealed mode enabled":"sealed mode disabled");
   ansi.println(battery->operationstatus.bits.fas?"full access mode enabled":"full access mode disabled");
-}
-
-void displayBatteryStatus(bq20z9xx* battery) {
-    ansi.print("Battery Status (0x16):");
-    uint16_t x, y;
-    ansi.readCursorPosition(x, y);
-    battery->batteryStatus();
-    ansi.gotoXY(TAB2, y);
-    printBits(battery->batterystatus.raw);
-    ansi.gotoXY(TAB3, y);
-    ansi.println(I2Ccode[battery->i2ccode]);
-    ansi.println(" " + errorcodes[battery->batterystatus.bits.error_codes]);
 }
 
 void displayMainmenu() {

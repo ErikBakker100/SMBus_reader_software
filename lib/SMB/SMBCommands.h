@@ -59,16 +59,6 @@
 #define OPTIONALMFGFUNCTION2   0x3e
 #define OPTIONALMFGFUNCTION1   0x3f
 
-// A variant to store different types of member function pointers
-/* using psmbcommand = std::variant<
-    std::function<bool()>,
-    std::function<uint16_t()>,
-    std::function<int16_t()>,
-    std::function<float()>,
-    std::function<char*()>,
-    std::function<uint16_t(uint16_t, uint16_t)> 
->; */
-
 template <typename T>
 using psmbcommand = std::variant<
     void (T::*)(),                    // Member function with signature `void()`
@@ -88,7 +78,6 @@ struct Info {
   uint8_t monitor_group;
   String name;
   // Constructor to initialize the struct
-//  Info(psmbcommand<T> pbf, uint8_t r, uint8_t g, String n) : commands(std::move(pbf)), reg(r) , monitor_group(g), name(n) {};
   Info(psmbcommand<T> pbf, uint8_t r, uint8_t g, String n) : commands(pbf), reg(r) , monitor_group(g), name(n) {};
 };
 

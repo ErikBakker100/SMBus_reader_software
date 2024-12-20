@@ -1,6 +1,6 @@
 #include "fsm.h"
 #include "../i2cscanner/i2cscanner.h"
-#include "../display/display.hpp"
+#include "../display/display.h"
 
 CmdParser cmd;
 
@@ -89,6 +89,7 @@ void scanState::enter(Command& command) {
 void standardState::enter(Command& command) {
     displaySmallmenu();
     display_sbscommands(command.battery);
+    
 }
 
 // class extended = 4
@@ -143,9 +144,7 @@ void specifycommandState::enter(Command& command) {
     displaySmallmenu();
     if(cmd.getParamCount() == 2) {
         String reg = cmd.getCmdParam(1);
-        if (reg = "BatteryStatus") {
-            displayBatteryStatus(command.battery);
-        }
+        command.battery->callFunctionByName(reg);
     } else Serial.println("Command not found");
     Serial.println("done!");
 }
