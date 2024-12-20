@@ -70,9 +70,9 @@ class bq20z9xx : public smbuscommands{
   }manufacturerstatus;
   /**> The commands in this section cause the bq20z90/bq20z95 to take actions when written. No data is returned.*/
   uint16_t manufacturerAccessSeal();
-  uint16_t manufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
-  uint16_t manufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
-  uint16_t manufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
+  void manufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
+  void manufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
+  void manufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
   char* manufacturerData();       // command 0x23
   /**
   * @struct manufacturerdata

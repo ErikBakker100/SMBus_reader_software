@@ -3,43 +3,42 @@
 smbuscommands::smbuscommands(uint8_t address) {
     batteryAddress = address;
   // list of the different SMB commands, including function pointers to these funtions. This to be able to call them via user input
-//    info.emplace_back([this]() {manufacturerAccess();}, 0x00, DEVICEINFO, "ManufacturerAccess()");
-//    info.emplace_back([this]() {remainingCapacityAlarm();},0x01, DEVICEINFO, "remainingCapacityAlarm()");
+    info.emplace_back(&smbuscommands::manufacturerAccess, 0x00, DEVICEINFO, "ManufacturerAccess()");
     info.emplace_back(&smbuscommands::remainingCapacityAlarm, 0x00, DEVICEINFO, "remainingCapacityAlarm()");
-/*    info.emplace_back([this]() {remainingTimeAlarm();}, 0x02, DEVICEINFO, "remainingTimeAlarm()");
-    info.emplace_back([this]() {batteryMode();}, 0x03, STATUSBITS, "batteryMode()");
-    info.emplace_back([this]() {atRate();}, 0x04, ATRATES, "atRate()");
-    info.emplace_back([this]() {atRateTimeToFull();}, 0x05, ATRATES, "atRateTimeToFull()");
-    info.emplace_back([this]() {atRateTimeToEmpty();}, 0x06, ATRATES, "atRateTimeToEmpty()");
-    info.emplace_back([this]() {atRateOK();}, 0x07, ATRATES, "atRateOK()");
-    info.emplace_back([this]() {temperature();}, 0x08, USAGEINFO, "temperature()");
-    info.emplace_back([this]() {voltage();}, 0x09, USAGEINFO, "voltage()");
-    info.emplace_back([this]() {current();}, 0x0a, USAGEINFO, "current()");
-    info.emplace_back([this]() {averageCurrent();}, 0x0b, USAGEINFO, "averageCurrent()");
-    info.emplace_back([this]() {maxError();}, 0x0c, USAGEINFO, "maxError()");
-    info.emplace_back([this]() {relativeStateOfCharge();}, 0x0d, COMPUTEDINFO, "relativeStateOfCharge()");
-    info.emplace_back([this]() {absoluteStateOfCharge();}, 0x0e, COMPUTEDINFO, "absoluteStateOfCharge()");
-    info.emplace_back([this]() {remainingCapacity();}, 0x0f, USAGEINFO, "remainingCapacity()");
-    info.emplace_back([this]() {fullCapacity();}, 0x10, USAGEINFO, "fullCapacity()");
-    info.emplace_back([this]() {runTimeToEmpty();}, 0x11, COMPUTEDINFO, "runTimeToEmpty()");
-    info.emplace_back([this]() {avgTimeToEmpty();}, 0x12, COMPUTEDINFO, "avgTimeToEmpty()");
-    info.emplace_back([this]() {avgTimeToFull();}, 0x13, COMPUTEDINFO, "avgTimeToFull()");
-    info.emplace_back([this]() {chargingCurrent();}, 0x14, USAGEINFO, "chargingCurrent()");
-    info.emplace_back([this]() {chargingVoltage();}, 0x15, USAGEINFO, "chargingVoltage()");
-    info.emplace_back([this]() {batteryStatus();}, 0x16, STATUSBITS, "batteryStatus()");
-    info.emplace_back([this]() {cycleCount();}, 0x17, USAGEINFO, "cycleCount()");
-    info.emplace_back([this]() {designCapacity();}, 0x18, DEVICEINFO, "designCapacity()");
-    info.emplace_back([this]() {designVoltage();}, 0x19, DEVICEINFO, "designVoltage()");
-    info.emplace_back([this]() {specificationInfo();}, 0x1a, DEVICEINFO, "specificationInfo()");
-    info.emplace_back([this]() {manufactureDate();}, 0x1b, DEVICEINFO, "manufactureDate()");
-    info.emplace_back([this]() {serialNumber();}, 0x1c, DEVICEINFO, "serialNumber()");
-    info.emplace_back([this]() {manufacturerName();}, 0x20, DEVICEINFO, "manufacturerName()");
-    info.emplace_back([this]() {deviceName();}, 0x21, DEVICEINFO, "deviceName()");
-    info.emplace_back([this]() {deviceChemistry();}, 0x22, DEVICEINFO, "deviceChemistry()");
-    info.emplace_back([this]() {optionalMFGfunction4();}, 0x3c, DEVICEINFO, "optionalMFGfunction4()");
-    info.emplace_back([this]() {optionalMFGfunction3();}, 0x3d, DEVICEINFO, "optionalMFGfunction3()");
-    info.emplace_back([this]() {optionalMFGfunction2();}, 0x3e, DEVICEINFO, "optionalMFGfunction2()");
-    info.emplace_back([this]() {optionalMFGfunction1();}, 0x3f, DEVICEINFO, "optionalMFGfunction1()"); */
+    info.emplace_back(&smbuscommands::remainingTimeAlarm, 0x02, DEVICEINFO, "remainingTimeAlarm()");
+    info.emplace_back(&smbuscommands::batteryMode, 0x03, STATUSBITS, "batteryMode()");
+    info.emplace_back(&smbuscommands::atRate, 0x04, ATRATES, "atRate()");
+    info.emplace_back(&smbuscommands::atRateTimeToFull, 0x05, ATRATES, "atRateTimeToFull()");
+    info.emplace_back(&smbuscommands::atRateTimeToEmpty, 0x06, ATRATES, "atRateTimeToEmpty()");
+    info.emplace_back(&smbuscommands::atRateOK, 0x07, ATRATES, "atRateOK()");
+    info.emplace_back(&smbuscommands::temperature, 0x08, USAGEINFO, "temperature()");
+    info.emplace_back(&smbuscommands::voltage, 0x09, USAGEINFO, "voltage()");
+    info.emplace_back(&smbuscommands::current, 0x0a, USAGEINFO, "current()");
+    info.emplace_back(&smbuscommands::averageCurrent, 0x0b, USAGEINFO, "averageCurrent()");
+    info.emplace_back(&smbuscommands::maxError, 0x0c, USAGEINFO, "maxError()");
+    info.emplace_back(&smbuscommands::relativeStateOfCharge, 0x0d, COMPUTEDINFO, "relativeStateOfCharge()");
+    info.emplace_back(&smbuscommands::absoluteStateOfCharge, 0x0e, COMPUTEDINFO, "absoluteStateOfCharge()");
+    info.emplace_back(&smbuscommands::remainingCapacity, 0x0f, USAGEINFO, "remainingCapacity()");
+    info.emplace_back(&smbuscommands::fullCapacity, 0x10, USAGEINFO, "fullCapacity()");
+    info.emplace_back(&smbuscommands::runTimeToEmpty, 0x11, COMPUTEDINFO, "runTimeToEmpty()");
+    info.emplace_back(&smbuscommands::avgTimeToEmpty, 0x12, COMPUTEDINFO, "avgTimeToEmpty()");
+    info.emplace_back(&smbuscommands::avgTimeToFull, 0x13, COMPUTEDINFO, "avgTimeToFull()");
+    info.emplace_back(&smbuscommands::chargingCurrent, 0x14, USAGEINFO, "chargingCurrent()");
+    info.emplace_back(&smbuscommands::chargingVoltage, 0x15, USAGEINFO, "chargingVoltage()");
+    info.emplace_back(&smbuscommands::batteryStatus, 0x16, STATUSBITS, "batteryStatus()");
+    info.emplace_back(&smbuscommands::cycleCount, 0x17, USAGEINFO, "cycleCount()");
+    info.emplace_back(&smbuscommands::designCapacity, 0x18, DEVICEINFO, "designCapacity()");
+    info.emplace_back(&smbuscommands::designVoltage, 0x19, DEVICEINFO, "designVoltage()");
+    info.emplace_back(&smbuscommands::specificationInfo, 0x1a, DEVICEINFO, "specificationInfo()");
+    info.emplace_back(&smbuscommands::manufactureDate, 0x1b, DEVICEINFO, "manufactureDate()");
+    info.emplace_back(&smbuscommands::serialNumber, 0x1c, DEVICEINFO, "serialNumber()");
+    info.emplace_back(&smbuscommands::manufacturerName, 0x20, DEVICEINFO, "manufacturerName()");
+    info.emplace_back(&smbuscommands::deviceName, 0x21, DEVICEINFO, "deviceName()");
+    info.emplace_back(&smbuscommands::deviceChemistry, 0x22, DEVICEINFO, "deviceChemistry()");
+    info.emplace_back(&smbuscommands::optionalMFGfunction4, 0x3c, DEVICEINFO, "optionalMFGfunction4()");
+    info.emplace_back(&smbuscommands::optionalMFGfunction3, 0x3d, DEVICEINFO, "optionalMFGfunction3()");
+    info.emplace_back(&smbuscommands::optionalMFGfunction2, 0x3e, DEVICEINFO, "optionalMFGfunction2()");
+    info.emplace_back(&smbuscommands::optionalMFGfunction1, 0x3f, DEVICEINFO, "optionalMFGfunction1()");
 }
 
 int16_t smbuscommands::readRegister(uint8_t reg) {
@@ -495,3 +494,36 @@ uint16_t smbuscommands::optionalMFGfunction1() {
 uint8_t smbuscommands::address() {
   return batteryAddress;
 };
+
+
+// Call a specific function by name
+void smbuscommands::callFunctionByName(const String& functionName) { /*
+  auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info& entry) { return entry.name == functionName;});
+  if (it != info.end()) {
+    Serial.print("Calling function: " + it->name); 
+    std::visit([](auto& f) { f(); }, it->func);
+  } else {
+    Serial.print("Function \"" + functionName + "\" not found.\n");
+  } */
+}
+
+// Call a specific function by register number
+void smbuscommands::callFunctionByReg(const uint16_t reg) {
+}
+
+// Call all functions with the same classifier
+void smbuscommands::callFunctionsByClassifier(uint8_t) {
+  /*
+  for (const auto& entry : functions) {
+    std::cout << "Calling function: " << entry.name << " with priority " << entry.priority << "\n";
+    std::visit([this](auto f) {
+      using FuncType = decltype(f);
+      if constexpr (std::is_same_v<FuncType, void (Base::*)()>) {
+        (this->*f)(); // Call void()
+      } else if constexpr (std::is_same_v<FuncType, void (Base::*)(int)>) {
+        (this->*f)(42); // Call void(int)
+      } else if constexpr (std::is_same_v<FuncType, int (Base::*)()>) {
+        std::cout << "Result: " << (this->*f)() << '\n'; // Call int()
+      }
+    }, entry.func); */
+}

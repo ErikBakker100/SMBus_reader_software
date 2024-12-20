@@ -75,6 +75,7 @@ using psmbcommand = std::variant<
     void (T::*)(uint16_t, uint16_t),  // Member function with signature `void(uint16_t, uint16_t)
     bool (T::*)(),                    // Member function with signature `bool()`
     uint16_t (T::*)(),                // Member function with signature `uint16_t()`
+    uint32_t (T::*)(),                // Member function with signature `uint32_t()`
     int16_t (T::*)(),                 // Member function with signature `int16_t()`
     float (T::*)(),                   // Member function with signature `float()`
     char* (T::*)()                    // Member function with signature `char*()`
@@ -182,38 +183,14 @@ public:
   uint8_t address();
   
   std::vector<Info<smbuscommands>> info; // Store structs
-/*  
-// Call a specific function by name
-  void callFunctionByName(const std::string& functionName) {
-      auto it = std::find_if(info.begin(), info.end(),
-                              [&functionName](const Info& entry) {
-                                  return entry.name == functionName;
-                              });
-      if (it != info.end()) {
-          Serial.print("Calling function: " + it->name); 
-          std::visit([](auto& f) { f(); }, it->func);
-      } else {
-          Serial.print("Function \"" + functionName + "\" not found.\n");
-      }
-  }
-
+  
+  // Call a specific function by name
+  void callFunctionByName(const String&);
+  // Call a specific function by register number
+  void callFunctionByReg(const uint16_t);
   // Call functions dynamically
-  void callFunctions() {
-      for (const auto& entry : functions) {
-          std::cout << "Calling function: " << entry.name 
-                    << " with priority " << entry.priority << "\n";
-          std::visit([this](auto f) {
-              using FuncType = decltype(f);
-              if constexpr (std::is_same_v<FuncType, void (Base::*)()>) {
-                  (this->*f)(); // Call void()
-              } else if constexpr (std::is_same_v<FuncType, void (Base::*)(int)>) {
-                  (this->*f)(42); // Call void(int)
-              } else if constexpr (std::is_same_v<FuncType, int (Base::*)()>) {
-                  std::cout << "Result: " << (this->*f)() << '\n'; // Call int()
-              }
-          }, entry.func);
-      }
-*/
+  void callFunctionsByClassifier(uint8_t);
+
   protected:
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
