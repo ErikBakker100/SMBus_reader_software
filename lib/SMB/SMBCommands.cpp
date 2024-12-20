@@ -497,14 +497,17 @@ uint8_t smbuscommands::address() {
 
 
 // Call a specific function by name
-void smbuscommands::callFunctionByName(const String& functionName) { /*
-  auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info& entry) { return entry.name == functionName;});
+void smbuscommands::callFunctionByName(const String& functionName) {
+  auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info<smbuscommands>& entry) {return entry.name == functionName;});
+//  auto it = std::find_if(info.begin(), info.end(), [&functionName](const auto& entry) {return entry.name == functionName;});
+
   if (it != info.end()) {
     Serial.print("Calling function: " + it->name); 
-    std::visit([](auto& f) { f(); }, it->func);
+    Serial.print("Calling function: "); 
+    std::visit([](auto& f) { f(); }, it->commands);
   } else {
     Serial.print("Function \"" + functionName + "\" not found.\n");
-  } */
+  } 
 }
 
 // Call a specific function by register number
