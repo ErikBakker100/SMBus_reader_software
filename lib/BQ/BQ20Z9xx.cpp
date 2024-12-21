@@ -1,26 +1,6 @@
 #include "BQ20Z9xx.h"
 
 bq20z9xx::bq20z9xx(uint8_t address) : smbuscommands(address) {
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessType)), 0x00, DEVICEINFO, "manufacturerAccessType()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessFirmware)), 0x00, DEVICEINFO, "manufacturerAccessFirmware()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessHardware)), 0x00, DEVICEINFO, "manufacturerAccessHardware()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessStatus)), 0x00, DEVICEINFO, "manufacturerAccessStatus()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessChemistryID)), 0x00, DEVICEINFO, "manufacturerAccessChemistryID()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<void (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessShutdown)), 0x00, SET, "manufacturerAccessShutdown()"); // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<void (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessSleep)), 0x00, SET, "manufacturerAccessSleep()"); // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::manufacturerAccessSeal)), 0x00, SET, "manufacturerAccessSeal()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<void (smbuscommands::*)(uint16_t, uint16_t)>(&bq20z9xx::manufacturerAccessPermanentFailClear)), 0x00, SET, "manufacturerAccessPermanentFailClear()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<void (smbuscommands::*)(uint16_t, uint16_t)>(&bq20z9xx::manufacturerAccessUnseal)), 0x00, SET, "manufacturerAccessUnseal()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<void (smbuscommands::*)(uint16_t, uint16_t)>(&bq20z9xx::manufacturerAccessFullAccess)), 0x00, SET, "manufacturerAccessFullAccess()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<char* (smbuscommands::*)()>(&bq20z9xx::manufacturerData)), 0x23, DEVICEINFO, "manufacturerData()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::fetControl)), 0x46, SET, "fetControl()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::stateOfHealth)), 0x4f, DEVICEINFO, "stateOfHealth()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::safetyAlert)), 0x50, DEVICEINFO, "safetyAlert()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::safetyStatus)), 0x51, DEVICEINFO, "safetyStatus()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::pfAlert)), 0x52, DEVICEINFO, "pfAlert()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::pfStatus)), 0x53, DEVICEINFO, "pfStatus()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint16_t (smbuscommands::*)()>(&bq20z9xx::operationStatus)), 0x54, DEVICEINFO, "operationStatus()");
-  info.emplace_back(static_cast<psmbcommand<smbuscommands>>(static_cast<uint32_t (smbuscommands::*)()>(&bq20z9xx::unsealKey)), 0x60, DEVICEINFO, "unsealKey()");
 }
 
 /**

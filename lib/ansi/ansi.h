@@ -12,7 +12,6 @@
 
 #define ANSI_LIB_VERSION        (F("0.3.2"))
 
-
 class ANSI : public Stream
 {
 public:

@@ -20,7 +20,10 @@ CmdBuffer<64> cmdBuffer;
 void setup() {
   Serial.begin(115200);
   cmdBuffer.setEcho(true);
+  cmdBuffer.readFromString("1");
   command.update();
+  command.handleInput(cmdBuffer);
+  cmdBuffer.clear();
 }
 
 void loop() {

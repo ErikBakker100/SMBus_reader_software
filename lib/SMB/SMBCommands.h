@@ -12,11 +12,7 @@
 
 #include <Arduino.h>
 #include <string.h>
-#include "CommandClassifiers.h"
 #include "SMBus.h"
-#include <variant>
-#include <vector>
-#include <functional>
 
 #define MANUFACTURERACCESS     0X00
 #define REMAININGCAPACITYALARM 0x01
@@ -58,28 +54,6 @@
 #define OPTIONALMFGFUNCTION3   0x3d
 #define OPTIONALMFGFUNCTION2   0x3e
 #define OPTIONALMFGFUNCTION1   0x3f
-
-template <typename T>
-using psmbcommand = std::variant<
-    void (T::*)(),                    // Member function with signature `void()`
-    void (T::*)(uint16_t, uint16_t),  // Member function with signature `void(uint16_t, uint16_t)
-    bool (T::*)(),                    // Member function with signature `bool()`
-    uint16_t (T::*)(),                // Member function with signature `uint16_t()`
-    uint32_t (T::*)(),                // Member function with signature `uint32_t()`
-    int16_t (T::*)(),                 // Member function with signature `int16_t()`
-    float (T::*)(),                   // Member function with signature `float()`
-    char* (T::*)()                    // Member function with signature `char*()`
->;
-
-template <typename T>
-struct Info {
-  psmbcommand<T> commands;
-  uint8_t reg;
-  uint8_t monitor_group;
-  String name;
-  // Constructor to initialize the struct
-  Info(psmbcommand<T> pbf, uint8_t r, uint8_t g, String n) : commands(pbf), reg(r) , monitor_group(g), name(n) {};
-};
 
 class smbuscommands : public smbus {
 public:
@@ -170,15 +144,6 @@ public:
   uint16_t optionalMFGfunction2();        // command 0x3e
   uint16_t optionalMFGfunction1();        // command 0x3f
   uint8_t address();
-  
-  std::vector<Info<smbuscommands>> info; // Store structs
-  
-  // Call a specific function by name
-  void callFunctionByName(const String&);
-  // Call a specific function by register number
-  void callFunctionByReg(const uint16_t);
-  // Call functions dynamically
-  void callFunctionsByClassifier(uint8_t);
 
   protected:
   int16_t readRegister(uint8_t reg);

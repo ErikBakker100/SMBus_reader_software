@@ -11,7 +11,6 @@
 
 #include "SMBus.h"
 
-
 /**
  * @brief Constructor for a new smbus object.
  * 

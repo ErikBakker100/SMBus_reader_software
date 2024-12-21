@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include "../BQ/BQ20Z9xx.h"
+#include "../display/display.h"
 #include "../CmdParser/CmdBuffer.hpp"
 #include "../CmdParser/CmdParser.hpp"
 
@@ -11,7 +11,7 @@ public:
     Command();
     virtual void handleInput(CmdBuffer<64>);
     virtual void update();
-    BQICTYPE* battery {nullptr};
+    Display* display {nullptr};
 private:
     CommandState* state_;
 protected:

@@ -62,6 +62,23 @@ bool CmdBufferObject::readFromSerial(Stream *serial, uint32_t timeOut)
     return false;
 }
 
+bool CmdBufferObject::readFromString(String data)
+{
+    // process String
+    uint8_t *buffer = this->getBuffer();
+    // is buffer full?
+    if (m_dataOffset >= this->getBufferSize()) {
+        m_dataOffset = 0;
+        return false;
+    }
+    for (uint8_t i = 0; i < data.length(); i++) {
+        buffer[m_dataOffset++] = data.charAt(i);
+    }
+    buffer[m_dataOffset] = '\0';
+    m_dataOffset         = 0;
+    return true;
+}
+
 bool CmdBufferObject::readSerialChar(Stream *serial)
 {
     uint8_t  readChar;

@@ -17,14 +17,13 @@
 #define BLOCKLENGTH 20 /**< Maximum of data stream bytes which may be read */
 
 class smbus{
-  public:
+  protected:
   smbus();
   virtual int16_t readRegister(uint8_t reg, uint8_t address);
   virtual void writeRegister(uint8_t reg, uint16_t data, uint8_t address);
   virtual void readBlock(uint8_t reg, uint8_t* data, uint8_t len, uint8_t address);
 
   uint8_t i2ccode; // Error code returned by I2C
-  private:
 };
 
 

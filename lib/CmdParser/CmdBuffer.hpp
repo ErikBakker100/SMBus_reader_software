@@ -48,6 +48,16 @@ class CmdBufferObject
     bool readFromSerial(Stream *serial, uint32_t timeOut = 0);
 
     /**
+     * Read data from String to buffer. It read only printable
+     * ASCII character from String. All other will ignore for buffer.
+     *
+     * @param String        Arduino Serial object from read commands
+     * @return              TRUE
+     */
+    bool readFromString(String);
+
+
+    /**
      * Read one char from serial communication to buffer if available.
      * It read only printable ASCII character from serial.
      * All other will ignore for buffer. This function only ready currently

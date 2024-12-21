@@ -1,6 +1,7 @@
 #include "fsm.h"
 #include "../i2cscanner/i2cscanner.h"
 #include "../display/display.h"
+#include "../display/menus.h"
 
 CmdParser cmd;
 
@@ -36,7 +37,7 @@ void CommandState::enter(Command& command) {
 CommandState* CommandState::handleInput (Command& command, uint8_t input) {
     if (input == 1) return new menuState;
     else if (input == 2) return new scanState;
-    if (command.battery == nullptr) {
+    if (command.display == nullptr) {
         Serial.println("please select '2' (Search address) first");
     } else {
         if (input == 3) return new standardState;
@@ -77,8 +78,10 @@ void scanState::enter(Command& command) {
         second = param.toInt();
         if (first <= second) address =i2cscan(first, second);
     } else address = i2cscan();
-    if (address > 0) command.battery = new BQICTYPE(address);
-    displayBatteryAddress(command.battery);
+    if (address > 0) { 
+        command.display = new Display(address);
+        command.display->displayBatteryAddress();
+    }
 }
 
 //class standard = 3
@@ -88,8 +91,7 @@ void scanState::enter(Command& command) {
 
 void standardState::enter(Command& command) {
     displaySmallmenu();
-    display_sbscommands(command.battery);
-    
+    display_sbscommands();
 }
 
 // class extended = 4
@@ -108,7 +110,7 @@ void extendedState::enter(Command& command) {
 
 void unsealState::enter(Command& command) {
     displaySmallmenu();
-        command.battery->manufacturerAccessUnseal(UNSEALA, UNSEALB);
+        command.display->displaymanufacturerAccessUnseal(UNSEALA, UNSEALB);
 //        displaySealstatus(battery);
 
 }
@@ -120,7 +122,7 @@ void unsealState::enter(Command& command) {
 
 void sealState::enter(Command& command) {
     displaySmallmenu();
-    command.battery->manufacturerAccessSeal();
+    command.display->displaymanufacturerAccessSeal();
 //        displaySealstatus(battery);
 }
 
@@ -131,7 +133,7 @@ void sealState::enter(Command& command) {
 
 void clearpfState::enter(Command& command) {
     displaySmallmenu();
-    command.battery->manufacturerAccessPermanentFailClear(PFCLEARA, PFCLEARB);
+    command.display->displaymanufacturerAccessPermanentFailClear(PFCLEARA, PFCLEARB);
     Serial.println("done!");
 }
 
@@ -144,7 +146,7 @@ void specifycommandState::enter(Command& command) {
     displaySmallmenu();
     if(cmd.getParamCount() == 2) {
         String reg = cmd.getCmdParam(1);
-        command.battery->callFunctionByName(reg);
+        command.display->callFunctionByName(reg);
     } else Serial.println("Command not found");
     Serial.println("done!");
 }

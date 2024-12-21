@@ -8,10 +8,63 @@
 #include "../ansi/ansi.h"
 #include "../BQ/BQ20Z9xx.h"
 #include "../i2cscanner/i2cscanner.h"
+#include "CommandClassifiers.h"
+#include <variant>
+#include <vector>
 
 static ANSI ansi(&Serial);
 
-class Display {
+template <typename T>
+using pdc = std::variant<             // pdc = pointer to display command
+    void (T::*)(),                    // Member function with signature `void()`
+    void (T::*)(uint16_t, uint16_t)  // Member function with signature `void(uint16_t, uint16_t)
+>;
+
+template <typename T>
+struct Info {
+  pdc<T> dc;                          // dc = display command
+  uint8_t monitor_group;
+  String name;                        // name of the battery function the display function calls 
+  // Constructor to initialize the struct
+  Info(pdc<T> f, uint8_t g, String n) : dc(f), monitor_group(g), name(n) {};
+};
+
+class Display : public bq20z9xx {
+public:
+    Display(uint8_t);
+    void displaymanufacturerAccess();
+    void displayremainingCapacityAlarm();
+    void displayremainingTimeAlarm();
+    void displaybatteryMode();
+    void displayatRate();
+    void displayatRateTimeToFull();
+    void displayatRateTimeToEmpty();
+    void displayatRateOK();
+    void displaytemperature();
+    void displayvoltage();
+    void displaycurrent();
+    void displayaverageCurrent();
+    void displaymaxError();
+    void displayrelativeStateOfCharge();
+    void displayabsoluteStateOfCharge();
+    void displayremainingCapacity();
+    void displayfullCapacity();
+    void displayrunTimeToEmpty();
+    void displayavgTimeToEmpty();
+    void displayavgTimeToFull();
+    void displaychargingCurrent();
+    void displaychargingVoltage();
+    void displaybatteryStatus();
+    void displaydesignCapacity();
+    void displaycycleCount();
+    void displaydesignVoltage();
+    void displayspecificationInfo();
+    void displaymanufactureDate();
+    void displayserialNumber();
+    void displaymanufacturerName();
+    void displaydeviceName();
+    void displaydeviceChemistry();
+    void displayoptionalMFGfunctions();
 
     void displaymanufacturerAccessType();       // command 0x00 0x0001
     void displaymanufacturerAccessFirmware();   // command 0x00
@@ -20,6 +73,7 @@ class Display {
     void displaymanufacturerAccessChemistryID(); // command 0x00 0x0008
     void displaymanufacturerAccessShutdown();   // command 0x0010
     void displaymanufacturerAccessSleep();      // command 0x0011
+    void displaymanufacturerAccessSeal();       // command 0x00 0x0020
     void displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
     void displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
     void displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
@@ -31,60 +85,30 @@ class Display {
     void displaypfAlert();
     void displaypfStatus();
     void displayoperationStatus();              // command 0x54
+    void displaySealstatus(); // command 0x54
     void displayunsealKey();                    // command 0x60
+    void displayBatteryAddress();
 
-    private:
+    std::vector<Info<Display>> info; // Store structs
+
+    // Call a specific function by name
+    void callFunctionByName(const String&);
+    // Call functions dynamically
+    void callFunctionsByClassifier(uint8_t);
+
+private:
     void printBits(uint8_t);
     void printBits(uint16_t);
-
 };
 
-void displayMainmenu();
-void displaySmallmenu();
-void displayBatteryAddress(bq20z9xx*);
 
-void display_sbscommands(bq20z9xx*);
-void display_bq20z9xx(bq20z9xx*);
+void displayBatteryInfo();
 
-void printBits(uint8_t);
-void printBits(uint16_t);
+void display_sbscommands();
+void display_bq20z9xx();
 
 
-void displaymanufacturerAccess(bq20z9xx*);
-void displayremainingCapacityAlarm(bq20z9xx*);
-void displayremainingTimeAlarm(bq20z9xx*);
-void displaybatteryMode(bq20z9xx*);
-void displayatRate(bq20z9xx*);
-void displayatRateTimeToFull(bq20z9xx*);
-void displayatRateTimeToEmpty(bq20z9xx*);
-void displayatRateOK(bq20z9xx*);
-void displaytemperature(bq20z9xx*);
-void displayvoltage(bq20z9xx*);
-void displaycurrent(bq20z9xx*);
-void displayaverageCurrent(bq20z9xx*);
-void displaymaxError(bq20z9xx*);
-void displayrelativeStateOfCharge(bq20z9xx*);
-void displayabsoluteStateOfCharge(bq20z9xx*);
-void displayremainingCapacity(bq20z9xx*);
-void displayfullCapacity(bq20z9xx*);
-void displayrunTimeToEmpty(bq20z9xx*);
-void displayavgTimeToEmpty(bq20z9xx*);
-void displayavgTimeToFull(bq20z9xx*);
-void displaychargingCurrent(bq20z9xx*);
-void displaychargingVoltage(bq20z9xx*);
-void displaybatteryStatus(bq20z9xx*);
-void displaydesignCapacity(bq20z9xx*);
-void displaycycleCount(bq20z9xx*);
-void displaydesignVoltage(bq20z9xx*);
-void displayspecificationInfo(bq20z9xx*);
-void displaymanufactureDate(bq20z9xx*);
-void displayserialNumber(bq20z9xx*);
-void displaymanufacturerName(bq20z9xx*);
-void displaydeviceName(bq20z9xx*);
-void displaydeviceChemistry(bq20z9xx*);
-void displayoptionalMFGfunctions(bq20z9xx*);
 
 
-void displaySealstatus(bq20z9xx*); // command 0x54
 
 
