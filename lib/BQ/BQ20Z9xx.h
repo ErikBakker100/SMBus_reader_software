@@ -44,7 +44,7 @@
  * @class command
  * @brief Extended commands pecific for the BQ20Z9xx
  */
-class bq20z9xx : public smbuscommands{
+class bq20z9xx : protected smbuscommands{
   protected:
   bq20z9xx(uint8_t address);
   uint16_t manufacturerAccessType(); // command 0x00 0x0001

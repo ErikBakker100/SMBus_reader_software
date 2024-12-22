@@ -92,7 +92,7 @@ void scanState::enter(Command& command) {
 
 void standardState::enter(Command& command) {
     displaySmallmenu();
-    display_sbscommands();
+    command.display->displayByClassifier(1);
 }
 
 // class extended = 4
@@ -147,7 +147,7 @@ void specifycommandState::enter(Command& command) {
     displaySmallmenu();
     if(cmd.getParamCount() == 2) {
         String reg = cmd.getCmdParam(1);
-        command.display->callFunctionByName(reg);
+        command.display->displayByName(reg);
     } else Serial.println("Command not found");
     Serial.println("done!");
 }

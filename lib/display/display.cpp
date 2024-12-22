@@ -842,7 +842,7 @@ void Display::displayBatteryAddress() {
 }
 
 // Call a specific function by name
-void Display::callFunctionByName(const String& functionName) {
+void Display::displayByName(const String& functionName) {
   auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info<Display>& entry) {return entry.name == functionName;});
   if (it != info.end()) {
     std::visit([this](auto& f) {
@@ -860,11 +860,21 @@ void Display::callFunctionByName(const String& functionName) {
 }
 
 // Call all functions with the same classifier
-void Display::callFunctionsByClassifier(uint8_t) {
-}
-
-void display_bq20z9xx() {
-
+void Display::displayByClassifier(uint8_t type) {
+  auto it = std::find_if(info.begin(), info.end(), [type](const Info<Display>& entry) {return entry.monitor_group == type;});
+  if (it != info.end()) {
+    std::visit([this](auto& f) {
+      using FunctionType = decltype(f);
+      // Handle different member function signatures
+      if constexpr (std::is_same_v<FunctionType, void (Display::*)()>) { 
+          (this->*f)();
+      } else if constexpr (std::is_same_v<FunctionType, void (Display::*)(uint16_t, uint16_t)>) {
+          (this->*f)(0, 0); // Provide default arguments
+      } else { Serial.println("Unsupported function type."); }
+    }, it->dc);
+  } else {
+    Serial.print("Classifier \"" + String(type) + "\" not found.\n");
+  }
 }
 
 // prints 8-bit integer in this form: 0000 0000
@@ -891,14 +901,4 @@ void Display::printBits(uint16_t n) {
     ansi.print(b);
     if (i < (numBits - 1) && ((numBits-i - 1) % 4 == 0 )) ansi.print(c); // print a separator at every 4 bits
   }
-}
-
-
-
-void display_sbscommands() {
-
-}
-
-void displayBatteryInfo() {
-
 }

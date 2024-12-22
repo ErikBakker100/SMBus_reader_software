@@ -30,6 +30,7 @@ struct Info {
 };
 
 class Display : private bq20z9xx {
+
 public:
     Display(uint8_t);
     void displaymanufacturerAccess();
@@ -92,20 +93,15 @@ public:
     std::vector<Info<Display>> info; // Store structs
 
     // Call a specific function by name
-    void callFunctionByName(const String&);
+    void displayByName(const String&);
     // Call functions dynamically
-    void callFunctionsByClassifier(uint8_t);
+    void displayByClassifier(uint8_t);
 
 private:
     void printBits(uint8_t);
     void printBits(uint16_t);
 };
 
-
-void displayBatteryInfo();
-
-void display_sbscommands();
-void display_bq20z9xx();
 
 
 
