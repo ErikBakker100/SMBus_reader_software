@@ -10,6 +10,7 @@
  */
 
 #include "SMBus.h"
+#include <Wire.h>
 
 /**
  * @brief Constructor for a new smbus object.
@@ -18,7 +19,7 @@
  */
 smbus::smbus() {
   Wire.begin();
-  Wire.setClock(CLOCKSPEED);                  
+  Wire.setClock(CLOCKSPEED);          
 }
 
 /**

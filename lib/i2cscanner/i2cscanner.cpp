@@ -28,6 +28,9 @@
 //
 
 #include "i2cscanner.h"
+#include <Wire.h>
+
+#define CLOCKSPEED 130000  /**< Roughly 100kHz */
 
 /*
 * Nodemcu board : pin number is equal to GPIO
@@ -48,6 +51,8 @@ uint8_t i2cscan() {
 } 
 
 uint8_t i2cscan(uint8_t first, uint8_t last) {
+  Wire.begin();
+  Wire.setClock(CLOCKSPEED);
   uint8_t error{0}, address{0};
   Serial.print("Scanning from "); 
   Serial.print(first);
