@@ -12,7 +12,7 @@
 #include <variant>
 #include <vector>
 
-static ANSI ansi(&Serial);
+extern ANSI ansi;
 
 template <typename T>
 using pdc = std::variant<             // pdc = pointer to display command
@@ -29,7 +29,7 @@ struct Info {
   Info(pdc<T> f, uint8_t g, String n) : dc(f), monitor_group(g), name(n) {};
 };
 
-class Display : public bq20z9xx {
+class Display : private bq20z9xx {
 public:
     Display(uint8_t);
     void displaymanufacturerAccess();

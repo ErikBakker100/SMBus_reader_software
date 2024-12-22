@@ -4,6 +4,7 @@
 #include "../display/menus.h"
 
 CmdParser cmd;
+ANSI ansi(&Serial);
 
 // class Command
 

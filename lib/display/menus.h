@@ -2,7 +2,6 @@
 
 #include "../ansi/ansi.h"
 
-
 extern ANSI ansi;
 
 void displayMainmenu();
