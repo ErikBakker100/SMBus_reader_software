@@ -10,7 +10,6 @@
  */
 
 #include "SMBus.h"
-#include <Wire.h>
 
 /**
  * @brief Constructor for a new smbus object.

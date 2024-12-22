@@ -151,5 +151,3 @@ void specifycommandState::enter(Command& command) {
     } else Serial.println("Command not found");
     Serial.println("done!");
 }
-
-

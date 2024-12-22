@@ -28,7 +28,6 @@
 //
 
 #include "i2cscanner.h"
-#include <Wire.h>
 
 #define CLOCKSPEED 130000  /**< Roughly 100kHz */
 

@@ -866,7 +866,7 @@ void Display::displayByClassifier(uint8_t type) {
     std::visit([this](auto& f) {
       using FunctionType = decltype(f);
       // Handle different member function signatures
-      if constexpr (std::is_same_v<FunctionType, void (Display::*)()>) { 
+      if constexpr (std::is_same_v<FunctionType, void (Display::*)()>) {
           (this->*f)();
       } else if constexpr (std::is_same_v<FunctionType, void (Display::*)(uint16_t, uint16_t)>) {
           (this->*f)(0, 0); // Provide default arguments

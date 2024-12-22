@@ -11,6 +11,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <Wire.h>
 
 #define CLOCKSPEED 130000  /**< Roughly 100kHz */
 #define BLOCKLENGTH 20 /**< Maximum of data stream bytes which may be read */
