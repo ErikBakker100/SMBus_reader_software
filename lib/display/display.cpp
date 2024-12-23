@@ -65,7 +65,7 @@ void Display::displaymanufacturerAccess() {
   ansi.gotoXY(TAB2, y);
   ansi.print(manufacturerAccess(), HEX);
   ansi.gotoXY(TAB3, y);
-  ansi.print(I2Ccode[i2ccode]);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displayremainingCapacityAlarm() {
@@ -77,7 +77,7 @@ void Display::displayremainingCapacityAlarm() {
   ansi.print(remainingCapacityAlarm());
   ansi.print(batterymode.bits.capacity_mode ? " 10mWh" : "mAh");
   ansi.gotoXY(TAB3, y);
-  ansi.print(I2Ccode[i2ccode]);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displayremainingTimeAlarm() {
@@ -597,6 +597,9 @@ void Display::displaymanufacturerAccessChemistryID() { // command 0x00 0x0008
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessChemistryID (0x00 -> 0x0008):");
   manufacturerAccessChemistryID();
+  ansi.gotoXY(TAB2, y);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displaymanufacturerAccessShutdown(){// command 0x00 0x0010
@@ -604,6 +607,9 @@ void Display::displaymanufacturerAccessShutdown(){// command 0x00 0x0010
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessShutdown (0x00 -> 0x0010):");
   manufacturerAccessShutdown();
+  ansi.gotoXY(TAB2, y);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displaymanufacturerAccessSleep(){// command 0x00 0x0011
@@ -611,6 +617,9 @@ void Display::displaymanufacturerAccessSleep(){// command 0x00 0x0011
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessSleep (0x00 -> 0x0011):");
   manufacturerAccessSleep();
+  ansi.gotoXY(TAB2, y);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
@@ -618,22 +627,36 @@ void Display::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessSeal (0x00 -> 0x0020):");
   manufacturerAccessSeal();
+  ansi.gotoXY(TAB2, y);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessPermanentFailClear (key a, key b):");
+  ansi.gotoXY(TAB2, y);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 } 
+
 void Display::displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessUnseal (key a, key b):");
+  ansi.gotoXY(TAB2, y);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 }
+
 void Display::displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessFullAccess (key a, key b):");
+  ansi.gotoXY(TAB2, y);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displaymanufacturerData() {             // command 0x23
@@ -821,6 +844,7 @@ void Display::displayunsealKey(){                     // command 0x60
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("unsealKey (0x60):");
+  ansi.println();
 }
 
 void Display::displaySealstatus() {
@@ -841,12 +865,16 @@ void Display::displayBatteryAddress() {
     ansi.println(address(), HEX);
 }
 
+// Helper to simulate remove_cvref_t
+template <typename T>
+using remove_cvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
 // Call a specific function by name
 void Display::displayByName(const String& functionName) {
   auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info<Display>& entry) {return entry.name == functionName;});
   if (it != info.end()) {
     std::visit([this](auto& f) {
-      using FunctionType = decltype(f);
+      using FunctionType = remove_cvref_t<decltype(f)>;
       // Handle different member function signatures
       if constexpr (std::is_same_v<FunctionType, void (Display::*)()>) { 
           (this->*f)();
@@ -861,19 +889,20 @@ void Display::displayByName(const String& functionName) {
 
 // Call all functions with the same classifier
 void Display::displayByClassifier(uint8_t type) {
-  auto it = std::find_if(info.begin(), info.end(), [type](const Info<Display>& entry) {return entry.monitor_group == type;});
-  if (it != info.end()) {
-    std::visit([this](auto& f) {
-      using FunctionType = decltype(f);
-      // Handle different member function signatures
-      if constexpr (std::is_same_v<FunctionType, void (Display::*)()>) {
-          (this->*f)();
-      } else if constexpr (std::is_same_v<FunctionType, void (Display::*)(uint16_t, uint16_t)>) {
-          (this->*f)(0, 0); // Provide default arguments
-      } else { Serial.println("Unsupported function type."); }
-    }, it->dc);
-  } else {
-    Serial.print("Classifier \"" + String(type) + "\" not found.\n");
+  for (const auto& it : info) {
+    // Access the element here
+    // element is of type Info<Display>
+    if (it.monitor_group == type) {
+      std::visit([this](auto& f) {
+        using FunctionType = remove_cvref_t<decltype(f)>;
+        // Handle different member function signatures
+        if constexpr (std::is_same_v<FunctionType, void (Display::*)()>) {
+            (this->*f)();
+        } else if constexpr (std::is_same_v<FunctionType, void (Display::*)(uint16_t, uint16_t)>) {
+            (this->*f)(0, 0); // Provide default arguments
+        } else { Serial.println("Unsupported function type."); }
+      }, it.dc);
+    }
   }
 }
 
