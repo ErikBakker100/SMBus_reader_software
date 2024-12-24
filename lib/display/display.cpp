@@ -3,59 +3,59 @@
 
 Display::Display(uint8_t address): BQICTYPE(address) {
   // list of the different commands, including function pointers to these funtions. This to be able to call them via user input
-    info.emplace_back(&Display::displaymanufacturerAccess, DEVICEINFO, "ManufacturerAccess()");
-    info.emplace_back(&Display::displayremainingCapacityAlarm, DEVICEINFO, "remainingCapacityAlarm()");
-    info.emplace_back(&Display::displayremainingTimeAlarm, DEVICEINFO, "remainingTimeAlarm()");
-    info.emplace_back(&Display::displaybatteryMode, STATUSBITS, "batteryMode()");
-    info.emplace_back(&Display::displayatRate, ATRATES, "atRate()");
-    info.emplace_back(&Display::displayatRateTimeToFull, ATRATES, "atRateTimeToFull()");
-    info.emplace_back(&Display::displayatRateTimeToEmpty, ATRATES, "atRateTimeToEmpty()");
-    info.emplace_back(&Display::displayatRateOK, ATRATES, "atRateOK()");
-    info.emplace_back(&Display::displaytemperature, USAGEINFO, "temperature()");
-    info.emplace_back(&Display::displayvoltage, USAGEINFO, "voltage()");
-    info.emplace_back(&Display::displaycurrent, USAGEINFO, "current()");
-    info.emplace_back(&Display::displayaverageCurrent, USAGEINFO, "averageCurrent()");
-    info.emplace_back(&Display::displaymaxError, USAGEINFO, "maxError()");
-    info.emplace_back(&Display::displayrelativeStateOfCharge, COMPUTEDINFO, "relativeStateOfCharge()");
-    info.emplace_back(&Display::displayabsoluteStateOfCharge, COMPUTEDINFO, "absoluteStateOfCharge()");
-    info.emplace_back(&Display::displayremainingCapacity, USAGEINFO, "remainingCapacity()");
-    info.emplace_back(&Display::displayfullCapacity, USAGEINFO, "fullCapacity()");
-    info.emplace_back(&Display::displayrunTimeToEmpty, COMPUTEDINFO, "runTimeToEmpty()");
-    info.emplace_back(&Display::displayavgTimeToEmpty, COMPUTEDINFO, "avgTimeToEmpty()");
-    info.emplace_back(&Display::displayavgTimeToFull, COMPUTEDINFO, "avgTimeToFull()");
-    info.emplace_back(&Display::displaychargingCurrent, USAGEINFO, "chargingCurrent()");
-    info.emplace_back(&Display::displaychargingVoltage, USAGEINFO, "chargingVoltage()");
-    info.emplace_back(&Display::displaybatteryStatus, STATUSBITS, "batteryStatus()");
-    info.emplace_back(&Display::displaycycleCount, USAGEINFO, "cycleCount()");
-    info.emplace_back(&Display::displaydesignCapacity, DEVICEINFO, "designCapacity()");
-    info.emplace_back(&Display::displaydesignVoltage, DEVICEINFO, "designVoltage()");
-    info.emplace_back(&Display::displayspecificationInfo, DEVICEINFO, "specificationInfo()");
-    info.emplace_back(&Display::displaymanufactureDate, DEVICEINFO, "manufactureDate()");
-    info.emplace_back(&Display::displayserialNumber, DEVICEINFO, "serialNumber()");
-    info.emplace_back(&Display::displaymanufacturerName, DEVICEINFO, "manufacturerName()");
-    info.emplace_back(&Display::displaydeviceName, DEVICEINFO, "deviceName()");
-    info.emplace_back(&Display::displaydeviceChemistry, DEVICEINFO, "deviceChemistry()");
-    info.emplace_back(&Display::displayoptionalMFGfunctions, DEVICEINFO, "optionalMFGfunction_1-4()");
-    info.emplace_back(&Display::displaymanufacturerAccessType, DEVICEINFO, "manufacturerAccessType()");
-    info.emplace_back(&Display::displaymanufacturerAccessFirmware, DEVICEINFO, "manufacturerAccessFirmware()");
-    info.emplace_back(&Display::displaymanufacturerAccessHardware, DEVICEINFO, "manufacturerAccessHardware()");
-    info.emplace_back(&Display::displaymanufacturerAccessStatus, DEVICEINFO, "manufacturerAccessStatus()");
-    info.emplace_back(&Display::displaymanufacturerAccessChemistryID, DEVICEINFO, "manufacturerAccessChemistryID()");
-    info.emplace_back(&Display::displaymanufacturerAccessShutdown, SET, "manufacturerAccessShutdown()"); // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
-    info.emplace_back(&Display::displaymanufacturerAccessSleep, SET, "manufacturerAccessSleep()"); // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
-    info.emplace_back(&Display::displaymanufacturerAccessSeal, SET, "manufacturerAccessSeal()");
-    info.emplace_back(&Display::displaymanufacturerAccessPermanentFailClear, SET, "manufacturerAccessPermanentFailClear()");
-    info.emplace_back(&Display::displaymanufacturerAccessUnseal, SET, "manufacturerAccessUnseal()");
-    info.emplace_back(&Display::displaymanufacturerAccessFullAccess, SET, "manufacturerAccessFullAccess()");
-    info.emplace_back(&Display::displaymanufacturerData, DEVICEINFO, "manufacturerData()");
-    info.emplace_back(&Display::displayfetControl, SET, "fetControl()");
-    info.emplace_back(&Display::displaystateOfHealth, DEVICEINFO, "stateOfHealth()");
-    info.emplace_back(&Display::displaysafetyAlert, DEVICEINFO, "safetyAlert()");
-    info.emplace_back(&Display::displaysafetyStatus, DEVICEINFO, "safetyStatus()");
-    info.emplace_back(&Display::displaypfAlert, DEVICEINFO, "pfAlert()");
-    info.emplace_back(&Display::displaypfStatus, DEVICEINFO, "pfStatus()");
-    info.emplace_back(&Display::displayoperationStatus, DEVICEINFO, "operationStatus()");
-    info.emplace_back(&Display::displayunsealKey, DEVICEINFO, "unsealKey()");
+    info.emplace_back(&Display::displaymanufacturerAccess, DEVICEINFO, "ManufacturerAccess");
+    info.emplace_back(&Display::displayremainingCapacityAlarm, USAGEINFO, "remainingCapacityAlarm");
+    info.emplace_back(&Display::displayremainingTimeAlarm, USAGEINFO, "remainingTimeAlarm");
+    info.emplace_back(&Display::displaybatteryMode, STATUSBITS, "batteryMode");
+    info.emplace_back(&Display::displayatRate, ATRATES, "atRate");
+    info.emplace_back(&Display::displayatRateTimeToFull, ATRATES, "atRateTimeToFull");
+    info.emplace_back(&Display::displayatRateTimeToEmpty, ATRATES, "atRateTimeToEmpty");
+    info.emplace_back(&Display::displayatRateOK, ATRATES, "atRateOK");
+    info.emplace_back(&Display::displaytemperature, USAGEINFO, "temperature");
+    info.emplace_back(&Display::displayvoltage, USAGEINFO, "voltage");
+    info.emplace_back(&Display::displaycurrent, USAGEINFO, "current");
+    info.emplace_back(&Display::displayaverageCurrent, USAGEINFO, "averageCurrent");
+    info.emplace_back(&Display::displaymaxError, USAGEINFO, "maxError");
+    info.emplace_back(&Display::displayrelativeStateOfCharge, COMPUTEDINFO, "relativeStateOfCharge");
+    info.emplace_back(&Display::displayabsoluteStateOfCharge, COMPUTEDINFO, "absoluteStateOfCharge");
+    info.emplace_back(&Display::displayremainingCapacity, USAGEINFO, "remainingCapacity");
+    info.emplace_back(&Display::displayfullCapacity, DEVICEINFO, "fullCapacity");
+    info.emplace_back(&Display::displayrunTimeToEmpty, COMPUTEDINFO, "runTimeToEmpty");
+    info.emplace_back(&Display::displayavgTimeToEmpty, COMPUTEDINFO, "avgTimeToEmpty");
+    info.emplace_back(&Display::displayavgTimeToFull, COMPUTEDINFO, "avgTimeToFull");
+    info.emplace_back(&Display::displaychargingCurrent, USAGEINFO, "chargingCurrent");
+    info.emplace_back(&Display::displaychargingVoltage, USAGEINFO, "chargingVoltage");
+    info.emplace_back(&Display::displaybatteryStatus, STATUSBITS, "batteryStatus");
+    info.emplace_back(&Display::displaycycleCount, USAGEINFO, "cycleCount");
+    info.emplace_back(&Display::displaydesignCapacity, DEVICEINFO, "designCapacity");
+    info.emplace_back(&Display::displaydesignVoltage, DEVICEINFO, "designVoltage");
+    info.emplace_back(&Display::displayspecificationInfo, DEVICEINFO, "specificationInfo");
+    info.emplace_back(&Display::displaymanufactureDate, DEVICEINFO, "manufactureDate");
+    info.emplace_back(&Display::displayserialNumber, DEVICEINFO, "serialNumber");
+    info.emplace_back(&Display::displaymanufacturerName, DEVICEINFO, "manufacturerName");
+    info.emplace_back(&Display::displaydeviceName, DEVICEINFO, "deviceName");
+    info.emplace_back(&Display::displaydeviceChemistry, DEVICEINFO, "deviceChemistry");
+    info.emplace_back(&Display::displayoptionalMFGfunctions, USAGEINFO, "optionalMFGfunction_1-4");
+    info.emplace_back(&Display::displaymanufacturerAccessType, DEVICEINFO, "manufacturerAccessType");
+    info.emplace_back(&Display::displaymanufacturerAccessFirmware, DEVICEINFO, "manufacturerAccessFirmware");
+    info.emplace_back(&Display::displaymanufacturerAccessHardware, DEVICEINFO, "manufacturerAccessHardware");
+    info.emplace_back(&Display::displaymanufacturerAccessStatus, STATUSBITS, "manufacturerAccessStatus");
+    info.emplace_back(&Display::displaymanufacturerAccessChemistryID, DEVICEINFO, "manufacturerAccessChemistryID");
+    info.emplace_back(&Display::displaymanufacturerAccessShutdown, SET, "manufacturerAccessShutdown"); // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
+    info.emplace_back(&Display::displaymanufacturerAccessSleep, SET, "manufacturerAccessSleep"); // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
+    info.emplace_back(&Display::displaymanufacturerAccessSeal, SET, "manufacturerAccessSeal");
+    info.emplace_back(&Display::displaymanufacturerAccessPermanentFailClear, SET, "manufacturerAccessPermanentFailClear");
+    info.emplace_back(&Display::displaymanufacturerAccessUnseal, SET, "manufacturerAccessUnseal");
+    info.emplace_back(&Display::displaymanufacturerAccessFullAccess, SET, "manufacturerAccessFullAccess");
+    info.emplace_back(&Display::displaymanufacturerData, DEVICEINFO, "manufacturerData");
+    info.emplace_back(&Display::displayfetControl, SET, "fetControl");
+    info.emplace_back(&Display::displaystateOfHealth, STATUSBITS, "stateOfHealth");
+    info.emplace_back(&Display::displaysafetyAlert, DEVICEINFO, "safetyAlert");
+    info.emplace_back(&Display::displaysafetyStatus, STATUSBITS, "safetyStatus");
+    info.emplace_back(&Display::displaypfAlert, DEVICEINFO, "pfAlert");
+    info.emplace_back(&Display::displaypfStatus, STATUSBITS, "pfStatus");
+    info.emplace_back(&Display::displayoperationStatus, DEVICEINFO, "operationStatus");
+    info.emplace_back(&Display::displayunsealKey, DEVICEINFO, "unsealKey");
 }
 
 void Display::displaymanufacturerAccess() {
@@ -365,7 +365,7 @@ void Display::displaybatteryStatus() {
   ansi.gotoXY(TAB2, y);
   printBits(batterystatus.raw);
   ansi.gotoXY(TAB3, y);
-  ansi.print(I2Ccode[i2ccode] + " " + errorcodes[batterystatus.bits.error_codes]);
+  ansi.print(I2Ccode[i2ccode]);
   ansi.gotoXY(TAB1, y+1);
   ansi.print("Fully Discharged:");
   ansi.gotoXY(TAB2, y+1);
@@ -518,7 +518,7 @@ void Display::displaydeviceChemistry() {
 void Display::displayoptionalMFGfunctions() {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("Voltage Cell 1 to 4 (0x3f - 0x3c):");
+  ansi.print("Voltage Cell 1 to 4 (0x3f-0x3c):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
   ansi.print((float)optionalMFGfunction4()/1000);
@@ -537,7 +537,7 @@ void Display::displayoptionalMFGfunctions() {
 void Display::displaymanufacturerAccessType() { // command 0x00 0x0001
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessType (0x00 -> 0x0001):");
+  ansi.print("manufacturerAccessType (0x00->0x0001):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
   ansi.print("BQ20Z");
@@ -549,7 +549,7 @@ void Display::displaymanufacturerAccessType() { // command 0x00 0x0001
 void Display::displaymanufacturerAccessFirmware() {   // command 0x00
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("Firmware version (0x00 -> 0x0002):");
+  ansi.print("Firmware version (0x00->0x0002):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
   uint16_t version = manufacturerAccessFirmware();
@@ -563,7 +563,7 @@ void Display::displaymanufacturerAccessFirmware() {   // command 0x00
 void Display::displaymanufacturerAccessHardware() {   // command 0x00
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("Hardware version (0x00 -> 0x0003):");
+  ansi.print("Hardware version (0x00->0x0003):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
   ansi.print((uint8_t)manufacturerAccessHardware(), HEX);
@@ -574,7 +574,7 @@ void Display::displaymanufacturerAccessHardware() {   // command 0x00
 void Display::displaymanufacturerAccessStatus() {     // command 0x00
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("ManufacturerStatus.name (0x00 -> 0x0006):");
+  ansi.print("ManufacturerStatus (0x00->0x0006):");
   manufacturerAccessStatus();
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
@@ -595,9 +595,9 @@ void Display::displaymanufacturerAccessStatus() {     // command 0x00
 void Display::displaymanufacturerAccessChemistryID() { // command 0x00 0x0008
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessChemistryID (0x00 -> 0x0008):");
-  manufacturerAccessChemistryID();
+  ansi.print("manufacturerAccessChemistryID (0x00->0x0008):");
   ansi.gotoXY(TAB2, y);
+  ansi.print(manufacturerAccessChemistryID(), HEX);
   ansi.gotoXY(TAB3, y);
   ansi.println(I2Ccode[i2ccode]);
 }
@@ -605,7 +605,7 @@ void Display::displaymanufacturerAccessChemistryID() { // command 0x00 0x0008
 void Display::displaymanufacturerAccessShutdown(){// command 0x00 0x0010
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessShutdown (0x00 -> 0x0010):");
+  ansi.print("manufacturerAccessShutdown (0x00->0x0010):");
   manufacturerAccessShutdown();
   ansi.gotoXY(TAB2, y);
   ansi.gotoXY(TAB3, y);
@@ -615,7 +615,7 @@ void Display::displaymanufacturerAccessShutdown(){// command 0x00 0x0010
 void Display::displaymanufacturerAccessSleep(){// command 0x00 0x0011
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessSleep (0x00 -> 0x0011):");
+  ansi.print("manufacturerAccessSleep (0x00->0x0011):");
   manufacturerAccessSleep();
   ansi.gotoXY(TAB2, y);
   ansi.gotoXY(TAB3, y);
@@ -625,7 +625,7 @@ void Display::displaymanufacturerAccessSleep(){// command 0x00 0x0011
 void Display::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessSeal (0x00 -> 0x0020):");
+  ansi.print("manufacturerAccessSeal (0x00->0x0020):");
   manufacturerAccessSeal();
   ansi.gotoXY(TAB2, y);
   ansi.gotoXY(TAB3, y);
@@ -635,8 +635,12 @@ void Display::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
 void Display::displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessPermanentFailClear (key a, key b):");
+  ansi.print("manufacturerAccessPermanentFailClear:");
   ansi.gotoXY(TAB2, y);
+  ansi.print("Keys: a:");
+  ansi.print(key_a, HEX);
+  ansi.print(", b:");
+  ansi.print(key_b, HEX);
   ansi.gotoXY(TAB3, y);
   ansi.println(I2Ccode[i2ccode]);
 } 
@@ -644,8 +648,13 @@ void Display::displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16
 void Display::displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessUnseal (key a, key b):");
+  ansi.print("manufacturerAccessUnseal:");
+  manufacturerAccessUnseal(key_a, key_b);
   ansi.gotoXY(TAB2, y);
+  ansi.print("Used keys: a:");
+  ansi.print(key_a, HEX);
+  ansi.print(", b:");
+  ansi.print(key_b, HEX);
   ansi.gotoXY(TAB3, y);
   ansi.println(I2Ccode[i2ccode]);
 }
@@ -653,8 +662,13 @@ void Display::displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b){
 void Display::displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessFullAccess (key a, key b):");
+  ansi.print("manufacturerAccessFullAccess:");
+  manufacturerAccessFullAccess(key_a, key_b);
   ansi.gotoXY(TAB2, y);
+  ansi.print("Used keys: a:");
+  ansi.print(key_a, HEX);
+  ansi.print(", b:");
+  ansi.print(key_b, HEX);
   ansi.gotoXY(TAB3, y);
   ansi.println(I2Ccode[i2ccode]);
 }
@@ -662,7 +676,7 @@ void Display::displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b
 void Display::displaymanufacturerData() {             // command 0x23
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
-  ansi.print("ManufacturerData.name (0x23):");
+  ansi.print("ManufacturerData (0x23):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
   manufacturerData();
@@ -827,7 +841,6 @@ void Display::displayoperationStatus() {              // command 0x54
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Operation Status (0x54):");
-  ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
   operationStatus();
   if (i2ccode) {
@@ -844,7 +857,16 @@ void Display::displayunsealKey(){                     // command 0x60
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("unsealKey (0x60):");
-  ansi.println();
+  ansi.gotoXY(TAB2, y);
+  uint32_t key = unsealKey();
+    if (i2ccode) {
+    ansi.print(I2Ccode[i2ccode]);
+    ansi.println(", is device in full access mode ?");
+  } else { 
+    ansi.print(key, HEX);;
+    ansi.gotoXY(TAB3, y);
+    ansi.println(I2Ccode[i2ccode]);
+  }
 }
 
 void Display::displaySealstatus() {
@@ -871,6 +893,7 @@ using remove_cvref_t = typename std::remove_cv<typename std::remove_reference<T>
 
 // Call a specific function by name
 void Display::displayByName(const String& functionName) {
+  
   auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info<Display>& entry) {return entry.name == functionName;});
   if (it != info.end()) {
     std::visit([this](auto& f) {
@@ -889,9 +912,8 @@ void Display::displayByName(const String& functionName) {
 
 // Call all functions with the same classifier
 void Display::displayByClassifier(uint8_t type) {
+  if (type > 5) return;
   for (const auto& it : info) {
-    // Access the element here
-    // element is of type Info<Display>
     if (it.monitor_group == type) {
       std::visit([this](auto& f) {
         using FunctionType = remove_cvref_t<decltype(f)>;
@@ -904,6 +926,12 @@ void Display::displayByClassifier(uint8_t type) {
       }, it.dc);
     }
   }
+}
+
+void Display::displayCommandNames(){
+    for (const auto& it : info) {
+      Serial.println(it.name); 
+    }
 }
 
 // prints 8-bit integer in this form: 0000 0000

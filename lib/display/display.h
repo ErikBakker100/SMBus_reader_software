@@ -75,9 +75,9 @@ public:
     void displaymanufacturerAccessShutdown();   // command 0x0010
     void displaymanufacturerAccessSleep();      // command 0x0011
     void displaymanufacturerAccessSeal();       // command 0x00 0x0020
-    void displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
-    void displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
-    void displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
+    void displaymanufacturerAccessPermanentFailClear(uint16_t key_a = PFCLEARA, uint16_t key_b = PFCLEARA); 
+    void displaymanufacturerAccessUnseal(uint16_t key_a = UNSEALA, uint16_t key_b = UNSEALB);
+    void displaymanufacturerAccessFullAccess(uint16_t key_a = FULLACCESSA, uint16_t key_b = FULLACCESSB);
     void displaymanufacturerData();             // command 0x23
     void displayfetControl();
     void displaystateOfHealth();                // command 0x4f
@@ -96,6 +96,7 @@ public:
     void displayByName(const String&);
     // Call functions dynamically
     void displayByClassifier(uint8_t);
+    void displayCommandNames();
 
 private:
     void printBits(uint8_t);

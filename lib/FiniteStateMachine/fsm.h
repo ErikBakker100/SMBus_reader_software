@@ -38,13 +38,13 @@ public:
 //    virtual CommandState* handleInput(Command&, uint8_t);
 };
 
-class standardState : public CommandState {
+class categoryState : public CommandState {
 public:
     virtual void enter(Command &);
 //    virtual CommandState* handleInput(Command&, uint8_t);
 };
 
-class extendedState : public CommandState {
+class commandnameState : public CommandState {
 public:
     virtual void enter(Command&);
 //    virtual CommandState* handleInput(Command&, uint8_t);
@@ -66,8 +66,10 @@ public:
     virtual void enter(Command&);
 //    virtual CommandState* handleInput(Command&, uint8_t);
 };
-class specifycommandState : public CommandState {
+
+class fullaccessState : public CommandState {
 public:
     virtual void enter(Command&);
 //    virtual CommandState* handleInput(Command&, uint8_t);
 };
+

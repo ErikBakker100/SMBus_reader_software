@@ -235,6 +235,12 @@ class CmdParser
         return this->getValueFromKey(key, true);
     }
 
+    // to convert a String to unsigned long (uint32_t). Takes hex (0x0000) or decimal as input
+    uint32_t toLong(uint8_t idx) {
+        char *param = this->getCmdParam(idx);
+        return strtoul(param, nullptr, 0);
+    }
+
 #endif
 
     /**

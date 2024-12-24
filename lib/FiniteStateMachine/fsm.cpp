@@ -7,7 +7,6 @@ CmdParser cmd;
 ANSI ansi(&Serial);
 
 // class Command
-
 Command::Command() {
     state_ = new menuState;
 }
@@ -41,12 +40,12 @@ CommandState* CommandState::handleInput (Command& command, uint8_t input) {
     if (command.display == nullptr) {
         Serial.println("please select '2' (Search address) first");
     } else {
-        if (input == 3) return new standardState;
-        else if (input == 4) return new extendedState;
+        if (input == 3) return new categoryState;
+        else if (input == 4) return new commandnameState;
         else if (input == 5) return new unsealState;
         else if (input == 6) return new sealState;
         else if (input == 7) return new clearpfState;
-        else if (input == 8) return new specifycommandState;
+        else if (input == 8) return new fullaccessState;
     }
     return nullptr;
 }
@@ -90,9 +89,12 @@ void scanState::enter(Command& command) {
     return nullptr;
 }*/
 
-void standardState::enter(Command& command) {
+void categoryState::enter(Command& command) {
     displaySmallmenu();
-    command.display->displayByClassifier(1);
+    if(cmd.getParamCount() == 2) {
+        String param = cmd.getCmdParam(1);
+        command.display->displayByClassifier(param.toInt());
+    } else Serial.println("please specify category. Select '3 x' (x is category number)");
 }
 
 // class extended = 4
@@ -100,8 +102,13 @@ void standardState::enter(Command& command) {
     return nullptr;
 }*/
 
-void extendedState::enter(Command& command) {
+void commandnameState::enter(Command& command) {
     displaySmallmenu();
+    if(cmd.getParamCount() == 2) {
+        String param = cmd.getCmdParam(1);
+        (param == "?")? command.display->displayCommandNames():command.display->displayByName(param);
+        
+    } else Serial.println("Please specify command name. Select '3 x' (x is name, or use ?)");
 }
 
 // class unseal = 5
@@ -111,9 +118,12 @@ void extendedState::enter(Command& command) {
 
 void unsealState::enter(Command& command) {
     displaySmallmenu();
-        command.display->displaymanufacturerAccessUnseal(UNSEALA, UNSEALB);
-//        displaySealstatus(battery);
-
+    if(cmd.getParamCount() == 3) {
+        uint32_t first, second;
+        first = cmd.toLong(1);
+        second = cmd.toLong(2);
+        command.display->displaymanufacturerAccessUnseal(first, second);
+    } else command.display->displaymanufacturerAccessUnseal(); // using default values
 }
 
 // class seal = 6
@@ -134,20 +144,27 @@ void sealState::enter(Command& command) {
 
 void clearpfState::enter(Command& command) {
     displaySmallmenu();
-    command.display->displaymanufacturerAccessPermanentFailClear(PFCLEARA, PFCLEARB);
-    Serial.println("done!");
+    if(cmd.getParamCount() == 3) {
+        uint32_t first, second;
+        first = cmd.toLong(1);
+        second = cmd.toLong(2);
+        command.display->displaymanufacturerAccessPermanentFailClear(first, second);
+    } else command.display->displaymanufacturerAccessPermanentFailClear(); // using default values
+
 }
 
-// class specify command = 8
-/*CommandState* specifycommand::handleInput (Command& command, uint8_t input) {
+// class full access = 8
+/*CommandState* fullaccessState::handleInput (Command& command, uint8_t input) {
     return nullptr;
 }*/
 
-void specifycommandState::enter(Command& command) {
+void fullaccessState::enter(Command& command) {
     displaySmallmenu();
-    if(cmd.getParamCount() == 2) {
-        String reg = cmd.getCmdParam(1);
-        command.display->displayByName(reg);
-    } else Serial.println("Command not found");
-    Serial.println("done!");
+    if(cmd.getParamCount() == 3) {
+        uint32_t first, second;
+        first = cmd.toLong(1);
+        second = cmd.toLong(2);
+        command.display->displaymanufacturerAccessFullAccess(first, second);
+    } else command.display->displaymanufacturerAccessFullAccess(); // using default values
+
 }
