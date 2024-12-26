@@ -596,7 +596,7 @@ void Display::displaymanufacturerAccessChemistryID() { // command 0x00 0x0008
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessChemistryID (0x00->0x0008):");
-  ansi.gotoXY(TAB2, y);
+  ansi.print(" ");
   ansi.print(manufacturerAccessChemistryID(), HEX);
   ansi.gotoXY(TAB3, y);
   ansi.println(I2Ccode[i2ccode]);
@@ -630,20 +630,25 @@ void Display::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
   ansi.gotoXY(TAB2, y);
   ansi.gotoXY(TAB3, y);
   ansi.println(I2Ccode[i2ccode]);
+  displaySealstatus();
 }
 
 void Display::displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
-  ansi.readCursorPosition(x, y);
-  ansi.print("manufacturerAccessPermanentFailClear:");
-  ansi.gotoXY(TAB2, y);
-  ansi.print("Keys: a:");
-  ansi.print(key_a, HEX);
-  ansi.print(", b:");
-  ansi.print(key_b, HEX);
-  ansi.gotoXY(TAB3, y);
-  ansi.println(I2Ccode[i2ccode]);
-} 
+  if (displaySealstatus()) ansi.println("Put in Unsealed or Full Access mode first");
+  else {
+    manufacturerAccessPermanentFailClear(key_a, key_b);
+    ansi.readCursorPosition(x, y);
+    ansi.print("manufacturerAccessPermanentFailClear:");
+    ansi.gotoXY(TAB2, y);
+    ansi.print("Keys: a:");
+    ansi.print(key_a, HEX);
+    ansi.print(", b:");
+    ansi.print(key_b, HEX);
+    ansi.gotoXY(TAB3, y);
+    ansi.println(I2Ccode[i2ccode]);
+  }
+}
 
 void Display::displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
@@ -869,12 +874,33 @@ void Display::displayunsealKey(){                     // command 0x60
   }
 }
 
-void Display::displaySealstatus() {
-  batteryStatus();
-  ansi.print(I2Ccode[i2ccode]);
-  ansi.println(" " + errorcodes[batterystatus.bits.error_codes]);
-  ansi.println(operationstatus.bits.ss?"sealed mode enabled":"sealed mode disabled");
-  ansi.println(operationstatus.bits.fas?"full access mode enabled":"full access mode disabled");
+bool Display::findkey(uint8_t) {
+  uint16_t key_a, key_b;
+  for (uint16_t a = 0x00; a<= 0xffff; a++) {
+
+  }
+  return true;
+}
+
+
+// returns true if sealed, false otherwise
+bool Display::displaySealstatus() {
+  bool status {true};
+  uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  operationStatus();
+  ansi.gotoXY(TAB1, y);
+  ansi.print("Mode: ");
+  ansi.gotoXY(TAB2, y);
+  if(!i2ccode) {
+    status = false;
+    ansi.print(operationstatus.bits.ss?"":"Unsealed");
+    ansi.print(operationstatus.bits.fas?"":" Full access");
+    ansi.println();
+  } else ansi.println("Sealed");
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
+  return status;
 }
 
 void Display::displayBatteryAddress() {

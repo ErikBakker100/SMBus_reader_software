@@ -17,7 +17,7 @@ extern ANSI ansi;
 template <typename T>
 using pdc = std::variant<             // pdc = pointer to display command
     void (T::*)(),                    // Member function with signature `void()`
-    void (T::*)(uint16_t, uint16_t)  // Member function with signature `void(uint16_t, uint16_t)
+    void (T::*)(uint16_t, uint16_t)  // Member function with signature `bool(uint16_t, uint16_t)
 >;
 
 template <typename T>
@@ -75,7 +75,7 @@ public:
     void displaymanufacturerAccessShutdown();   // command 0x0010
     void displaymanufacturerAccessSleep();      // command 0x0011
     void displaymanufacturerAccessSeal();       // command 0x00 0x0020
-    void displaymanufacturerAccessPermanentFailClear(uint16_t key_a = PFCLEARA, uint16_t key_b = PFCLEARA); 
+    void displaymanufacturerAccessPermanentFailClear(uint16_t key_a = PFCLEARA, uint16_t key_b = PFCLEARB); 
     void displaymanufacturerAccessUnseal(uint16_t key_a = UNSEALA, uint16_t key_b = UNSEALB);
     void displaymanufacturerAccessFullAccess(uint16_t key_a = FULLACCESSA, uint16_t key_b = FULLACCESSB);
     void displaymanufacturerData();             // command 0x23
@@ -86,10 +86,11 @@ public:
     void displaypfAlert();
     void displaypfStatus();
     void displayoperationStatus();              // command 0x54
-    void displaySealstatus(); // command 0x54
     void displayunsealKey();                    // command 0x60
     void displayBatteryAddress();
 
+    bool displaySealstatus();                   // true if sealed, otherwise false.
+    bool findkey(uint8_t);                      // Searches for a key pair. 1=find key pair for Unseal, 2=PFclear, 3=Full access
     std::vector<Info<Display>> info; // Store structs
 
     // Call a specific function by name

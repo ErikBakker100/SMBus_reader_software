@@ -60,14 +60,17 @@ uint16_t bq20z9xx::manufacturerAccessChemistryID() { // command 0x00 0x0008
 }
 
 /**
- * @brief implementation specific. For TI bq20z90/bq20z95 Returns the Battery Status.
- * @return uint16_t
+ * @brief Shutdown
+ * @return none
  */
-
 void bq20z9xx::manufacturerAccessShutdown(){ // command 0x0010
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSSHUTDOWN);
 }
 
+/**
+ * @brief Sleep
+ * @return none
+ */
 void bq20z9xx::manufacturerAccessSleep(){ // command 0x0011
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSSLEEP);
 }
@@ -77,11 +80,10 @@ void bq20z9xx::manufacturerAccessSleep(){ // command 0x0011
  * Content determined by the Smart Battery's manufacturer. For the bq20z90/bq20z95 used to limit access to the extended SBS functions and data flash space, sets.
  * This command is only available when the bq20z90/bq20z95 is in Unsealed or Full Access mode.
  * • SBS:ManufacturerAccess(0x00)
- * @return 0
+ * @return none
  */
-uint16_t bq20z9xx::manufacturerAccessSeal() {
+void bq20z9xx::manufacturerAccessSeal() {
   writeRegister(MANUFACTURERACCESS, MANUFACTURERACCESSSEAL);
-  return 0;
 }
 
 /**

@@ -8,7 +8,6 @@ ANSI ansi(&Serial);
 
 // class Command
 Command::Command() {
-    state_ = new menuState;
 }
 
 void Command::handleInput (CmdBuffer<64> buffer) {
@@ -54,12 +53,12 @@ void CommandState::update () {
 }
 
 //class menu = 1
-/*CommandState* menuState::handleInput (Command& command, uint8_t input) {
-    return nullptr;
-}*/
-
 void menuState::enter(Command& command) {
+}
+
+CommandState* menuState::handleInput (Command& command, uint8_t input) {
     displayMainmenu();
+    return nullptr;
 }
 
 //class I2c Scan = 2
@@ -112,12 +111,23 @@ void commandnameState::enter(Command& command) {
 }
 
 // class unseal = 5
-/*CommandState* unsealState::handleInput (Command& command, uint8_t input) {
+CommandState* unsealState::handleInput (Command& command, uint8_t input) {
+    Serial.println("Interrupted by user.");
     return nullptr;
-}*/
+}
+
+void unsealState::update () {
+//    command.display->findkey();
+
+
+}
 
 void unsealState::enter(Command& command) {
     displaySmallmenu();
+    if(cmd.getParamCount() == 2) {
+        String param = cmd.getCmdParam(1);
+        if (param == "?") command.display->findkey(1);
+    }
     if(cmd.getParamCount() == 3) {
         uint32_t first, second;
         first = cmd.toLong(1);
@@ -138,9 +148,10 @@ void sealState::enter(Command& command) {
 }
 
 // class clear pf = 7
-/*CommandState* clearpfState::handleInput (Command& command, uint8_t input) {
+CommandState* clearpfState::handleInput (Command& command, uint8_t input) {
+    Serial.println("Interrupted by user.");
     return nullptr;
-}*/
+}
 
 void clearpfState::enter(Command& command) {
     displaySmallmenu();
@@ -150,13 +161,13 @@ void clearpfState::enter(Command& command) {
         second = cmd.toLong(2);
         command.display->displaymanufacturerAccessPermanentFailClear(first, second);
     } else command.display->displaymanufacturerAccessPermanentFailClear(); // using default values
-
 }
 
 // class full access = 8
-/*CommandState* fullaccessState::handleInput (Command& command, uint8_t input) {
+CommandState* fullaccessState::handleInput (Command& command, uint8_t input) {
+    Serial.println("Interrupted by user.");
     return nullptr;
-}*/
+}
 
 void fullaccessState::enter(Command& command) {
     displaySmallmenu();

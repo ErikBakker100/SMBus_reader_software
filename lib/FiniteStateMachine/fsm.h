@@ -29,7 +29,7 @@ protected:
 class menuState : public CommandState {
 public:
     virtual void enter(Command&);
-//    virtual CommandState* handleInput(Command&, uint8_t);
+    virtual CommandState* handleInput(Command&, uint8_t);
 };
 
 class scanState : public CommandState {
@@ -53,7 +53,8 @@ public:
 class unsealState : public CommandState {
 public:
     virtual void enter(Command&);
-//    virtual CommandState* handleInput(Command&, uint8_t);
+    virtual CommandState* handleInput(Command&, uint8_t);
+    virtual void update();
 };
 
 class sealState : public CommandState {
@@ -64,12 +65,14 @@ public:
 class clearpfState : public CommandState {
 public:
     virtual void enter(Command&);
-//    virtual CommandState* handleInput(Command&, uint8_t);
+    virtual CommandState* handleInput(Command&, uint8_t);
+    virtual void update();
 };
 
 class fullaccessState : public CommandState {
 public:
     virtual void enter(Command&);
-//    virtual CommandState* handleInput(Command&, uint8_t);
+    virtual CommandState* handleInput(Command&, uint8_t);
+    virtual void update();
 };
 

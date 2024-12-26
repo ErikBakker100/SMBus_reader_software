@@ -69,7 +69,7 @@ class bq20z9xx : protected smbuscommands{
     } bits;
   }manufacturerstatus;
   /**> The commands in this section cause the bq20z90/bq20z95 to take actions when written. No data is returned.*/
-  uint16_t manufacturerAccessSeal();
+  void manufacturerAccessSeal();
   void manufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
   void manufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
   void manufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
