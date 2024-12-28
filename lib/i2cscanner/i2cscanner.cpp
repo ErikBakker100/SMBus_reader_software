@@ -68,7 +68,7 @@ uint8_t i2cscan(uint8_t first, uint8_t last) {
     Serial.println(" " + I2Ccode[error]);
     if (error == 0) break;
   }
-  if (address >= 0x7f) {
+  if (address > last) {
     Serial.println("No I2C devices found\n");
     address=0;
   }

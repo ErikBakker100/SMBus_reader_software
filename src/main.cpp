@@ -20,12 +20,13 @@ CmdBuffer<64> cmdBuffer;
 void setup() {
   Serial.begin(115200);
   cmdBuffer.setEcho(true);
+  command.update();
 }
 
 void loop() {
-  if (cmdBuffer.readFromSerial(&Serial)) {
+  if (cmdBuffer.readFromSerial(&Serial, 1)) {
       command.handleInput(cmdBuffer);
       cmdBuffer.clear();
-  } else Serial.println("Parser error!");
+  }
   command.update();
 }

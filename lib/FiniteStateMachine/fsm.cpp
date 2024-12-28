@@ -35,7 +35,7 @@ void CommandState::enter(Command& command) {
 
 CommandState* CommandState::handleInput (Command& command, uint8_t input) {
     if (input == 1) return new menuState;
-    else if (input == 2) return new scanState;
+    if (input == 2) return new scanState;
     if (command.display == nullptr) {
         Serial.println("please select '2' (Search address) first");
     } else {
@@ -46,20 +46,20 @@ CommandState* CommandState::handleInput (Command& command, uint8_t input) {
         else if (input == 7) return new clearpfState;
         else if (input == 8) return new fullaccessState;
     }
-    return nullptr;
+    return new menuState;
 }
 
 void CommandState::update () {
 }
 
 //class menu = 1
+/*CommandState* menuState::handleInput (Command& command, uint8_t input) {
+    return nullptr;
+}*/
 void menuState::enter(Command& command) {
+    displayMainmenu();
 }
 
-CommandState* menuState::handleInput (Command& command, uint8_t input) {
-    displayMainmenu();
-    return nullptr;
-}
 
 //class I2c Scan = 2
 /*CommandState* scanState::handleInput (Command& command, uint8_t input) {
@@ -71,13 +71,11 @@ void scanState::enter(Command& command) {
     uint8_t address = 0;
     if(cmd.getParamCount() == 3) {
         uint8_t first, second;
-        String param = cmd.getCmdParam(1);
-        first = param.toInt();
-        param = cmd.getCmdParam(2);
-        second = param.toInt();
+        first = (uint8_t)cmd.toLong(1);
+        second = (uint8_t)cmd.toLong(2);
         if (first <= second) address =i2cscan(first, second);
     } else address = i2cscan();
-    if (address > 0) { 
+    if (address > 0) {
         command.display = new Display(address);
         command.display->displayBatteryAddress();
     }
@@ -112,23 +110,23 @@ void commandnameState::enter(Command& command) {
 
 // class unseal = 5
 CommandState* unsealState::handleInput (Command& command, uint8_t input) {
-    Serial.println("Interrupted by user.");
-    return nullptr;
+    return new menuState;
 }
 
 void unsealState::update () {
-//    command.display->findkey();
-
-
+    com->display->testkey(key);
+    key++;
+    if (key == 0xffff) scanning = false;
 }
 
 void unsealState::enter(Command& command) {
     displaySmallmenu();
+    com = &command;
     if(cmd.getParamCount() == 2) {
         String param = cmd.getCmdParam(1);
-        if (param == "?") command.display->findkey(1);
+        if (param == "?") scanning = true;
     }
-    if(cmd.getParamCount() == 3) {
+    else if(cmd.getParamCount() == 3) {
         uint32_t first, second;
         first = cmd.toLong(1);
         second = cmd.toLong(2);
@@ -149,8 +147,7 @@ void sealState::enter(Command& command) {
 
 // class clear pf = 7
 CommandState* clearpfState::handleInput (Command& command, uint8_t input) {
-    Serial.println("Interrupted by user.");
-    return nullptr;
+    return new menuState;
 }
 
 void clearpfState::enter(Command& command) {
@@ -163,10 +160,14 @@ void clearpfState::enter(Command& command) {
     } else command.display->displaymanufacturerAccessPermanentFailClear(); // using default values
 }
 
+void clearpfState::update () {
+//    command.display->findkey();
+}
+
+
 // class full access = 8
 CommandState* fullaccessState::handleInput (Command& command, uint8_t input) {
-    Serial.println("Interrupted by user.");
-    return nullptr;
+    return new menuState;
 }
 
 void fullaccessState::enter(Command& command) {
@@ -177,5 +178,8 @@ void fullaccessState::enter(Command& command) {
         second = cmd.toLong(2);
         command.display->displaymanufacturerAccessFullAccess(first, second);
     } else command.display->displaymanufacturerAccessFullAccess(); // using default values
+}
 
+void fullaccessState::update () {
+//    command.display->findkey();
 }

@@ -11,9 +11,9 @@ public:
     Command();
     virtual void handleInput(CmdBuffer<64>);
     virtual void update();
-    Display* display {nullptr};
+    Display* display = {nullptr};
 private:
-    CommandState* state_;
+    CommandState* state_ {nullptr};
 protected:
 };
 
@@ -29,7 +29,7 @@ protected:
 class menuState : public CommandState {
 public:
     virtual void enter(Command&);
-    virtual CommandState* handleInput(Command&, uint8_t);
+//    virtual CommandState* handleInput(Command&, uint8_t);
 };
 
 class scanState : public CommandState {
@@ -55,6 +55,10 @@ public:
     virtual void enter(Command&);
     virtual CommandState* handleInput(Command&, uint8_t);
     virtual void update();
+private:
+    bool scanning {false};
+    uint32_t key {0x1000};
+    Command* com;
 };
 
 class sealState : public CommandState {

@@ -874,14 +874,26 @@ void Display::displayunsealKey(){                     // command 0x60
   }
 }
 
-bool Display::findkey(uint8_t) {
-  uint16_t key_a, key_b;
-  for (uint16_t a = 0x00; a<= 0xffff; a++) {
-
-  }
-  return true;
+bool Display::testkey(uint16_t key) {
+    writeRegister(MANUFACTURERACCESS, key);
+/*  switch (com) {
+    case 1:
+      displaymanufacturerAccessUnseal(key_a, key_b);
+      if (!displaySealstatus()) test = true;
+      break;
+    case 2:
+      displaymanufacturerAccessPermanentFailClear(key_a, key_b);
+      if (!displaySealstatus()) test = true;
+      break;
+    case 3:
+      displaymanufacturerAccessFullAccess(key_a, key_b);
+      if (!displaySealstatus()) test = true;
+      break;
+    default:
+      return false;
+  } */
+  return !i2ccode;
 }
-
 
 // returns true if sealed, false otherwise
 bool Display::displaySealstatus() {

@@ -90,7 +90,8 @@ public:
     void displayBatteryAddress();
 
     bool displaySealstatus();                   // true if sealed, otherwise false.
-    bool findkey(uint8_t);                      // Searches for a key pair. 1=find key pair for Unseal, 2=PFclear, 3=Full access
+    bool testkey(uint16_t);  // Tests a 16 bit key part. Returns true if I2C code is ok.
+    
     std::vector<Info<Display>> info; // Store structs
 
     // Call a specific function by name
