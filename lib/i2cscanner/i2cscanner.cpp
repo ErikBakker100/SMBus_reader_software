@@ -50,7 +50,7 @@ uint8_t i2cscan() {
 } 
 
 uint8_t i2cscan(uint8_t first, uint8_t last) {
-  Wire.begin();
+  Wire.begin(SDA, SCL);
   Wire.setClock(CLOCKSPEED);
   uint8_t error{0}, address{0};
   Serial.print("Scanning from "); 
