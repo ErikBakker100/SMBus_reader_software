@@ -135,20 +135,20 @@ public:
   uint16_t manufactureMonth();
   uint16_t manufactureYear();
   uint16_t serialNumber();                // command 0x1c
-  char* manufacturerName();               // command 0x20
-  char* deviceName();                     // command 0x21
-  char* deviceChemistry();                // command 0x22
-  virtual char* manufacturerData();       // command 0x23, virtual function may be overidden to be more specific for a certain type IC
+  void manufacturerName();                // command 0x20
+  void deviceName();                      // command 0x21
+  void deviceChemistry();                 // command 0x22
+  void manufacturerData();                // command 0x23
   uint16_t optionalMFGfunction4();        // command 0x3c
   uint16_t optionalMFGfunction3();        // command 0x3d
   uint16_t optionalMFGfunction2();        // command 0x3e
   uint16_t optionalMFGfunction1();        // command 0x3f
   uint8_t address();
-
+  
   protected:
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
-  void readBlock(uint8_t reg, uint8_t* data, uint8_t len);
+  void readBlock(uint8_t reg);
 
   uint8_t batteryAddress;
 };

@@ -12,8 +12,8 @@ void smbuscommands::writeRegister(uint8_t reg, uint16_t data) {
   smbus::writeRegister(reg, data, batteryAddress);
 }
 
-void smbuscommands::readBlock(uint8_t reg, uint8_t* data, uint8_t len) {
-  smbus::readBlock(reg, data, len, batteryAddress);
+void smbuscommands::readBlock(uint8_t reg) {
+  smbus::readBlock(reg, batteryAddress);
 }
 
 /**
@@ -371,51 +371,39 @@ uint16_t smbuscommands::serialNumber() {
  * @brief Get the Manufacturer Name from the battery.
  * This function returns a character array containing the battery's manufacturer's name.  For example,
  * "MyBattCo" would identify the Smart Battery's manufacturer as MyBattCo.
- * @return const char* 
+ * @return fills the smbus::text array 
  */
-  char* smbuscommands::manufacturerName() {
-  static char data[BLOCKLENGTH]; // 20 characters plus null terminator
-  readBlock(MANUFACTURERNAME, reinterpret_cast<uint8_t*>(data), BLOCKLENGTH-2);
-  data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
-  return data;
+  void smbuscommands::manufacturerName() {
+  readBlock(MANUFACTURERNAME);
 }
 
 /**
  * @brief Get the Device Name from the battery.
  * This function returns a character string that contains the battery's name.  For example, a DeviceName() of "MBC101" 
  * would indicate that the battery is a model MBC101.
- * @return const char* 
+ * @return fills the smbus::text array 
  */
-  char* smbuscommands::deviceName() {
-  static char data[BLOCKLENGTH];
-  readBlock(DEVICENAME, reinterpret_cast<uint8_t*>(data), 7);
-  data[BLOCKLENGTH-1] = '\0'; // Null-terminate the C-string
-  return data;
+  void smbuscommands::deviceName() {
+  readBlock(DEVICENAME);
 }
 
 /**
  * @brief Get the Device Chemistry from the battery.
  * This function returns a character string that contains the battery's chemistry.  For example, if the
  * DeviceChemistry() function returns "NiMH," the battery pack would contain nickel metal hydride cells.
- * @return const char* 
+ * @return fills the smbus::text array 
  */
-  char* smbuscommands::deviceChemistry() {
-  static char data[BLOCKLENGTH];
-  readBlock(DEVICECHEMISTRY, reinterpret_cast<uint8_t*>(data), 4);
-  data[BLOCKLENGTH-1] = '\0';
-  return data;
+  void smbuscommands::deviceChemistry() {
+  readBlock(DEVICECHEMISTRY);
 }
 
 /**
  * @brief Get the manufacturer data.
  * Implementation dependant, can be overridden.
- * @return char*
+ * @return fills the smbus::text array
  */
-char* smbuscommands::manufacturerData() {
-  static char data[BLOCKLENGTH];
-  readBlock(MANUFACTURERDATA, reinterpret_cast<uint8_t*>(data), 15);
-  data[BLOCKLENGTH-1] = '\0';
-  return data;
+ void smbuscommands::manufacturerData() {
+  readBlock(MANUFACTURERDATA);
 }
 
 /**

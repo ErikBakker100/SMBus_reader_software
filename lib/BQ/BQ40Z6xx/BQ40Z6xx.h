@@ -54,16 +54,16 @@
  * @class command
  * @brief Extended commands pecific for the bq40z6xx
  */
-class bq40z6xx : protected smbuscommands{
+class bq40z6xx {
   protected:
   bq40z6xx(uint8_t address);
-  char* manufacturerAccessType();      // command 0x00 0x0001 read data via 0x23 (manufacturerData)
-  char* manufacturerAccessFirmware();     // command 0x00 0x0002 read data via 0x23 (manufacturerData)
-  char* manufacturerAccessHardware();     // command 0x00 0x0003 read data via 0x23 (manufacturerData)
-  char* manufacturerAccessChemistryID();  // command 0x00 0x0006 read data via 0x23 (manufacturerData)
+  void manufacturerAccessType();      // command 0x00 0x0001 read data via manufacturerAccess
+  void manufacturerAccessFirmware();     // command 0x00 0x0002 read data via 0x23 (manufacturerData)
+  void manufacturerAccessHardware();     // command 0x00 0x0003 read data via 0x23 (manufacturerData)
+  void manufacturerAccessChemistryID();  // command 0x00 0x0006 read data via 0x23 (manufacturerData)
   void manufacturerAccessShutdown();      // command 0x0010
   void manufacturerAccessSleep();         // command 0x0011
-
+  void manufacturerAccessStatus() {};     // not available
   /**
   * @union manufacturerstatus
   * @brief 
@@ -79,18 +79,10 @@ class bq40z6xx : protected smbuscommands{
   }manufacturerstatus;
   /**> The commands in this section cause the bq20z90/bq20z95 to take actions when written. No data is returned.*/
   void manufacturerAccessSeal();
-  char* manufacturerSecurityKeys();
+  void manufacturerSecurityKeys();
   void manufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
   void manufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
   void manufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
-  char* manufacturerData();       // command 0x23
-  /**
-  * @struct manufacturerdata
-  * @brief This read- or write-word function allows direct control of the FETs for test purposes.
-  */
-  union {
-    char raw[17];                 /**< Data read */
-  }manufacturerdata;
   
   // following are extended SBS commands which are only available when the bq20z90/bq20z95 device is in unsealed mode.
   uint16_t fetControl(); // command 0x46
@@ -359,8 +351,15 @@ static String fetcodes[4] {
  *
  */
 static String permanentfailurecodes[4] {
-  "Fuse is blown if enabled via DF:Configuration:Register(64):Permanent Fail Cfg(6)",  /**> If the 2 bits contain a 0 */
-  "Cell imbalance failure",                 /**> If the 2 bits contain a 1 */
-  "Safety voltage failure",                 /**> If the 2 bits contain a 2 */
-  "FET failure"                             /**> If the 2 bits contain a 3 */
+  "Fuse is blown if enabled via DF:Configuration:Register(64):Permanent Fail Cfg(6)",  /**> If the 2 bits are 0 */
+  "Cell imbalance failure",                 /**> If the 2 bits are 1 */
+  "Safety voltage failure",                 /**> If the 2 bits are 2 */
+  "FET failure"                             /**> If the 2 bits are 3 */
+};
+
+static String securityModes[4] {
+  "Reserved",                               /**> If the 2 bits are 0 */
+  "Unsealed",                               /**> If the 2 bits are 1 */
+  "Full Access",                            /**> If the 2 bits are 2 */
+  "Sealed"                                  /**> If the 2 bits are 3 */
 };

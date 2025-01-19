@@ -3,17 +3,17 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#ifdef ESP8266
+#if defined (ESP8266)
 #define SDA D2
 #define SCL D1
 #endif
 
-#ifdef STM32
+#if defined (STM32)
 #define SDA PA1
 #define SCL PA2
 #endif
 
-#ifdef ESP32
+#if defined (ESP32)
 #define SDA 21
 #define SCL 22
 #endif

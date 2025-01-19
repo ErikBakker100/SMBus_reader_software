@@ -19,10 +19,10 @@
 class smbus{
   protected:
   smbus();
-  virtual int16_t readRegister(uint8_t reg, uint8_t address);
-  virtual void writeRegister(uint8_t reg, uint16_t data, uint8_t address);
-  virtual void readBlock(uint8_t reg, uint8_t* data, uint8_t len, uint8_t address);
-
+  int16_t readRegister(uint8_t reg, uint8_t address);
+  void writeRegister(uint8_t reg, uint16_t data, uint8_t address);
+  char text[BLOCKLENGTH];                 // used for holding text returned by readBlock
+  void readBlock(uint8_t reg, uint8_t address); // fills the text array
   uint8_t i2ccode; // Error code returned by I2C
 };
 

@@ -61,19 +61,19 @@ void smbus::writeRegister(uint8_t reg, uint16_t data, uint8_t address) {
  * @param data 
  * @param length 
  */
-void smbus::readBlock(uint8_t reg, uint8_t* data, uint8_t length, uint8_t address) {
+void smbus::readBlock(uint8_t reg, uint8_t address) {
   Wire.beginTransmission(address);
   Wire.write(reg);
   i2ccode = Wire.endTransmission(false);
-  uint8_t datalength = length + 1; // Request one extra byte for the length byte
-  uint8_t count = Wire.requestFrom(address, datalength); // returns the number of bytes returned from the peripheral device
+  uint8_t datalength = BLOCKLENGTH; // Request one extra byte for the length byte
+  uint8_t count = Wire.requestFrom((uint8_t)address, (uint8_t)datalength-1); // returns the number of bytes returned from the peripheral device
   if (Wire.available()) {
     count = Wire.read(); // The first byte is the length of the block, it returns the number of bytes received.
   }
-  for (uint8_t i = 0; i < count && i < length; i++) {
+  for (uint8_t i = 0; i < count && i < BLOCKLENGTH; i++) {
     if (Wire.available()) {
-      data[i] = Wire.read();
+      text[i] = Wire.read();
     }
   }
-  data[count+1] = '\0'; //terminate the string
+  text[count+1] = '\0'; //terminate the string
 }

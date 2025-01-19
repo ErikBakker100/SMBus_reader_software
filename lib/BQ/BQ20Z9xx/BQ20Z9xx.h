@@ -12,7 +12,7 @@
 
 #include <Arduino.h>
 #include <string.h>
-#include "../SMB/SMBCommands.h"
+
 
 #define BQICTYPE bq20z9xx
 
@@ -47,13 +47,13 @@
 class bq20z9xx : protected smbuscommands{
   protected:
   bq20z9xx(uint8_t address);
-  uint16_t manufacturerAccessType(); // command 0x00 0x0001
-  uint16_t manufacturerAccessFirmware(); // command 0x00
-  uint16_t manufacturerAccessHardware(); // command 0x00
-  uint16_t manufacturerAccessStatus(); // command 0x00
+  void manufacturerAccessType();         // command 0x00 0x0001
+  void manufacturerAccessFirmware();  // command 0x00
+  uint16_t manufacturerAccessHardware();  // command 0x00
+  uint16_t manufacturerAccessStatus();    // command 0x00 0x0006
   uint16_t manufacturerAccessChemistryID(); // command 0x00 0x0008
-  void manufacturerAccessShutdown(); // command 0x0010
-  void manufacturerAccessSleep(); // command 0x0011
+  void manufacturerAccessShutdown();      // command 0x0010
+  void manufacturerAccessSleep();         // command 0x0011
 
   /**
   * @union manufacturerstatus
@@ -73,7 +73,6 @@ class bq20z9xx : protected smbuscommands{
   void manufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b); 
   void manufacturerAccessUnseal(uint16_t key_a, uint16_t key_b);
   void manufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b);
-  char* manufacturerData();       // command 0x23
   /**
   * @struct manufacturerdata
   * @brief This read- or write-word function allows direct control of the FETs for test purposes.

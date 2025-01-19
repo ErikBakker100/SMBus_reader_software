@@ -60,7 +60,6 @@ void menuState::enter(Command& command) {
     displayMainmenu();
 }
 
-
 //class I2c Scan = 2
 /*CommandState* scanState::handleInput (Command& command, uint8_t input) {
     return nullptr;
@@ -76,7 +75,11 @@ void scanState::enter(Command& command) {
         if (first <= second) address =i2cscan(first, second);
     } else address = i2cscan();
     if (address > 0) {
-        command.display = new Display(address);
+#if defined (BQ20Z9xx)
+    command.display = new DisplayBQ20Z9xx(address);
+#elif defined (BQ40Z6xx)
+    command.display = new DisplayBQ40Z6xx(address);
+#endif
         command.display->displayBatteryAddress();
     }
 }
