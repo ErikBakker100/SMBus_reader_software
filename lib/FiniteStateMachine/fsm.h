@@ -4,6 +4,33 @@
 #include "../CmdParser/CmdBuffer.hpp"
 #include "../CmdParser/CmdParser.hpp"
 
+// Abstracte basisclass, do not modify
+class Config {
+public:
+    virtual void setup(uint8_t) = 0;
+    virtual void loop() = 0;
+    virtual ~Config() {};
+private:
+
+};
+
+// create a class for each configuration, based on the platformio.ini [bqchip] build_flags = setting
+#if defined (BQ20Z9XX)
+class DisplayBQ20Z9xx : public Config, bq20z9xx {
+public:
+    void setup(uint8_t) override;
+    void loop() override;
+}
+#endif
+
+#if defined (BQ40Z6XX)
+class BQ40Z9xx : public Config {
+public:
+    void setup() override;
+    void loop() override;
+}
+#endif
+// end of configuration part, do not modify below
 class CommandState;
 
 class Command{
@@ -11,9 +38,9 @@ public:
     Command();
     virtual void handleInput(CmdBuffer<64>);
     virtual void update();
-    Display* display = {nullptr};
+    Config* display = nullptr;
 private:
-    CommandState* state_ {nullptr};
+    CommandState* state_ = nullptr;
 protected:
 };
 

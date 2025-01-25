@@ -1,7 +1,17 @@
 #include "display.h"
 #include <bitset>
 
-Display::Display(uint8_t address) {
+Display::Display(uint8_t address) : smbuscommands(address) {
+}
+
+void Display::displaymanufacturerAccess() {
+    uint16_t x, y; // x and y position
+  ansi.readCursorPosition(x, y);
+  ansi.print("manufacturerAccess (0x00):");
+  ansi.gotoXY(TAB2, y);
+  ansi.print(manufacturerAccess(), HEX);
+  ansi.gotoXY(TAB3, y);
+  ansi.println(I2Ccode[i2ccode]);
 }
 
 void Display::displayremainingCapacityAlarm() {

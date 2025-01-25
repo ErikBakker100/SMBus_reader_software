@@ -1,9 +1,8 @@
-#include "BQ20Z9xx.h"
 #include <bitset>
+#include "displayBQ209xx.h"
 
-DisplayBQ20Z9xx::Display(uint8_t address): BQICTYPE(address) {
+DisplayBQ20Z9xx::DisplayBQ20Z9xx(uint8_t address): bq20z9xx(address), Display(address) {
   // list of the different commands, including function pointers to these funtions. This to be able to call them via user input
-    info.emplace_back(&Display::displaymanufacturerAccess, DEVICEINFO, "ManufacturerAccess");
     info.emplace_back(&Display::displayremainingCapacityAlarm, USAGEINFO, "remainingCapacityAlarm");
     info.emplace_back(&Display::displayremainingTimeAlarm, USAGEINFO, "remainingTimeAlarm");
     info.emplace_back(&Display::displaybatteryMode, STATUSBITS, "batteryMode");
@@ -35,31 +34,41 @@ DisplayBQ20Z9xx::Display(uint8_t address): BQICTYPE(address) {
     info.emplace_back(&Display::displaymanufacturerName, DEVICEINFO, "manufacturerName");
     info.emplace_back(&Display::displaydeviceName, DEVICEINFO, "deviceName");
     info.emplace_back(&Display::displaydeviceChemistry, DEVICEINFO, "deviceChemistry");
-    info.emplace_back(&Display::displayoptionalMFGfunctions, USAGEINFO, "optionalMFGfunction_1-4");
-    info.emplace_back(&Display::displaymanufacturerAccessType, DEVICEINFO, "manufacturerAccessType");
-    info.emplace_back(&Display::displaymanufacturerAccessFirmware, DEVICEINFO, "manufacturerAccessFirmware");
-    info.emplace_back(&Display::displaymanufacturerAccessHardware, DEVICEINFO, "manufacturerAccessHardware");
-    info.emplace_back(&Display::displaymanufacturerAccessStatus, STATUSBITS, "manufacturerAccessStatus");
-    info.emplace_back(&Display::displaymanufacturerAccessChemistryID, DEVICEINFO, "manufacturerAccessChemistryID");
-    info.emplace_back(&Display::displaymanufacturerAccessShutdown, SET, "manufacturerAccessShutdown"); // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
-    info.emplace_back(&Display::displaymanufacturerAccessSleep, SET, "manufacturerAccessSleep"); // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
-    info.emplace_back(&Display::displaymanufacturerAccessSeal, SET, "manufacturerAccessSeal");
-    info.emplace_back(&Display::displaymanufacturerAccessPermanentFailClear, SET, "manufacturerAccessPermanentFailClear");
-    info.emplace_back(&Display::displaymanufacturerAccessUnseal, SET, "manufacturerAccessUnseal");
-    info.emplace_back(&Display::displaymanufacturerAccessFullAccess, SET, "manufacturerAccessFullAccess");
-    info.emplace_back(&Display::displaymanufacturerData, DEVICEINFO, "manufacturerData");
-    info.emplace_back(&Display::displayfetControl, SET, "fetControl");
-    info.emplace_back(&Display::displaystateOfHealth, STATUSBITS, "stateOfHealth");
-    info.emplace_back(&Display::displaysafetyAlert, DEVICEINFO, "safetyAlert");
-    info.emplace_back(&Display::displaysafetyStatus, STATUSBITS, "safetyStatus");
-    info.emplace_back(&Display::displaypfAlert, DEVICEINFO, "pfAlert");
-    info.emplace_back(&Display::displaypfStatus, STATUSBITS, "pfStatus");
-    info.emplace_back(&Display::displayoperationStatus, DEVICEINFO, "operationStatus");
-    info.emplace_back(&Display::displayunsealKey, DEVICEINFO, "unsealKey");
+    info.emplace_back(&Display::displaymanufacturerAccess, DEVICEINFO, "ManufacturerAccess");
+    // Specific BQ20Z9xx functions
+    info.emplace_back(&displayoptionalMFGfunctions, USAGEINFO, "optionalMFGfunction_1-4");
+    info.emplace_back(&displaymanufacturerAccessType, DEVICEINFO, "manufacturerAccessType");
+    info.emplace_back(&displaymanufacturerAccessFirmware, DEVICEINFO, "manufacturerAccessFirmware");
+    info.emplace_back(&displaymanufacturerAccessHardware, DEVICEINFO, "manufacturerAccessHardware");
+    info.emplace_back(&displaymanufacturerAccessStatus, STATUSBITS, "manufacturerAccessStatus");
+    info.emplace_back(&displaymanufacturerAccessChemistryID, DEVICEINFO, "manufacturerAccessChemistryID");
+    info.emplace_back(&displaymanufacturerAccessShutdown, SET, "manufacturerAccessShutdown"); // Instructs the bq20z90/bq20z95 to verify and enter shutdown mode.
+    info.emplace_back(&displaymanufacturerAccessSleep, SET, "manufacturerAccessSleep"); // Instructs the bq20z90/bq20z95 to verify and enter sleep mode if no other command is sent after the Sleep command.
+    info.emplace_back(&displaymanufacturerAccessSeal, SET, "manufacturerAccessSeal");
+    info.emplace_back(&displaymanufacturerAccessPermanentFailClear, SET, "manufacturerAccessPermanentFailClear");
+    info.emplace_back(&displaymanufacturerAccessUnseal, SET, "manufacturerAccessUnseal");
+    info.emplace_back(&displaymanufacturerAccessFullAccess, SET, "manufacturerAccessFullAccess");
+    info.emplace_back(&displaymanufacturerData, DEVICEINFO, "manufacturerData");
+    info.emplace_back(&displayfetControl, SET, "fetControl");
+    info.emplace_back(&displaystateOfHealth, STATUSBITS, "stateOfHealth");
+    info.emplace_back(&displaysafetyAlert, DEVICEINFO, "safetyAlert");
+    info.emplace_back(&displaysafetyStatus, STATUSBITS, "safetyStatus");
+    info.emplace_back(&displaypfAlert, DEVICEINFO, "pfAlert");
+    info.emplace_back(&displaypfStatus, STATUSBITS, "pfStatus");
+    info.emplace_back(&displayoperationStatus, DEVICEINFO, "operationStatus");
+    info.emplace_back(&displayunsealKey, DEVICEINFO, "unsealKey");
+}
+
+void DisplayBQ20Z9xx::setup(uint8_t address) {
+  batteryAddress = address;
+}
+
+void DisplayBQ20Z9xx::loop() {
+
 }
 
 // Following functions are not part of the smart battery specification version 1.1
-void Display::displayoptionalMFGfunctions() {
+void DisplayBQ20Z9xx::displayoptionalMFGfunctions() {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Voltage Cell 1 to 4 (0x3f-0x3c):");
@@ -78,20 +87,20 @@ void Display::displayoptionalMFGfunctions() {
 }
 
 // specific BQ20Zxx commands
-void Display::displaymanufacturerAccessType() { // command 0x00 0x0001
+void DisplayBQ20Z9xx::displaymanufacturerAccessType() { // command 0x00 0x0001
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessType (0x00->0x0001):");
   ansi.readCursorPosition(x, y);
   ansi.gotoXY(TAB2, y);
-  ansi.print(BQ20Z);
+  ansi.print("BQ20Z");
   manufacturerAccessType();
   ansi.print(smbus::text);
   ansi.gotoXY(TAB3, y);
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerAccessFirmware() {   // command 0x00
+void DisplayBQ20Z9xx::displaymanufacturerAccessFirmware() {   // command 0x00
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Firmware version (0x00->0x0002):");
@@ -103,7 +112,7 @@ void Display::displaymanufacturerAccessFirmware() {   // command 0x00
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerAccessHardware() {   // command 0x00
+void DisplayBQ20Z9xx::displaymanufacturerAccessHardware() {   // command 0x00
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Hardware version (0x00->0x0003):");
@@ -115,7 +124,7 @@ void Display::displaymanufacturerAccessHardware() {   // command 0x00
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerAccessStatus() {     // command 0x00
+void DisplayBQ20Z9xx::displaymanufacturerAccessStatus() {     // command 0x00
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("ManufacturerStatus (0x00->0x0006):");
@@ -136,7 +145,7 @@ void Display::displaymanufacturerAccessStatus() {     // command 0x00
   ansi.println(fetcodes[manufacturerstatus.bits.fet]);
 }
 
-void Display::displaymanufacturerAccessChemistryID() { // command 0x00 0x0008
+void DisplayBQ20Z9xx::displaymanufacturerAccessChemistryID() { // command 0x00 0x0008
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessChemistryID (0x00->0x0008):");
@@ -147,7 +156,7 @@ void Display::displaymanufacturerAccessChemistryID() { // command 0x00 0x0008
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerAccessShutdown(){// command 0x00 0x0010
+void DisplayBQ20Z9xx::displaymanufacturerAccessShutdown(){// command 0x00 0x0010
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessShutdown (0x00->0x0010):");
@@ -157,7 +166,7 @@ void Display::displaymanufacturerAccessShutdown(){// command 0x00 0x0010
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerAccessSleep(){// command 0x00 0x0011
+void DisplaBQ20Z9xx::displaymanufacturerAccessSleep(){// command 0x00 0x0011
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessSleep (0x00->0x0011):");
@@ -167,7 +176,7 @@ void Display::displaymanufacturerAccessSleep(){// command 0x00 0x0011
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
+void DisplayBQ20Z9xx::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessSeal (0x00->0x0020):");
@@ -178,7 +187,7 @@ void Display::displaymanufacturerAccessSeal() {       // command 0x00 0x0020
   displaySealstatus();
 }
 
-void Display::displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b){
+void DisplayBQ20Z9xx::displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   if (displaySealstatus()) ansi.println("Put in Unsealed or Full Access mode first");
   else {
@@ -195,7 +204,7 @@ void Display::displaymanufacturerAccessPermanentFailClear(uint16_t key_a, uint16
   }
 }
 
-void Display::displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b){
+void DisplayBQ20Z9xx::displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessUnseal:");
@@ -209,7 +218,7 @@ void Display::displaymanufacturerAccessUnseal(uint16_t key_a, uint16_t key_b){
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b){
+void DisplayBQ20Z9xx::displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("manufacturerAccessFullAccess:");
@@ -223,7 +232,7 @@ void Display::displaymanufacturerAccessFullAccess(uint16_t key_a, uint16_t key_b
   ansi.println(I2Ccode[i2ccode]);
 }
 
-void Display::displaymanufacturerData() {             // command 0x23
+void DisplayBQ20Z9xx::displaymanufacturerData() {             // command 0x23
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("ManufacturerData (0x23):");
@@ -237,7 +246,7 @@ void Display::displaymanufacturerData() {             // command 0x23
   ansi.println(" " + I2Ccode[i2ccode]);
 }
 
-void Display::displayfetControl(){
+void DisplayBQ20Z9xx::displayfetControl(){
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("FETControl (0x46):");
@@ -262,7 +271,7 @@ void Display::displayfetControl(){
   }
 }
 
-void Display::displaystateOfHealth() {                // command 0x4f
+void DisplayBQ20Z9xx::displaystateOfHealth() {                // command 0x4f
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("State Of Health (0x4f):");
@@ -279,7 +288,7 @@ void Display::displaystateOfHealth() {                // command 0x4f
   }
 }
 
-void Display::displaysafetyAlert() {                  // command 0x50
+void DisplayBQ20Z9xx::displaysafetyAlert() {                  // command 0x50
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Safety Alert (0x50):");
@@ -296,7 +305,7 @@ void Display::displaysafetyAlert() {                  // command 0x50
   }
 }
 
-void Display::displaysafetyStatus() {                 // command 0x51
+void DisplayBQ20Z9xx::displaysafetyStatus() {                 // command 0x51
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Safety Status (0x51):");
@@ -313,7 +322,7 @@ void Display::displaysafetyStatus() {                 // command 0x51
   }
 }
 
-void Display::displaypfAlert() {
+void DisplayBQ20Z9xx::displaypfAlert() {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("PF Alert (0x52):");
@@ -330,7 +339,7 @@ void Display::displaypfAlert() {
   }
 }
 
-void Display::displaypfStatus() {
+void DisplayBQ20Z9xx::displaypfStatus() {
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("PF Status (0x53):");
@@ -347,7 +356,7 @@ void Display::displaypfStatus() {
   }
 }
 
-void Display::displayoperationStatus() {              // command 0x54
+void DisplayBQ20Z9xx::displayoperationStatus() {              // command 0x54
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("Operation Status (0x54):");
@@ -363,7 +372,7 @@ void Display::displayoperationStatus() {              // command 0x54
   }
 }
 
-void Display::displayunsealKey(){                     // command 0x60
+void DisplayBQ20Z9xx::displayunsealKey(){                     // command 0x60
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
   ansi.print("unsealKey (0x60):");
@@ -379,7 +388,7 @@ void Display::displayunsealKey(){                     // command 0x60
   }
 }
 
-bool Display::testkey(uint16_t key) {
+bool DisplayBQ20Z9xx::testkey(uint16_t key) {
     writeRegister(MANUFACTURERACCESS, key);
 /*  switch (com) {
     case 1:
@@ -401,7 +410,7 @@ bool Display::testkey(uint16_t key) {
 }
 
 // returns true if sealed, false otherwise
-bool Display::displaySealstatus() {
+bool DisplayBQ20Z9xx::displaySealstatus() {
   bool status {true};
   uint16_t x, y; // x and y position
   ansi.readCursorPosition(x, y);
@@ -420,22 +429,8 @@ bool Display::displaySealstatus() {
   return status;
 }
 
-void Display::displayBatteryAddress() {
-    uint16_t x, y; // x and y position
-    ansi.readCursorPosition(x, y);
-    ansi.print("Batteryaddress set to: ");
-    ansi.gotoXY(TAB2, y);
-    ansi.print("0x");
-    ansi.print(address() < 0x10 ? "0": "");
-    ansi.println(address(), HEX);
-}
-
-// Helper to simulate remove_cvref_t
-template <typename T>
-using remove_cvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-
 // Call a specific function by name
-void Display::displayByName(const String& functionName) {
+void DisplayBQ20Z9xx::displayByName(const String& functionName) {
   
   auto it = std::find_if(info.begin(), info.end(), [&functionName](const Info<Display>& entry) {return entry.name == functionName;});
   if (it != info.end()) {
@@ -454,7 +449,7 @@ void Display::displayByName(const String& functionName) {
 }
 
 // Call all functions with the same classifier
-void Display::displayByClassifier(uint8_t type) {
+void DisplayBQ20Z9xx::displayByClassifier(uint8_t type) {
   if (type > 5) return;
   for (const auto& it : info) {
     if (it.monitor_group == type) {
@@ -471,47 +466,8 @@ void Display::displayByClassifier(uint8_t type) {
   }
 }
 
-void Display::displayCommandNames(){
+void DisplayBQ20Z9xx::displayCommandNames(){
     for (const auto& it : info) {
       Serial.println(it.name); 
     }
-}
-
-// prints 8-bit integer in this form: 0000 0000
-void Display::printBits(uint8_t n) {
-  byte numBits = 8;  // 2^numBits must be big enough to include the number n
-  char b;
-  char c = ' ';   // delimiter character
-  for (byte i = 0; i < numBits; i++) {
-    // shift 1 and mask to identify each bit value
-    b = (n & (1 << (numBits - 1 - i))) > 0 ? '1' : '0'; // slightly faster to print chars than ints (saves conversion)
-    ansi.print(b);
-    if (i < (numBits - 1) && ((numBits-i - 1) % 4 == 0 )) ansi.print(c); // print a separator at every 4 bits
-  }
-}
-
-// prints 16-bit integer in this form: 0000 0000 0000 0000
-void Display::printBits(uint16_t n) {
-  byte numBits = 16;  // 2^numBits must be big enough to include the number n
-  char b;
-  char c = ' ';   // delimiter character
-  for (byte i = 0; i < numBits; i++) {
-    // shift 1 and mask to identify each bit value
-    b = (n & (1 << (numBits - 1 - i))) > 0 ? '1' : '0'; // slightly faster to print chars than ints (saves conversion)
-    ansi.print(b);
-    if (i < (numBits - 1) && ((numBits-i - 1) % 4 == 0 )) ansi.print(c); // print a separator at every 4 bits
-  }
-}
-
-// prints 32-bit integer in this form: 0000 0000 0000 0000 0000 0000 0000 0000
-void Display::printBits(uint32_t n) {
-  byte numBits = 32;  // 2^numBits must be big enough to include the number n
-  char b;
-  char c = ' ';   // delimiter character
-  for (byte i = 0; i < numBits; i++) {
-    // shift 1 and mask to identify each bit value
-    b = (n & (1 << (numBits - 1 - i))) > 0 ? '1' : '0'; // slightly faster to print chars than ints (saves conversion)
-    ansi.print(b);
-    if (i < (numBits - 1) && ((numBits-i - 1) % 4 == 0 )) ansi.print(c); // print a separator at every 4 bits
-  }
 }

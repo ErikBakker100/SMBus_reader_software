@@ -1,7 +1,19 @@
 #include "BQ20Z9xx.h"
 #include <cstdlib>
 
-bq20z9xx::bq20z9xx(uint8_t address) : smbuscommands(address) {
+bq20z9xx::bq20z9xxss() {
+}
+
+int16_t bq20z9xx::readRegister(uint8_t reg) {
+  return readRegister(reg);
+}
+
+void bq20z9xx::writeRegister(uint8_t reg, uint16_t data) {
+  writeRegister(reg, data);
+}
+
+void bq20z9xx::readBlock(uint8_t reg) {
+  readBlock(reg);
 }
 
 /**

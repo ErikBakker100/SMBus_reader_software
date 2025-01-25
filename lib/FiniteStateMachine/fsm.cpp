@@ -2,6 +2,7 @@
 #include "../i2cscanner/i2cscanner.h"
 #include "../display/display.h"
 #include "../display/menus.h"
+#include "../BQ/BQ20Z9xx/displayBQ209xx.h"
 
 CmdParser cmd;
 ANSI ansi(&Serial);
@@ -75,12 +76,15 @@ void scanState::enter(Command& command) {
         if (first <= second) address =i2cscan(first, second);
     } else address = i2cscan();
     if (address > 0) {
-#if defined (BQ20Z9xx)
-    command.display = new DisplayBQ20Z9xx(address);
-#elif defined (BQ40Z6xx)
-    command.display = new DisplayBQ40Z6xx(address);
+#if defined (BQ20Z9XX)
+    command.display = new DisplayBQ20Z9xx();
+#elif defined (BQ40Z6XX)
+    command.display = new DisplayBQ40Z6xx();
 #endif
-        command.display->displayBatteryAddress();
+    if (command.display) {
+        command.display->setup(address);
+    }
+    command.display->displayBatteryAddress();
     }
 }
 

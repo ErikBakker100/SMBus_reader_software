@@ -15,8 +15,8 @@
 extern ANSI ansi;
 
 template <typename T>
-using pdc = std::variant<             // pdc = pointer to display command
-    void (T::*)(),                    // Member function with signature `void()`
+using pdc = std::variant<            // pdc = pointer to display command
+    void (T::*)(),                   // Member function with signature `void()`
     void (T::*)(uint16_t, uint16_t)  // Member function with signature `bool(uint16_t, uint16_t)
 >;
 
@@ -29,43 +29,44 @@ struct Info {
   Info(pdc<T> f, uint8_t g, String n) : dc(f), monitor_group(g), name(n) {};
 };
 
-class Display : protected smbuscommands{
+class Display : public smbuscommands{
 
 public:
     Display(uint8_t);
-    void displayremainingCapacityAlarm();
-    void displayremainingTimeAlarm();
-    void displaybatteryMode();
+    static void displaymanufacturerAccess();
+    static void displayremainingCapacityAlarm();
+    static void displayremainingTimeAlarm();
+    static void displaybatteryMode();
 
-    void displayatRate();
-    void displayatRateTimeToFull();
-    void displayatRateTimeToEmpty();
-    void displayatRateOK();
-    void displaytemperature();
-    void displayvoltage();
-    void displaycurrent();
-    void displayaverageCurrent();
-    void displaymaxError();
-    void displayrelativeStateOfCharge();
-    void displayabsoluteStateOfCharge();
-    void displayremainingCapacity();
-    void displayfullCapacity();
-    void displayrunTimeToEmpty();
-    void displayavgTimeToEmpty();
-    void displayavgTimeToFull();
-    void displaychargingCurrent();
-    void displaychargingVoltage();
-    void displaybatteryStatus();
-    void displaydesignCapacity();
-    void displaycycleCount();
-    void displaydesignVoltage();
-    void displayspecificationInfo();
-    void displaymanufactureDate();
-    void displayserialNumber();
-    void displaymanufacturerName();
-    void displaydeviceName();
-    void displaydeviceChemistry();
-    virtual void displayoptionalMFGfunctions(); // not within the SMBUS standard v1.1, so may be overridden
+    static void displayatRate();
+    static void displayatRateTimeToFull();
+    static void displayatRateTimeToEmpty();
+    static void displayatRateOK();
+    static void displaytemperature();
+    static void displayvoltage();
+    static void displaycurrent();
+    static void displayaverageCurrent();
+    static void displaymaxError();
+    static void displayrelativeStateOfCharge();
+    static void displayabsoluteStateOfCharge();
+    static void displayremainingCapacity();
+    static void displayfullCapacity();
+    static void displayrunTimeToEmpty();
+    static void displayavgTimeToEmpty();
+    static void displayavgTimeToFull();
+    static void displaychargingCurrent();
+    static void displaychargingVoltage();
+    static void displaybatteryStatus();
+    static void displaydesignCapacity();
+    static void displaycycleCount();
+    static void displaydesignVoltage();
+    static void displayspecificationInfo();
+    static void displaymanufactureDate();
+    static void displayserialNumber();
+    static void displaymanufacturerName();
+    static void displaydeviceName();
+    static void displaydeviceChemistry();
+    static void displayoptionalMFGfunctions(); // not within the SMBUS standard v1.1, so may be overridden
 
     void displayBatteryAddress();
 
@@ -74,10 +75,3 @@ protected:
     void printBits(uint16_t);
     void printBits(uint32_t);
 };
-
-
-
-
-
-
-

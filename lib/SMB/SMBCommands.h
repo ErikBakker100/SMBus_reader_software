@@ -139,13 +139,14 @@ public:
   void deviceName();                      // command 0x21
   void deviceChemistry();                 // command 0x22
   void manufacturerData();                // command 0x23
+  uint16_t optionalMFGfunction5();        // command 0x2f
   uint16_t optionalMFGfunction4();        // command 0x3c
   uint16_t optionalMFGfunction3();        // command 0x3d
   uint16_t optionalMFGfunction2();        // command 0x3e
   uint16_t optionalMFGfunction1();        // command 0x3f
   uint8_t address();
   
-  protected:
+  private:
   int16_t readRegister(uint8_t reg);
   void writeRegister(uint8_t reg, uint16_t data);
   void readBlock(uint8_t reg);
@@ -169,3 +170,7 @@ The Smart Battery detected an attempt to access an unsupported optional manufact
   "badSize",            /**< The Smart Battery detected an attempt to write to a function code with an incorrect size data block. */
   "unknown"             /**< The Smart Battery detected an unidentifiable error. */
 };
+
+// Helper to simulate remove_cvref_t
+template <typename T>
+using remove_cvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;

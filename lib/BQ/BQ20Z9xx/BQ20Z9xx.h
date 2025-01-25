@@ -12,9 +12,7 @@
 
 #include <Arduino.h>
 #include <string.h>
-
-
-#define BQICTYPE bq20z9xx
+#include "../../lib/SMB/SMBus.h"
 
 #define UNSEALA                     0x0414 /**< Unseal Key a */
 #define UNSEALB                     0x3672 /**< Unseal Key b */
@@ -23,6 +21,7 @@
 #define PFCLEARA                    0x2673 /**< Permanent Failure Clear Key A or 0x0001 , 0x0102*/
 #define PFCLEARB                    0x1712 /**< Permanent Failure Clear Key B */
 
+#define MANUFACTURERACCESS          0X00
 #define MANUFACTURERACCESSTYPE      0x01
 #define MANUFACTURERACCESSFIRMWARE  0x02
 #define MANUFACTURERACCESSHARDWARE  0x03
@@ -44,16 +43,16 @@
  * @class command
  * @brief Extended commands pecific for the BQ20Z9xx
  */
-class bq20z9xx : protected smbuscommands{
+class bq20z9xx : public smbus {
   protected:
-  bq20z9xx(uint8_t address);
-  void manufacturerAccessType();         // command 0x00 0x0001
-  void manufacturerAccessFirmware();  // command 0x00
-  uint16_t manufacturerAccessHardware();  // command 0x00
-  uint16_t manufacturerAccessStatus();    // command 0x00 0x0006
+  bq20z9xx();
+  void manufacturerAccessType();            // command 0x00 0x0001
+  void manufacturerAccessFirmware();        // command 0x00
+  uint16_t manufacturerAccessHardware();    // command 0x00
+  uint16_t manufacturerAccessStatus();      // command 0x00 0x0006
   uint16_t manufacturerAccessChemistryID(); // command 0x00 0x0008
-  void manufacturerAccessShutdown();      // command 0x0010
-  void manufacturerAccessSleep();         // command 0x0011
+  void manufacturerAccessShutdown();        // command 0x0010
+  void manufacturerAccessSleep();           // command 0x0011
 
   /**
   * @union manufacturerstatus
@@ -243,7 +242,12 @@ class bq20z9xx : protected smbuscommands{
     } bits;
   }operationstatus;
   uint32_t unsealKey();           // command 0x60
-//  private:
+
+  uint8_t batteryAddress = 0;
+private:
+  int16_t readRegister(uint8_t reg);
+  void writeRegister(uint8_t reg, uint16_t data);
+  void readBlock(uint8_t reg);
 };
 
 /**

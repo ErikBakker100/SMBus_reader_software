@@ -407,6 +407,15 @@ uint16_t smbuscommands::serialNumber() {
 }
 
 /**
+ * @brief Get the optional information.
+ * @return uint16_t
+ */
+
+uint16_t smbuscommands::optionalMFGfunction5() {
+  return readRegister(OPTIONALMFGFUNCTION5);  
+}
+
+/**
  * @brief Get the battery's cell 4 voltage.
  * Returns the nominal voltage of cell 4, in mV.
  * @return uint16_t
