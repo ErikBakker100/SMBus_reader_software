@@ -20,7 +20,7 @@ class DisplayBQ20Z9xx : public Config, bq20z9xx {
 public:
     void setup(uint8_t) override;
     void loop() override;
-}
+};
 #endif
 
 #if defined (BQ40Z6XX)
@@ -28,7 +28,7 @@ class BQ40Z9xx : public Config {
 public:
     void setup() override;
     void loop() override;
-}
+};
 #endif
 // end of configuration part, do not modify below
 class CommandState;
