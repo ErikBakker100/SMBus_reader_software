@@ -464,24 +464,6 @@ void Display::displaydeviceChemistry() {
 }
 
 // Following functions are not part of the smart battery specification version 1.1
-void Display::displayoptionalMFGfunctions() {
-  uint16_t x, y; // x and y position
-  ansi.readCursorPosition(x, y);
-  ansi.print("Voltage Cell 1 to 4 (0x3f-0x3c):");
-  ansi.readCursorPosition(x, y);
-  ansi.gotoXY(TAB2, y);
-  ansi.print((float)optionalMFGfunction4()/1000);
-  ansi.print("V, ");
-  ansi.print((float)optionalMFGfunction3()/1000);
-  ansi.print("V, ");
-  ansi.print((float)optionalMFGfunction2()/1000);
-  ansi.print("V, ");
-  ansi.print((float)optionalMFGfunction1()/1000);
-  ansi.println("V.");
-  ansi.gotoXY(TAB3, y);
-  ansi.println(I2Ccode[i2ccode]);
-}
-
 void Display::displayBatteryAddress() {
     uint16_t x, y; // x and y position
     ansi.readCursorPosition(x, y);

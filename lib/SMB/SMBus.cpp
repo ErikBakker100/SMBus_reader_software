@@ -18,7 +18,12 @@
  */
 smbus::smbus() {
   Wire.begin();
-  Wire.setClock(CLOCKSPEED);          
+  Wire.setClock(CLOCKSPEED);
+  batteryAddress = 0;
+}
+
+void smbus::setup(uint8_t address){
+  batteryAddress = address;
 }
 
 /**
@@ -27,7 +32,7 @@ smbus::smbus() {
  * @param reg 
  * @return uint16_t 
  */
-int16_t smbus::readRegister(uint8_t reg, uint8_t address) {
+int16_t smbus::readRegister(uint8_t reg, uint8_t address = batteryAddress) {
   Wire.beginTransmission(address);
   Wire.write(reg);
   i2ccode = Wire.endTransmission(false);
@@ -46,7 +51,7 @@ int16_t smbus::readRegister(uint8_t reg, uint8_t address) {
  * @param data 
  * @return void 
  */
-void smbus::writeRegister(uint8_t reg, uint16_t data, uint8_t address) {
+void smbus::writeRegister(uint8_t reg, uint16_t data, uint8_t address = batteryAddress) {
   Wire.beginTransmission(address);
   Wire.write(reg);
   Wire.write(lowByte(data));
@@ -61,7 +66,7 @@ void smbus::writeRegister(uint8_t reg, uint16_t data, uint8_t address) {
  * @param data 
  * @param length 
  */
-void smbus::readBlock(uint8_t reg, uint8_t address) {
+void smbus::readBlock(uint8_t reg, uint8_t address = batteryAddress) {
   Wire.beginTransmission(address);
   Wire.write(reg);
   i2ccode = Wire.endTransmission(false);

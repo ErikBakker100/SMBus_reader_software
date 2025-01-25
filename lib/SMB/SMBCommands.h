@@ -49,12 +49,6 @@
 #define DEVICECHEMISTRY        0x22
 #define MANUFACTURERDATA       0x23
                                // 0x25 - 0x2e are reserved
-#define OPTIONALMFGFUNCTION5   0x2f
-#define OPTIONALMFGFUNCTION4   0x3c
-#define OPTIONALMFGFUNCTION3   0x3d
-#define OPTIONALMFGFUNCTION2   0x3e
-#define OPTIONALMFGFUNCTION1   0x3f
-
 class smbuscommands : public smbus {
 public:
   smbuscommands(uint8_t address);
@@ -151,7 +145,6 @@ public:
   void writeRegister(uint8_t reg, uint16_t data);
   void readBlock(uint8_t reg);
 
-  uint8_t batteryAddress;
 };
 
 /**

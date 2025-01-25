@@ -1,7 +1,7 @@
 #include <bitset>
 #include "displayBQ209xx.h"
 
-DisplayBQ20Z9xx::DisplayBQ20Z9xx(uint8_t address): bq20z9xx(address), Display(address) {
+DisplayBQ20Z9xx::DisplayBQ20Z9xx() {
   // list of the different commands, including function pointers to these funtions. This to be able to call them via user input
     info.emplace_back(&Display::displayremainingCapacityAlarm, USAGEINFO, "remainingCapacityAlarm");
     info.emplace_back(&Display::displayremainingTimeAlarm, USAGEINFO, "remainingTimeAlarm");

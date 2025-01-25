@@ -66,7 +66,6 @@ public:
     static void displaymanufacturerName();
     static void displaydeviceName();
     static void displaydeviceChemistry();
-    static void displayoptionalMFGfunctions(); // not within the SMBUS standard v1.1, so may be overridden
 
     void displayBatteryAddress();
 

@@ -17,11 +17,13 @@
 #define BLOCKLENGTH 20 /**< Maximum of data stream bytes which may be read */
 
 class smbus{
-  protected:
+protected:
   smbus();
-  int16_t readRegister(uint8_t reg, uint8_t address);
-  void writeRegister(uint8_t reg, uint16_t data, uint8_t address);
-  char text[BLOCKLENGTH];                 // used for holding text returned by readBlock
-  void readBlock(uint8_t reg, uint8_t address); // fills the text array
-  static uint8_t i2ccode; // Error code returned by I2C
+  void setup(uint8_t);
+  int16_t readRegister(uint8_t, uint8_t);
+  void writeRegister(uint8_t, uint16_t, uint8_t);
+  void readBlock(uint8_t, uint8_t); // fills the text array
+  static char text[BLOCKLENGTH];                       // used for holding text returned by readBlock
+  static uint8_t i2ccode;                       // Error code returned by I2C
+  static uint8_t batteryAddress;
 };

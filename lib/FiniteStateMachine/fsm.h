@@ -16,6 +16,7 @@ private:
 
 // create a class for each configuration, based on the platformio.ini [bqchip] build_flags = setting
 #if defined (BQ20Z9XX)
+#include "../BQ/BQ20Z9xx/displayBQ209xx.h"
 class DisplayBQ20Z9xx : public Config, bq20z9xx {
 public:
     void setup(uint8_t) override;
